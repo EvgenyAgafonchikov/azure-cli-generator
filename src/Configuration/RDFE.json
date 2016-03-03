@@ -1,0 +1,17 @@
+{
+  "info": {
+      "title": "Microsoft.WindowsAzure.Management.Compute",
+      "version": "12.6.0",
+      "description": "Microsoft Azure Service Management"
+  },
+  "produces": [
+    {
+      "name": "PowerShell",
+      "flavor": "Invoke"
+    },
+    {
+      "name": "CLI",
+      "flavor": "Verb"
+    }
+  ]
+}

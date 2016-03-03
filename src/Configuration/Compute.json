@@ -1,0 +1,134 @@
+{
+  "info": {
+      "title": "Microsoft.Azure.Management.Compute",
+      "version": "11.3.0-prerelease",
+      "description": "Virtual Machine Scale Sets"
+  },
+  "produces": [
+    {
+      "name": "PowerShell",
+      "flavor": "Verb"
+    },
+    {
+      "name": "CLI",
+      "flavor": "Verb"
+    }
+  ],
+  "operations": [
+    {
+      "name": "VirtualMachineScaleSets",
+      "methods": [
+        {
+          "name": "Get",
+          "friends": [
+            "GetInstanceView",
+            "List",
+            "ListAll"
+          ]
+        },
+        {
+          "name": "Deallocate",
+          "cmdlet": {
+            "verb": "Stop",
+            "suffix": ""
+          },
+          "friends": [
+            "PowerOff"
+          ]
+        },
+        {
+          "name": "PowerOff",
+          "cmdlet": {
+            "skip": true
+          }
+        },
+        {
+          "name": "GetInstanceView",
+          "cmdlet": {
+            "skip": true
+          }
+        },
+        {
+          "name": "List",
+          "cmdlet": {
+            "skip": true
+          }
+        },
+        {
+          "name": "ListNext",
+          "cmdlet": {
+            "skip": true
+          }
+        },
+        {
+          "name": "ListAll",
+          "cmdlet": {
+            "skip": true
+          }
+        },
+        {
+          "name": "ListAllNext",
+          "cmdlet": {
+            "skip": true
+          }
+        },
+        {
+          "name": "ListSkusNext",
+          "cmdlet": {
+            "skip": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "VirtualMachineScaleSetVMs",
+      "methods": [
+        {
+          "name": "PowerOff",
+          "cmdlet": {
+            "skip": true
+          }
+        },
+        {
+          "name": "GetInstanceView",
+          "cmdlet": {
+            "skip": true
+          }
+        },
+        {
+          "name": "List",
+          "cmdlet": {
+            "skip": true
+          }
+        },
+        {
+          "name": "ListNext",
+          "cmdlet": {
+            "skip": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "VirtualMachines",
+      "methods": [
+        { "name": "Capture", "cmdlet": { "skip": true },"command": { "skip": true } },
+        { "name": "CreateOrUpdate", "cmdlet": { "skip": true },"command": { "skip": true } },
+        { "name": "Deallocate", "cmdlet": { "skip": true },"command": { "skip": true } },
+        { "name": "Delete", "cmdlet": { "skip": true },"command": { "skip": true } },
+        { "name": "Generalize", "cmdlet": { "skip": true },"command": { "skip": true } },
+        { "name": "Get", "cmdlet": { "skip": true },"command": { "skip": true } },
+        { "name": "List", "cmdlet": { "skip": true },"command": { "skip": true } },
+        { "name": "ListAll", "cmdlet": { "skip": true },"command": { "skip": true } },
+        { "name": "ListAllNext", "cmdlet": { "skip": true },"command": { "skip": true } },
+        { "name": "ListAvailableSizes", "cmdlet": { "skip": true },"command": { "skip": true } },
+        { "name": "ListAvailableSizesNext", "cmdlet": { "skip": true },"command": { "skip": true } },
+        { "name": "ListNext", "cmdlet": { "skip": true },"command": { "skip": true } },
+        { "name": "PowerOff", "cmdlet": { "skip": true },"command": { "skip": true } },
+        { "name": "Redeploy", "cmdlet": { "skip": true },"command": { "skip": false } },
+        { "name": "Restart", "cmdlet": { "skip": true },"command": { "skip": true } },
+        { "name": "Start", "cmdlet": { "skip": true },"command": { "skip": true } }
+      ]
+    }
+  ]
+}
