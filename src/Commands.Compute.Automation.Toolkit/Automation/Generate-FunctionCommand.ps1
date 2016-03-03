@@ -1128,6 +1128,7 @@ function Generate-CliFunctionCommandImpl
     {
         $requireParamsJoinStr = "] [";
         $requireParamsString = " [" + ([string]::Join($requireParamsJoinStr, $requireParams)) + "]";
+        
         $usageParamsJoinStr = "> <";
         $usageParamsString = " <" + ([string]::Join($usageParamsJoinStr, $requireParams)) + ">";
         $optionParamString = ([string]::Join(", ", $requireParamNormalizedNames)) + ", ";
@@ -1190,10 +1191,13 @@ function Generate-CliFunctionCommandImpl
     $code += "  .option('--parameter-file <parameter-file>', `$('the input parameter file'))" + $NEW_LINE;
     $code += "  .option('-s, --subscription <subscription>', `$('the subscription identifier'))" + $NEW_LINE;
     $code += "  .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
+
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
     {
         # Parameter Assignment - For Each Method Parameter
         [string]$optionParamName = $methodParamNameList[$index];
+        [string]$cli_option_name = Get-CliOptionName $optionParamName;
+
         if ($allStringFieldCheck[$optionParamName])
         {
             [System.Type]$optionParamType = $methodParamTypeDict[$optionParamName];
@@ -1222,9 +1226,9 @@ function Generate-CliFunctionCommandImpl
         else
         {
             $cli_param_name = Get-CliNormalizedName $optionParamName;
-            $code += "    cli.output.verbose('${cli_param_name} = ' + ${cli_param_name});" + $NEW_LINE;
             if ((${cli_param_name} -eq 'Parameters') -or (${cli_param_name} -like '*InstanceIds'))
             {
+                $code += "    cli.output.verbose('${cli_param_name} = ' + ${cli_param_name});" + $NEW_LINE;
                 $code += "    var ${cli_param_name}Obj = null;" + $NEW_LINE;
                 $code += "    if (options.parameterFile) {" + $NEW_LINE;
                 $code += "      cli.output.verbose(`'Reading file content from: \`"`' + options.parameterFile + `'\`"`');" + $NEW_LINE;
@@ -1251,6 +1255,15 @@ function Generate-CliFunctionCommandImpl
 
                 $code += "    }" + $NEW_LINE;
                 $code += "    cli.output.verbose('${cli_param_name}Obj = ' + JSON.stringify(${cli_param_name}Obj));" + $NEW_LINE;
+            }
+            else
+            {
+                # Prompt Users If Required Parameters Not Specified
+                $code += "    if (!${cli_param_name}) {" + $NEW_LINE;
+                $code += "      ${cli_param_name} = cli.interaction.promptIfNotGiven(`$('${cli_option_name} : '), ${cli_param_name}, _)" + $NEW_LINE;
+                $code += "    }" + $NEW_LINE;
+                $code += $NEW_LINE;
+                $code += "    cli.output.verbose('${cli_param_name} = ' + ${cli_param_name});" + $NEW_LINE;
             }
         }
     }

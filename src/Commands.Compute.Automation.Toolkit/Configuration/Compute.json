@@ -125,7 +125,7 @@
         { "name": "ListAvailableSizesNext", "cmdlet": { "skip": true },"command": { "skip": true } },
         { "name": "ListNext", "cmdlet": { "skip": true },"command": { "skip": true } },
         { "name": "PowerOff", "cmdlet": { "skip": true },"command": { "skip": true } },
-        { "name": "Redeploy", "cmdlet": { "skip": true },"command": { "skip": false } },
+        { "name": "Redeploy", "cmdlet": { "skip": true },"command": { "skip": true } },
         { "name": "Restart", "cmdlet": { "skip": true },"command": { "skip": true } },
         { "name": "Start", "cmdlet": { "skip": true },"command": { "skip": true } }
       ]
