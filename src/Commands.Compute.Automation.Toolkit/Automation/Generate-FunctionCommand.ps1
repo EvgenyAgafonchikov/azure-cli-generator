@@ -1239,8 +1239,8 @@ function Generate-CliFunctionCommandImpl
                     
                 if ($oneStringListCheck[$optionParamName])
                 {
-                    $code += "      var ${cli_param_name}ValArr = ${cli_param_name}.split(',');" + $NEW_LINE;
-                    $code += "      cli.output.verbose(`'${cli_param_name}ValArr : `' + ${cli_param_name}ValArr);" + $NEW_LINE;
+                    $code += "      var ${cli_param_name}ValArr = ${cli_param_name} ? ${cli_param_name}.split(',') : [];" + $NEW_LINE;
+                    $code += "      cli.output.verbose(`'${cli_param_name} : `' + ${cli_param_name}ValArr);" + $NEW_LINE;
                     #$code += "      ${cli_param_name}Obj = {};" + $NEW_LINE;
                     #$code += "      ${cli_param_name}Obj.instanceIDs = ${cli_param_name}ValArr;" + $NEW_LINE;
                     $code += "      ${cli_param_name}Obj = [];" + $NEW_LINE;
@@ -1337,7 +1337,9 @@ function Generate-CliFunctionCommandImpl
     } 
     else
     {
-        $code += "    cli.output.json(result);" + $NEW_LINE;
+        $code += "    if (result) {" + $NEW_LINE;
+        $code += "      cli.output.json(result);" + $NEW_LINE;
+        $code += "    }" + $NEW_LINE;
     }
     $code += "  });" + $NEW_LINE;
 
