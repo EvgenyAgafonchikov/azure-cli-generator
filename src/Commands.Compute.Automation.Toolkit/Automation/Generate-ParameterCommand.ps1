@@ -60,12 +60,12 @@ function Get-ParameterCommandCategoryDescription
         [Parameter(Mandatory = $true)]
         [string]$FunctionParamName,
 
-        # e.g. 'os-profile'
+        # e.g. 'set', 'add', or 'remove'
         [Parameter(Mandatory = $true)]
-        [string]$SubParameterName
+        [string]$ConfigVerb
     )
 
-    $description = "Commands to set/remove/add ${SubParameterName} ";
+    $description = "Commands to ${ConfigVerb} components ";
     $description += "of ${OperationName} in ${FunctionParamName} file.";
 
     return $description;
@@ -177,7 +177,7 @@ function Generate-CliParameterCommandImpl
         $code += "  var ${params_category_var_name} = ${cat_params_category_var_name}.category('${params_category_name}')" + $NEW_LINE;
         $code += "  .description(`$('Commands to manage parameter for your ${cli_op_description}.'));" + $NEW_LINE;
         $code += "  var ${params_generate_category_var_name} = ${params_category_var_name}.category('${action_category_name}')" + $NEW_LINE;
-        $code += "  .description(`$('" + (Get-ParameterCommandCategoryDescription $cli_op_description $params_category_name $cli_method_option_name) +"'));" + $NEW_LINE;
+        $code += "  .description(`$('" + (Get-ParameterCommandCategoryDescription $cli_op_description $params_category_name $action_category_name) +"'));" + $NEW_LINE;
         $code += "  ${params_generate_category_var_name}.command('${cli_method_option_name}')" + $NEW_LINE;
         $code += "  .description(`$('Set ${cli_method_option_name} in ${params_category_name} string or files, e.g. \r\n${sampleJsonText}\r\n" + $CLI_HELP_MSG + "'))" + $NEW_LINE;
         $code += "  .usage('[options]')" + $NEW_LINE;
@@ -290,7 +290,7 @@ function Generate-CliParameterCommandImpl
     $code += "  var ${params_category_var_name} = ${cat_params_category_var_name}.category('${params_category_name}')" + $NEW_LINE;
     $code += "  .description(`$('Commands to manage parameter for your ${cli_op_description}.'));" + $NEW_LINE;
     $code += "  var ${params_generate_category_var_name} = ${params_category_var_name}.category('${action_category_name}')" + $NEW_LINE;
-    $code += "  .description(`$('" + (Get-ParameterCommandCategoryDescription $cli_op_description $params_category_name $cli_method_option_name) +"'));" + $NEW_LINE;
+    $code += "  .description(`$('" + (Get-ParameterCommandCategoryDescription $cli_op_description $params_category_name $action_category_name) +"'));" + $NEW_LINE;
     $code += "  ${params_generate_category_var_name}.command('${cli_method_option_name}')" + $NEW_LINE;
     $code += "  .description(`$('Remove ${cli_method_option_name} in ${params_category_name} string or files, e.g. \r\n${sampleJsonText}\r\n" + $CLI_HELP_MSG + "'))" + $NEW_LINE;
     $code += "  .usage('[options]')" + $NEW_LINE;
@@ -380,7 +380,7 @@ function Generate-CliParameterCommandImpl
     $code += "  var ${params_category_var_name} = ${cat_params_category_var_name}.category('${params_category_name}')" + $NEW_LINE;
     $code += "  .description(`$('Commands to manage the parameter input file for your ${cli_op_description}.'));" + $NEW_LINE;
     $code += "  var ${params_generate_category_var_name} = ${params_category_var_name}.category('${action_category_name}')" + $NEW_LINE;
-    $code += "  .description(`$('" + (Get-ParameterCommandCategoryDescription $cli_op_description $params_category_name $cli_method_option_name) +"'));" + $NEW_LINE;
+    $code += "  .description(`$('" + (Get-ParameterCommandCategoryDescription $cli_op_description $params_category_name $action_category_name) +"'));" + $NEW_LINE;
     $code += "  ${params_generate_category_var_name}.command('${cli_method_option_name}')" + $NEW_LINE;
     $code += "  .description(`$('Add ${cli_method_option_name} in ${params_category_name} string or files, e.g. \r\n${sampleJsonText}\r\n" + $CLI_HELP_MSG + "'))" + $NEW_LINE;
     $code += "  .usage('[options]')" + $NEW_LINE;
