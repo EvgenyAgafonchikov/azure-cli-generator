@@ -44,7 +44,7 @@ $CLI_HELP_MSG = "         There are two sets of commands:\r\n" `
               + "           1) function commands that are used to manage Azure resources in the cloud, and \r\n" `
               + "           2) parameter commands that generate & edit input files for the other set of commands.\r\n" `
               + "         For example, \'vmss get/list/stop\' are the function commands that call get, list and stop operations of \r\n" `
-              + "         virtual machine scale set, whereas \'vmss create-or-update-parameters * generate/set/remove/add\' commands \r\n" `
+              + "         virtual machine scale set, whereas \'vmss config * generate/set/remove/add\' commands \r\n" `
               + "         are used to configure the input parameter file. The \'vmss create-or-update\' command takes a parameter \r\n" `
               + "         file as for the VM scale set configuration, and creates it online.";
 
@@ -94,7 +94,14 @@ function Generate-CliParameterCommandImpl
     # i.e. 'vmss'
     $cliParamCmdTopCatName = Get-CliCategoryName $OperationName;
     # i.e. 'create-or-update-parameters'
-    $cliParamCmdSubCatName = (Get-CliCategoryName $MethodName) + '-parameters';
+    if ($MethodName -eq "createOrUpdate")
+    {
+        $cliParamCmdSubCatName = 'config';
+    }
+    else
+    {
+        $cliParamCmdSubCatName = (Get-CliCategoryName $MethodName) + '-parameters';
+    }
 
     # 0. Construct Path to Node
     $pathToTreeNode = "";

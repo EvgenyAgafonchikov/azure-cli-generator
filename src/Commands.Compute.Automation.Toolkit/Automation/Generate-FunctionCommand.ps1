@@ -1356,7 +1356,15 @@ function Generate-CliFunctionCommandImpl
         $cli_param_name = Get-CliNormalizedName $methodParamNameList[$index];
         if ($cli_param_name -eq 'Parameters')
         {
-            $cliParamCmdSubCatName = $cliMethodOption + '-parameters';
+            if ( $cliMethodOption -eq "create-or-update")
+            {
+                $cliParamCmdSubCatName = 'config';
+            }
+            else
+            {
+                $cliParamCmdSubCatName = $cliMethodOption + '-parameters';
+            }
+
             $params_category_var_name = "${cliCategoryVarName}${cliMethodName}Parameters" + $index;
             $action_category_name = 'generate';
             $params_generate_category_var_name = "${cliCategoryVarName}${cliMethodName}Generate" + $index;
