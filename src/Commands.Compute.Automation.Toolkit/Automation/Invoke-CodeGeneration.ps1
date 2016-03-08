@@ -123,6 +123,10 @@ if (-not [string]::IsNullOrEmpty($ConfigPath))
 
 # Code Generation Main Run
 $outFolder += '/Generated';
+if (-not (Test-Path $outFolder))
+{
+    $st = mkdir -Force $outFolder;
+}
 
 if (-not (Test-Path -Path $dllFileFullPath))
 {

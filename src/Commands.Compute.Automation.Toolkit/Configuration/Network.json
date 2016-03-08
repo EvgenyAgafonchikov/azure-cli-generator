@@ -1,0 +1,21 @@
+{
+  "info": {
+      "title": "Microsoft.Azure.Management.Network",
+      "version": "3.1.0-preview",
+      "description": "Network Resource Provider"
+  },
+  "produces": [
+    {
+      "name": "PowerShell",
+      "flavor": "Verb"
+    },
+    {
+      "name": "CLI",
+      "flavor": "Verb"
+    }
+  ],
+  "operations": [
+    { "name": "PublicIPAddresses" },
+    { "name": "VirtualNetworks" }
+  ]
+}

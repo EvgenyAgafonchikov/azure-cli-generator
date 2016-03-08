@@ -651,15 +651,30 @@ function Get-MethodComplexParameter
 # Sample: VirtualMachineCreateParameters => ConfigurationSet, VMImageInput, ...
 function Get-SubComplexParameterListFromType
 {
-    param(
-        [Parameter(Mandatory = $True)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
         $type_info,
 
-        [Parameter(Mandatory = $True)]
-        [string]$client_name_space
+        [Parameter(Mandatory = $true)]
+        [string]$client_name_space,
+
+        [Parameter(Mandatory = $true)]
+        $existingParamTypeList
     )
 
     $subParamTypeList = @();
+
+    foreach ($ept in $existingParamTypeList)
+    {
+        if ($ept.FullName -eq $type_info.FullName)
+        {
+            return $subParamTypeList;
+        }
+    }
+
+    # Not found, record the type
+    $existingParamTypeList += $type_info;
 
     if (-not (Is-ClientComplexType $type_info))
     {
@@ -684,7 +699,7 @@ function Get-SubComplexParameterListFromType
 
         if ($isClientType)
         {
-            $recursiveSubParamTypeList = Get-SubComplexParameterListFromType $pp.PropertyType $client_name_space;
+            $recursiveSubParamTypeList = Get-SubComplexParameterListFromType $pp.PropertyType $client_name_space $existingParamTypeList;
             foreach ($rsType in $recursiveSubParamTypeList)
             {
                 $subParamTypeList += $rsType;
@@ -706,7 +721,7 @@ function Get-SubComplexParameterList
         [string]$client_name_space
     )
 
-    return Get-SubComplexParameterListFromType $param_info.ParameterType $client_name_space;
+    return Get-SubComplexParameterListFromType $param_info.ParameterType $client_name_space @();
 }
 
 # Get proper type name
