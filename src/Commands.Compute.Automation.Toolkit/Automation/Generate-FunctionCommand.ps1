@@ -1462,6 +1462,10 @@ Generate-PsFunctionCommandImpl $OperationName $MethodInfo $FileOutputFolder $Fri
 $opItem = $cliOperationSettings[$OperationName];
 if ($opItem -contains $MethodInfo.Name)
 {
-    return $null;
+    return '';
 }
-Generate-CliFunctionCommandImpl $OperationName $MethodInfo $ModelClassNameSpace $FileOutputFolder;
+else
+{
+    $code = Generate-CliFunctionCommandImpl $OperationName $MethodInfo $ModelClassNameSpace $FileOutputFolder;
+    return '' + $code;
+}
