@@ -73,7 +73,8 @@ function Get-ParameterCommandCategoryDescription
 
 function Generate-CliParameterCommandImpl
 {
-    param(
+    param
+    (
         [Parameter(Mandatory = $true)]
         $TreeNode
     )
@@ -82,6 +83,8 @@ function Generate-CliParameterCommandImpl
     {
         return $null;
     }
+
+    $code = "";
 
     # i.e. VirtualMachineScaleSetExtensionProfile
     $cliCodeParamSuffix = $OperationName + $TreeNode.Name;
@@ -177,17 +180,18 @@ function Generate-CliParameterCommandImpl
         $sampleJsonText += $padding + "}\r\n";
     }
 
-    if ($TreeNode.Properties.Count -gt 0 -or ($TreeNode.IsListItem))
+    if ((-not $TreeNode.ComplexOnly) -and ($TreeNode.Properties.Count -gt 0 -or ($TreeNode.IsListItem)))
     {
         # 1. Parameter Set Command
         $params_category_var_name = $cliCodeParamPrefix + $MethodName + $cliCodeParamSuffix + "0";
         $cat_params_category_var_name = 'cat' + $params_category_var_name;
         $action_category_name = 'set';
         $params_generate_category_var_name = $action_category_name + $params_category_var_name;
-        $code = "  //$cliParamCmdSubCatName set ${treeNodeCliOptionName}" + $NEW_LINE;
+        $code += "  //$cliParamCmdSubCatName set ${treeNodeCliOptionName}" + $NEW_LINE;
         $code += "  var ${cat_params_category_var_name} = cli${invoke_category_code}.category('${cliParamCmdTopCatName}');" + $NEW_LINE;
         $code += "  var ${params_category_var_name} = ${cat_params_category_var_name}.category('${cliParamCmdSubCatName}')" + $NEW_LINE;
-        $code += "  .description(`$('Commands to manage parameter for your ${opCliOptionName}.'));" + $NEW_LINE;
+        #$code += "  .description(`$('Commands to manage parameter for your ${opCliOptionName}.'));" + $NEW_LINE;
+        $code += "  .description(`$('Commands to manage configuration of ${opCliOptionName} in the parameter file.'));" + $NEW_LINE;
         $code += "  var ${params_generate_category_var_name} = ${params_category_var_name}.category('${action_category_name}')" + $NEW_LINE;
         $code += "  .description(`$('" + (Get-ParameterCommandCategoryDescription $opCliOptionName $cliParamCmdSubCatName $action_category_name) +"'));" + $NEW_LINE;
         $code += "  ${params_generate_category_var_name}.command('${treeNodeCliOptionName}')" + $NEW_LINE;
@@ -300,7 +304,8 @@ function Generate-CliParameterCommandImpl
     $code += "  //$cliParamCmdSubCatName ${action_category_name} ${treeNodeCliOptionName}" + $NEW_LINE;
     $code += "  var ${cat_params_category_var_name} = cli${invoke_category_code}.category('${cliParamCmdTopCatName}');" + $NEW_LINE;
     $code += "  var ${params_category_var_name} = ${cat_params_category_var_name}.category('${cliParamCmdSubCatName}')" + $NEW_LINE;
-    $code += "  .description(`$('Commands to manage parameter for your ${opCliOptionName}.'));" + $NEW_LINE;
+    #$code += "  .description(`$('Commands to manage parameter for your ${opCliOptionName}.'));" + $NEW_LINE;
+    $code += "  .description(`$('Commands to manage configuration of ${opCliOptionName} in the parameter file.'));" + $NEW_LINE;
     $code += "  var ${params_generate_category_var_name} = ${params_category_var_name}.category('${action_category_name}')" + $NEW_LINE;
     $code += "  .description(`$('" + (Get-ParameterCommandCategoryDescription $opCliOptionName $cliParamCmdSubCatName $action_category_name) +"'));" + $NEW_LINE;
     $code += "  ${params_generate_category_var_name}.command('${treeNodeCliOptionName}')" + $NEW_LINE;
@@ -390,7 +395,8 @@ function Generate-CliParameterCommandImpl
     $code += "  //$cliParamCmdSubCatName ${action_category_name} ${treeNodeCliOptionName}" + $NEW_LINE;
     $code += "  var ${cat_params_category_var_name} = cli${invoke_category_code}.category('${cliParamCmdTopCatName}');" + $NEW_LINE;
     $code += "  var ${params_category_var_name} = ${cat_params_category_var_name}.category('${cliParamCmdSubCatName}')" + $NEW_LINE;
-    $code += "  .description(`$('Commands to manage the parameter input file for your ${opCliOptionName}.'));" + $NEW_LINE;
+    #$code += "  .description(`$('Commands to manage the parameter input file for your ${opCliOptionName}.'));" + $NEW_LINE;
+    $code += "  .description(`$('Commands to manage configuration of ${opCliOptionName} in the parameter file.'));" + $NEW_LINE;
     $code += "  var ${params_generate_category_var_name} = ${params_category_var_name}.category('${action_category_name}')" + $NEW_LINE;
     $code += "  .description(`$('" + (Get-ParameterCommandCategoryDescription $opCliOptionName $cliParamCmdSubCatName $action_category_name) +"'));" + $NEW_LINE;
     $code += "  ${params_generate_category_var_name}.command('${treeNodeCliOptionName}')" + $NEW_LINE;

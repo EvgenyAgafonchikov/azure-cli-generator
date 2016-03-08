@@ -125,6 +125,46 @@ function Contains-OnlySimpleFields
     return $result;
 }
 
+function Contains-OnlyComplexFields
+{
+    param(
+        [Parameter(Mandatory = $True)]
+        [System.Type]$parameterType,
+
+        [Parameter(Mandatory = $True)]
+        [System.String]$namespace
+    )
+
+    if ($parameterType -eq $null)
+    {
+        return $false;
+    }
+
+    $result = $true;
+
+    foreach ($propItem in $parameterType.GetProperties())
+    {
+        if ($propItem.PropertyType.Namespace -like "*$namespace*")
+        {
+            continue;
+        }
+
+        if ($propItem.PropertyType.FullName.StartsWith("System.Collections.Generic.IList"))
+        {
+            # List Type
+            [System.Type]$listItemType = $propItem.PropertyType.GenericTypeArguments[0];
+            if ($listItemType.Namespace -like "*$namespace*")
+            {
+                continue;
+            }
+        }
+
+        $result = $false;
+    }
+
+    return $result;
+}
+
 function Get-SpecificSubNode
 {
     param(

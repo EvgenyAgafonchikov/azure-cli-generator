@@ -992,6 +992,9 @@ function Generate-CliFunctionCommandImpl
 
     $componentName = Get-ComponentName $ModelClassNameSpace;
     $componentNameInLowerCase = $componentName.ToLower();
+    
+    # i.e. --virtual-machine-scale-set
+    $opCliOptionName = Get-CliOptionName $OperationName;
 
     # 3. CLI Code
     # 3.1 Types
@@ -1371,7 +1374,9 @@ function Generate-CliFunctionCommandImpl
 
             # 3.3.1 Parameter Generate Command
             $code += "  var ${params_category_var_name} = ${cliCategoryVarName}.category('${cliParamCmdSubCatName}')" + $NEW_LINE;
-            $code += "  .description(`$('Commands to generate parameter input file for your ${cliOperationDescription}.'));" + $NEW_LINE;
+            #$code += "  .description(`$('Commands to generate parameter input file for your ${cliOperationDescription}.'));" + $NEW_LINE;
+            $code += "  .description(`$('Commands to manage configuration of ${opCliOptionName} in the parameter file.'));" + $NEW_LINE;
+
             $code += "  ${params_category_var_name}.command('${action_category_name}')" + $NEW_LINE;
             $code += "  .description(`$('Generate ${cliCategoryVarName} parameter string or files.'))" + $NEW_LINE;
             $code += "  .usage('[options]')" + $NEW_LINE;

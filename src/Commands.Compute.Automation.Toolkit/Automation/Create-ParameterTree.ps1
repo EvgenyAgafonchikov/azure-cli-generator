@@ -51,6 +51,7 @@ function New-ParameterTreeNode
     $node | Add-Member -Type NoteProperty -Name SubNodes -Value @();
     $node | Add-Member -Type NoteProperty -Name IsPrimitive -Value $false;
     $node | Add-Member -Type NoteProperty -Name IsReference -Value $false;
+    $node | Add-Member -Type NoteProperty -Name ComplexOnly -Value $false;
     
     return $node;
 }
@@ -113,6 +114,15 @@ function Create-ParameterTreeImpl
             {
                 $treeNode.OnlySimple = $true;
             }
+            
+            if (Contains-OnlyComplexFields $TypeInfo $NameSpace)
+            {
+                $treeNode.ComplexOnly = $true;
+            }
+            else
+            {
+                $treeNode.ComplexOnly = $false;
+            }
 
             $padding = ($Depth.ToString() + (' ' * (4 * ($Depth + 1))));
             if ($Depth -gt 0)
@@ -127,6 +137,14 @@ function Create-ParameterTreeImpl
             elseif ($treeNode.OneStringList)
             {
                 $annotation = " ^";
+            }
+            elseif ($treeNode.ComplexOnly)
+            {
+                $annotation = " $";
+            }
+            else
+            {
+                $annotation = "";
             }
 
             Write-Verbose ($padding + "[ Node ] " + $treeNode.Name + $annotation);
