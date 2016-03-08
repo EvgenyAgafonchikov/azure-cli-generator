@@ -192,9 +192,9 @@ function Generate-CliParameterCommandImpl
         $code += "  var ${params_category_var_name} = ${cat_params_category_var_name}.category('${cliParamCmdSubCatName}')" + $NEW_LINE;
         #$code += "  .description(`$('Commands to manage parameter for your ${opCliOptionName}.'));" + $NEW_LINE;
         $code += "  .description(`$('Commands to manage configuration of ${opCliOptionName} in the parameter file.'));" + $NEW_LINE;
-        $code += "  var ${params_generate_category_var_name} = ${params_category_var_name}.category('${action_category_name}')" + $NEW_LINE;
+        $code += "  var ${params_generate_category_var_name} = ${params_category_var_name}.category('${treeNodeCliOptionName}')" + $NEW_LINE;
         $code += "  .description(`$('" + (Get-ParameterCommandCategoryDescription $opCliOptionName $cliParamCmdSubCatName $action_category_name) +"'));" + $NEW_LINE;
-        $code += "  ${params_generate_category_var_name}.command('${treeNodeCliOptionName}')" + $NEW_LINE;
+        $code += "  ${params_generate_category_var_name}.command('${action_category_name}')" + $NEW_LINE;
         $code += "  .description(`$('Set ${treeNodeCliOptionName} in ${cliParamCmdSubCatName} string or files, e.g. \r\n${sampleJsonText}\r\n" + $CLI_HELP_MSG + "'))" + $NEW_LINE;
         $code += "  .usage('[options]')" + $NEW_LINE;
         $code += "  .option('--parameter-file <parameter-file>', `$('The parameter file path.'))" + $NEW_LINE;
@@ -306,9 +306,9 @@ function Generate-CliParameterCommandImpl
     $code += "  var ${params_category_var_name} = ${cat_params_category_var_name}.category('${cliParamCmdSubCatName}')" + $NEW_LINE;
     #$code += "  .description(`$('Commands to manage parameter for your ${opCliOptionName}.'));" + $NEW_LINE;
     $code += "  .description(`$('Commands to manage configuration of ${opCliOptionName} in the parameter file.'));" + $NEW_LINE;
-    $code += "  var ${params_generate_category_var_name} = ${params_category_var_name}.category('${action_category_name}')" + $NEW_LINE;
+    $code += "  var ${params_generate_category_var_name} = ${params_category_var_name}.category('${treeNodeCliOptionName}')" + $NEW_LINE;
     $code += "  .description(`$('" + (Get-ParameterCommandCategoryDescription $opCliOptionName $cliParamCmdSubCatName $action_category_name) +"'));" + $NEW_LINE;
-    $code += "  ${params_generate_category_var_name}.command('${treeNodeCliOptionName}')" + $NEW_LINE;
+    $code += "  ${params_generate_category_var_name}.command('${action_category_name}')" + $NEW_LINE;
     $code += "  .description(`$('Remove ${treeNodeCliOptionName} in ${cliParamCmdSubCatName} string or files, e.g. \r\n${sampleJsonText}\r\n" + $CLI_HELP_MSG + "'))" + $NEW_LINE;
     $code += "  .usage('[options]')" + $NEW_LINE;
     $code += "  .option('--parameter-file <parameter-file>', `$('The parameter file path.'))" + $NEW_LINE;
@@ -397,9 +397,9 @@ function Generate-CliParameterCommandImpl
     $code += "  var ${params_category_var_name} = ${cat_params_category_var_name}.category('${cliParamCmdSubCatName}')" + $NEW_LINE;
     #$code += "  .description(`$('Commands to manage the parameter input file for your ${opCliOptionName}.'));" + $NEW_LINE;
     $code += "  .description(`$('Commands to manage configuration of ${opCliOptionName} in the parameter file.'));" + $NEW_LINE;
-    $code += "  var ${params_generate_category_var_name} = ${params_category_var_name}.category('${action_category_name}')" + $NEW_LINE;
+    $code += "  var ${params_generate_category_var_name} = ${params_category_var_name}.category('${treeNodeCliOptionName}')" + $NEW_LINE;
     $code += "  .description(`$('" + (Get-ParameterCommandCategoryDescription $opCliOptionName $cliParamCmdSubCatName $action_category_name) +"'));" + $NEW_LINE;
-    $code += "  ${params_generate_category_var_name}.command('${treeNodeCliOptionName}')" + $NEW_LINE;
+    $code += "  ${params_generate_category_var_name}.command('${action_category_name}')" + $NEW_LINE;
     $code += "  .description(`$('Add ${treeNodeCliOptionName} in ${cliParamCmdSubCatName} string or files, e.g. \r\n${sampleJsonText}\r\n" + $CLI_HELP_MSG + "'))" + $NEW_LINE;
     $code += "  .usage('[options]')" + $NEW_LINE;
     $code += "  .option('--parameter-file <parameter-file>', `$('The parameter file path.'))" + $NEW_LINE;
