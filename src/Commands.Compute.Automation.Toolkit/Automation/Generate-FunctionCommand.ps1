@@ -1263,7 +1263,7 @@ function Generate-CliFunctionCommandImpl
             {
                 # Prompt Users If Required Parameters Not Specified
                 $code += "    if (!${cli_param_name}) {" + $NEW_LINE;
-                $code += "      ${cli_param_name} = cli.interaction.promptIfNotGiven(`$('${cli_option_name} : '), ${cli_param_name}, _)" + $NEW_LINE;
+                $code += "      ${cli_param_name} = cli.interaction.promptIfNotGiven(`$('${cli_option_name} : '), ${cli_param_name}, _);" + $NEW_LINE;
                 $code += "    }" + $NEW_LINE;
                 $code += $NEW_LINE;
                 $code += "    cli.output.verbose('${cli_param_name} = ' + ${cli_param_name});" + $NEW_LINE;
