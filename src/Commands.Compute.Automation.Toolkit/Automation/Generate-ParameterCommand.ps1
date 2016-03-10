@@ -60,7 +60,7 @@ function Get-ParameterCommandCategoryDescription
         [Parameter(Mandatory = $true)]
         [string]$FunctionParamName,
 
-        # e.g. 'set', 'add', or 'remove'
+        # e.g. 'set', 'add', or 'delete'
         [Parameter(Mandatory = $true)]
         [string]$ConfigVerb
     )
@@ -299,7 +299,7 @@ function Generate-CliParameterCommandImpl
     # 2. Parameter Remove Command
     $params_category_var_name = $cliCodeParamPrefix + $MethodName + $cliCodeParamSuffix + "1";
     $cat_params_category_var_name = 'cat' + $params_category_var_name;
-    $action_category_name = 'remove';
+    $action_category_name = 'delete';
     $params_generate_category_var_name = $action_category_name + $params_category_var_name;
     $code += "  //$cliParamCmdSubCatName ${action_category_name} ${treeNodeCliOptionName}" + $NEW_LINE;
     $code += "  var ${cat_params_category_var_name} = cli${invoke_category_code}.category('${cliParamCmdTopCatName}');" + $NEW_LINE;
