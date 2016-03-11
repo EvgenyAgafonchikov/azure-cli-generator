@@ -1337,7 +1337,16 @@ function Generate-CliFunctionCommandImpl
         $code += "        row.cell(`$('Location'), item.location);" + $NEW_LINE;
         $code += "      });" + $NEW_LINE;
         $code += "    }" + $NEW_LINE;
-    } 
+    }  
+    elseif ($methodName -eq 'Get' -or $methodName -eq 'GetInstanceView')
+    {
+        $code += "    if (cli.output.format().json) {" + $NEW_LINE;
+        $code += "      cli.output.json(result);" + $NEW_LINE;
+        $code += "    }" + $NEW_LINE;
+        $code += "    else {" + $NEW_LINE;
+        $code += "      display(cli, result);" + $NEW_LINE;
+        $code += "    }" + $NEW_LINE;
+    }
     else
     {
         $code += "    if (result) {" + $NEW_LINE;

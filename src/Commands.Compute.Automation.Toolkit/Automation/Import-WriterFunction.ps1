@@ -1084,8 +1084,56 @@ var utils = require('../../../util/utils');
 var $ = utils.getLocaleString;
 
 function beautify(jsonText) {
-    var obj = JSON.parse(jsonText);
-    return JSON.stringify(obj, null, 2);
+  var obj = JSON.parse(jsonText);
+  return JSON.stringify(obj, null, 2);
+}
+
+function capitalize(str) {
+  if (str && str.length >= 1) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+  else {
+    return str;
+  }
+}
+
+function makeTuple(k, v, d) {
+  return { key : k, value : v, depth : d };
+}
+
+function displayImpl(o, key, depth, arr) {
+  if ((!!o) && (o.constructor === Object || o.constructor === Array)) {
+    arr.push(makeTuple(key, '', depth));
+    var len = 0;
+    Object.keys(o).forEach(function(k1) {
+      var v1 = o[k1];
+      var p1 = o.constructor === Array ? '#' : '';
+      var w = displayImpl(v1, p1 + k1, depth + 1, arr);
+      if (w > len) {
+        len = w;
+      }
+    });
+    return len;
+  }
+  else {
+    arr.push(makeTuple(key, o ? o.toString() : '', depth));
+    return depth * 2 + (key ? key.length : 0);
+  }
+}
+
+function display(cli, o) {
+  var arr = [];
+  var width = displayImpl(o, '', 0, arr);
+  for (var t in arr) {
+    var prebuf = Array(arr[t].depth * 2).join(' ');
+    var key = arr[t].key ? arr[t].key : '';
+    var postbuf = Array(width - (prebuf.length + key.length) + 1).join(' ');
+    var str = prebuf + capitalize(key) + postbuf;
+    if (arr[t].value) {
+      str += arr[t].value;
+    }
+    cli.output.data(str);
+  }
 }
 
 exports.init = function (cli) {
