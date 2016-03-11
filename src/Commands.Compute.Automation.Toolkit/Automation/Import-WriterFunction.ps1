@@ -1127,10 +1127,10 @@ function display(cli, o) {
   for (var t in arr) {
     var prebuf = Array(arr[t].depth * 2).join(' ');
     var key = arr[t].key ? arr[t].key : '';
-    var postbuf = Array(width - (prebuf.length + key.length) + 1).join(' ');
+    var postbuf = Array(width - (prebuf.length + key.length)).join(' ');
     var str = prebuf + capitalize(key) + postbuf;
     if (arr[t].value) {
-      str += arr[t].value;
+      str += ' : ' + arr[t].value;
     }
     cli.output.data(str);
   }
