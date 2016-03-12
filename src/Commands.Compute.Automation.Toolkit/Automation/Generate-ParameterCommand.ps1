@@ -214,7 +214,7 @@ function Generate-CliParameterCommandImpl
                 $code += "  .option('--value <value>', `$('The input string value for the indexed item.'))" + $NEW_LINE;
             }
         }
-        $code += "  .option('--parse', `$('Parse the input value string to a JSON object.'))" + $NEW_LINE;
+        $code += "  .option('--parse', `$('Parse the input string, i.e. str, for parameters to a JSON object, e.g. JSON.parse(str).'))" + $NEW_LINE;
 
         # 1.2 For Each Property, Set the Option
         foreach ($propertyItem in $TreeNode.Properties)
