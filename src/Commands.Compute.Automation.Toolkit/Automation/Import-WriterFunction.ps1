@@ -1125,9 +1125,9 @@ function display(cli, o) {
   var arr = [];
   var width = displayImpl(o, '', 0, arr);
   for (var t in arr) {
-    var prebuf = Array(arr[t].depth * 2).join(' ');
+    var prebuf = new Array(arr[t].depth * 2).join(' ');
     var key = arr[t].key ? arr[t].key : '';
-    var postbuf = Array(width - (prebuf.length + key.length)).join(' ');
+    var postbuf = new Array(width - (prebuf.length + key.length)).join(' ');
     var str = prebuf + capitalize(key) + postbuf;
     if (arr[t].value) {
       str += ' : ' + arr[t].value;
