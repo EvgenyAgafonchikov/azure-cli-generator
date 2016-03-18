@@ -2,6 +2,7 @@
   <Import Project="$(EnvironmentConfig)" />
   <ItemGroup>
     <ProjectFile Include="Samples\dirs.proj" />
+    <ProjectFile Include="Commands.Compute.Automation.Toolkit\Commands.Compute.Automation.Toolkit.csproj" />
   </ItemGroup>
   <Import Project="$(ExtendedTargetsPath)\Traversal.targets" />
 </Project>
