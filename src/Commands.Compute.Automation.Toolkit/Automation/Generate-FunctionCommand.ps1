@@ -43,7 +43,10 @@ param
     [bool]$CombineGetAndList = $false,
     
     [Parameter(Mandatory = $false)]
-    [bool]$CombineGetAndListAll = $false
+    [bool]$CombineGetAndListAll = $false,
+
+    [Parameter(Mandatory = $false)]
+    [bool]$CombineDeleteAndDeleteInstances = $false
 )
 
 . "$PSScriptRoot\Import-StringFunction.ps1";
@@ -400,7 +403,55 @@ $dynamic_param_assignment_code
     }
 
     $invoke_cmdlt_source_template = '';
-    if ($method_return_type.FullName -eq 'System.Void')
+
+    if ($methodName -eq 'DeleteInstances' -and $ModelClassNameSpace -like "*.Azure.Management.*Model*")
+    {
+        # Only for ARM Cmdlets
+        [System.Collections.ArrayList]$paramLocalNameList2 = @();
+        for ($i2 = 0; $i2 -lt $paramLocalNameList.Count - 1; $i2++)
+        {
+            $item2 = $paramLocalNameList[$i2];
+            $paramLocalNameList2 += $item2;
+        }
+        $invoke_cmdlt_source_template =  "        protected void Execute${invoke_param_set_name}Method(object[] ${invoke_input_params_name})" + $NEW_LINE;
+        $invoke_cmdlt_source_template += "        {" + $NEW_LINE;
+        $invoke_cmdlt_source_template += "${invoke_local_param_code_content}" + $NEW_LINE;
+        $invoke_cmdlt_source_template += "            if ("
+        for ($i2 = 0; $i2 -lt $paramLocalNameList.Count; $i2++)
+        {
+            if ($paramLocalNameList[$i2] -ne 'instanceIds')
+            {
+                if ($i2 -gt 0)
+                {
+                    $invoke_cmdlt_source_template += " && ";
+                }
+                $invoke_cmdlt_source_template += "!string.IsNullOrEmpty(" + $paramLocalNameList[$i2] + ")"
+            }
+            else
+            {
+            if ($i2 -gt 0)
+                {
+                    $invoke_cmdlt_source_template += " && ";
+                }
+                $invoke_cmdlt_source_template += $paramLocalNameList[$i2] + " != null";
+            }
+        }
+        $invoke_cmdlt_source_template += ")" + $NEW_LINE;
+        $invoke_cmdlt_source_template += "            {" + $NEW_LINE;
+        $invoke_cmdlt_source_template += "                ${OperationName}Client.${methodName}(${invoke_params_join_str});" + $NEW_LINE;
+        $invoke_cmdlt_source_template += "            }" + $NEW_LINE;
+
+        if ($CombineDeleteAndDeleteInstances)
+        {
+            $invoke_params_join_str_for_list = [string]::Join(', ', $paramLocalNameList2.ToArray());
+            $invoke_cmdlt_source_template += "            else" + $NEW_LINE;
+            $invoke_cmdlt_source_template += "            {" + $NEW_LINE;
+            $invoke_cmdlt_source_template += "                ${OperationName}Client.Delete($invoke_params_join_str_for_list);" + $NEW_LINE;
+            $invoke_cmdlt_source_template += "            }" + $NEW_LINE;
+        }
+        $invoke_cmdlt_source_template += "        }" + $NEW_LINE;
+    }
+    elseif ($method_return_type.FullName -eq 'System.Void')
     {
         $invoke_cmdlt_source_template =
 @"
@@ -869,7 +920,7 @@ function Get-VerbNounCmdletCode
 "@;
 
     $dynamic_param_assignment_code = [string]::Join($NEW_LINE, $dynamic_param_assignment_code_lines);
-    
+
     if ($FriendMethodInfo -ne $null)
     {
         $friend_code = "";

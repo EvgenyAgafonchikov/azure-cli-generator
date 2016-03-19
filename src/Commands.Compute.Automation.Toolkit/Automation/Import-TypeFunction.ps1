@@ -882,7 +882,7 @@ function Find-MatchedMethod
             }
         }
     }
-    
+
     return $null;
 }
 

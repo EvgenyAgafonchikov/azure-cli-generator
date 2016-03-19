@@ -273,7 +273,7 @@ else
                 {
                     $searchName = 'ListAll';
                 }
-             
+
                 if ($searchName -ne $null)
                 {
                     $methods2 = Get-OperationMethods $operation_type;
@@ -351,6 +351,19 @@ else
                 }
             }
 
+            # Combine Delete and DeleteInstances Methods (if any)
+            $combineDeleteAndDeleteInstances = $false;
+            if ($mtItem.Name -eq 'DeleteInstances')
+            {
+                $methods3 = Get-OperationMethods $operation_type;
+                $foundMethod1 = Find-MatchedMethod 'Delete' $methods3;
+
+                if ($foundMethod1 -ne $null)
+                {
+                    $combineDeleteAndDeleteInstances = $true;
+                }
+            }
+
             $opCmdletFlavor = $cmdletFlavor;
             if ($SKIP_VERB_NOUN_CMDLET_LIST -contains $methodInfo.Name)
             {
@@ -389,7 +402,7 @@ else
                 Write-Verbose ("-" + $paramInfo.Name + " : " + $paramInfo.ParameterType);
             }
             Write-Verbose $SEC_LINE;
-            
+
             $outputs = (. $PSScriptRoot\Generate-FunctionCommand.ps1 -OperationName $opShortName `
                                                                      -MethodInfo $methodInfo `
                                                                      -ModelClassNameSpace $clientModelNameSpace `
@@ -398,7 +411,8 @@ else
                                                                      -FriendMethodInfo $friendMethodInfo `
                                                                      -PageMethodInfo $pageMethodInfo `
                                                                      -CombineGetAndList $combineGetAndList `
-                                                                     -CombineGetAndListAll $combineGetAndListAll );
+                                                                     -CombineGetAndListAll $combineGetAndListAll `
+                                                                     -CombineDeleteAndDeleteInstances $combineDeleteAndDeleteInstances);
 
             if ($outputs.Count -ne $null)
             {
