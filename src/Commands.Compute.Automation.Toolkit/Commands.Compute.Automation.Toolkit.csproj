@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <OutputType>library</OutputType>
-    <AssemblyName>Commands.Compute.Automation.Toolkit</AssemblyName>
+    <AssemblyName>AzureRT.Compute.Automation.Toolkit</AssemblyName>
     <ProjectGuid>{4D6870EC-0C38-45A8-96FB-9D9F409BC2CD}</ProjectGuid>
   </PropertyGroup>
   <ItemGroup>
