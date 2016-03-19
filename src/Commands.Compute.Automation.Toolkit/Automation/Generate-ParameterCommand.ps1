@@ -514,19 +514,26 @@ function Generate-PowershellParameterCommandImpl
     {
         foreach ($propertyItem in $TreeNode.Properties)
         {
-            if (-not ($propertyItem["Type"] -like "*$ModelNameSpace*"))
+            $underlyingType = [System.Nullable]::GetUnderlyingType($propertyItem["Type"]);
+            $isEnum = $propertyItem["Type"].IsEnum;
+            if ($underlyingType -ne $null)
+            {
+                $isEnum = $underlyingType.IsEnum;
+            }
+
+            if (($propertyItem["Type"] -like "*$ModelNameSpace*") -and (-not $isEnum))
+            {
+                Write-Verbose("Skip this property: " + $propertyItem["Name"]);
+            }
+            else
             {
                 $property_type = Get-ProperTypeName $propertyItem["Type"];
                 if ($propertyItem["CanWrite"])
                 {
                     $param_name = Get-SingularNoun $propertyItem["Name"];
-                    $param = @{Name = $param_name; Type = $property_type; OriginalName = $propertyItem["Name"]; Chain = $pathFromRoot};
+                    $param = @{Name = $param_name; Type = $property_type; OriginalName = $propertyItem["Name"]; Chain = $pathFromRoot; Enum = $propertyItem["Type"].IsEnum};
                     $parameters += $param;
                 }
-            }
-            else
-            {
-               Write-Verbose("Skip this property: " + $propertyItem["Name"]);
             }
         }
 
@@ -534,7 +541,10 @@ function Generate-PowershellParameterCommandImpl
         {
             $nonSingleSubNodeResult = Get-NonSingleComplexDescendant $subNode $pathFromRoot;
             $nonSingleSubNode = $nonSingleSubNodeResult["Node"];
-
+            if ($subNode -ne $nonSingleSubNode)
+            {
+                $type_binding = AddTo-HashTable $type_binding $subNode.Name $subNode.TypeInfo;
+            }
             if (-not $nonSingleSubNode.IsListItem)
             {
                 foreach ($propertyItem in $nonSingleSubNode.Properties)
@@ -546,22 +556,20 @@ function Generate-PowershellParameterCommandImpl
                         $chain += $nonSingleSubNode.Name;
                         $type_binding = AddTo-HashTable $type_binding $nonSingleSubNode.Name $nonSingleSubNode.TypeInfo;
 
-                        if ($nonSingleSubNode.OnlySimple)
+                        if ($nonSingleSubNode.OnlySimple -or ($propertyItem["Type"] -like "System.Nullable*") -or $propertyItem["Type"].IsEnum)
                         {
                             $param_name = Get-SingularNoun ($nonSingleSubNode.Name + $propertyItem["Name"]);
-                            $param = @{Name = $param_name; Type = $property_type; OriginalName = $propertyItem["Name"]; Chain = $chain};
+                            $param = @{Name = $param_name; Type = $property_type; OriginalName = $propertyItem["Name"]; Chain = $chain;  Enum = $propertyItem["Type"].IsEnum};
                             $parameters += $param;
                         }
                         else
                         {
-                            if ($propertyItem["Type"] -like "*$ModelNameSpace*")
+                            if (($propertyItem["Type"] -like "*$ModelNameSpace*") -and (-not ($propertyItem["Type"] -like "System.Nullable*")) -and (-not $propertyItem["Type"].IsEnum))
                             {
-
                                 $subsub = Get-SpecificSubNode $nonSingleSubNode $propertyItem["Name"];
                                 $nonSingleComlexResult = Get-NonSingleComplexDescendant $subsub $chain;
                                 $realsubsub = $nonSingleComlexResult["Node"];
                                 $chain = $nonSingleComlexResult["Chain"];
-
                                 if ($realsubsub.Properties.Count -eq 1)
                                 {
                                     $parameter = $realsubsub.Properties[0];
@@ -584,7 +592,7 @@ function Generate-PowershellParameterCommandImpl
                                     if ($propertyItem["CanWrite"])
                                     {
                                         $param_name = Get-SingularNoun $propertyItem["Name"];
-                                        $param = @{Name = $param_name; Type = $paramterType; OriginalName = $parameter["Name"]; Chain = $chain};
+                                        $param = @{Name = $param_name; Type = $paramterType; OriginalName = $parameter["Name"]; Chain = $chain; Enum = $parameter["Type"].IsEnum};
                                         $parameters += $param;
                                     }
                                 }
@@ -601,7 +609,7 @@ function Generate-PowershellParameterCommandImpl
                                         $paramterType = $property_type;
                                     }
                                     $param_name = Get-SingularNoun $realsubsub.Name;
-                                    $param = @{Name = $param_name; Type = $paramterType; OriginalName = $realsubsub.Name; Chain = $chain};
+                                    $param = @{Name = $param_name; Type = $paramterType; OriginalName = $realsubsub.Name; Chain = $chain; Enum = $realsubsub.TypeInfo.IsEnum};
                                     $parameters += $param;
 
                                     $binding = Generate-PowershellParameterCommandImpl $realsubsub $fileOutputFolder;
@@ -611,7 +619,7 @@ function Generate-PowershellParameterCommandImpl
                             else
                             {
                                 $param_name = Get-SingularNoun $propertyItem["Name"];
-                                $param = @{Name = $param_name; Type = $property_type; OriginalName = $propertyItem["Name"]; Chain = $chain};
+                                $param = @{Name = $param_name; Type = $property_type; OriginalName = $propertyItem["Name"]; Chain = $chain; Enum = $propertyItem["Type"].IsEnum};
                                 $parameters += $param;
                             }
                         }
@@ -629,7 +637,7 @@ function Generate-PowershellParameterCommandImpl
                 if ($onlyProperty["CanWrite"])
                 {
                     $param_name = Get-SingularNoun ($nonSingleSubNode.Name + $onlyProperty["Name"]);
-                    $param = @{Name = $param_name; Type = "Array:" + $property_type; OriginalName = $onlyProperty["Name"]; Chain = $chain};
+                    $param = @{Name = $param_name; Type = "Array:" + $property_type; OriginalName = $onlyProperty["Name"]; Chain = $chain; Enum = $onlyProperty["Type"].IsEnum};
                     $parameters += $param;
                 }
             }
@@ -639,7 +647,7 @@ function Generate-PowershellParameterCommandImpl
                 $property_type = Get-ProperTypeName $nonSingleSubNode.TypeInfo;
 
                 $param_name = Get-SingularNoun $nonSingleSubNode.Name;
-                $param = @{Name = $param_name; Type = "Array:" + $property_type; OriginalName = $nonSingleSubNode.Name; Chain = $chain};
+                $param = @{Name = $param_name; Type = "Array:" + $property_type; OriginalName = $nonSingleSubNode.Name; Chain = $chain; Enum = $nonSingleSubNode.TypeInfo.IsEnum};
                 $parameters += $param;
                 $binding = Generate-PowershellParameterCommandImpl $nonSingleSubNode $fileOutputFolder;
                 $type_binding = Merge-HashTables $type_binding $binding;
@@ -648,7 +656,6 @@ function Generate-PowershellParameterCommandImpl
 
         (. $PSScriptRoot\Generate-PowershellParameterCmdlet.ps1 -OutputFolder $OutputFolder -TreeNode $TreeNode -Parameters $parameters -ModelNameSpace $ModelNameSpace -ObjectName $powershell_object_name -TypeBinding $type_binding);
     }
-
     return $type_binding;
 }
 

@@ -135,7 +135,7 @@ if (-not (Test-Path -Path $dllFileFullPath))
 else
 {
     $assembly = Load-AssemblyFile $dllFileFullPath;
-    
+
     # All original types
     $types = $assembly.GetTypes();
     $filtered_types = Get-FilteredOperationTypes $types $clientNameSpace $operationNameFilter;

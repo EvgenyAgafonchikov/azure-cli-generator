@@ -95,7 +95,7 @@ function Create-ParameterTreeImpl
         }
         else
         {
-            if ($TypeInfo.FullName -like "Microsoft.*Azure.Management.*.*" -and (-not ($typeInfo.FullName -like "Microsoft.*Azure.Management.*.SubResource")))
+            if ((-not $TypeInfo.IsEnum) -and $TypeInfo.FullName -like "Microsoft.*Azure.Management.*.*" -and (-not ($typeInfo.FullName -like "Microsoft.*Azure.Management.*.SubResource")))
             {
                 $TypeList.Add($TypeInfo.FullName, $TypeInfo);
             }
@@ -157,7 +157,7 @@ function Create-ParameterTreeImpl
                 $nodeProp = @{ Name = $itemProp.Name; Type = $itemProp.PropertyType; CanWrite = $can_write};
                 $treeNode.Properties += $nodeProp;
 
-                if ($itemProp.PropertyType.FullName.StartsWith($NameSpace + "."))
+                if ((-not $itemProp.PropertyType.IsEnum) -and $itemProp.PropertyType.FullName.StartsWith($NameSpace + "."))
                 {
                     # Model Class Type - Recursive Call
                     $subTreeNode = Create-ParameterTreeImpl $itemProp.Name $itemProp.PropertyType $TypeList $treeNode ($Depth + 1);

@@ -124,7 +124,7 @@ function Is-ValueType
     {
         return $True;
     }
-    if ($type.Contains("int") -and $type.EndsWith("?"))
+    if ($type.Contains("int") -and (-not $type.EndsWith("?")))
     {
         return $True;
     }
@@ -385,8 +385,6 @@ function Write-PowershellCmdlet
     $TypeBinding
     )
 
-
-
     $library_namespace = $ModelNameSpace.Substring(0, $ModelNameSpace.LastIndexOf('.'));
 
     $ps_cmdlet_namespace = ($library_namespace.Replace('.Management.', '.Commands.'));
@@ -422,8 +420,8 @@ function Write-PowershellCmdlet
         $cmdlet_noun = $cmdlet_noun.Substring(0, $cmdlet_noun.Length - 1);
     }
 
+    $cmdlet_noun = Get-PowershellNoun $objectName $cmdlet_noun;
     $cmdlet_class_name = $cmdlet_verb + $cmdlet_noun + "Command";
-
     $cmdlet_class_code =
 @"
 
@@ -905,23 +903,34 @@ namespace ${ps_generated_cmdlet_namespace}
                 $var_name = Get-PropertyFromChain $my_chain;
                 $property = $p["OriginalName"];
                 $assign = Get-AssignCode $p;
-
-                $create_object_code = Get-NewObjectCode $my_chain 16;
-                $cmdlet_code_body +=
+                if (-not $p["Enum"])
+                {
+                    $create_object_code = Get-NewObjectCode $my_chain 16;
+                    $cmdlet_code_body +=
 @"
 
             if (${assign} != null)
             {
+
 "@
-
                 $cmdlet_code_body += ${create_object_code};
-
                 $cmdlet_code_body +=
 @"
                 this.${ObjectName}.${var_name}.${property} = ${assign};
             }
 
-"@;
+"@
+                }
+                else
+                {
+                    $create_object_code = Get-NewObjectCode $my_chain 12;
+                    $cmdlet_code_body += ${create_object_code};
+                    $cmdlet_code_body +=
+@"
+            this.${ObjectName}.${var_name}.${property} = ${assign};
+
+"@
+                }
             }
         }
 

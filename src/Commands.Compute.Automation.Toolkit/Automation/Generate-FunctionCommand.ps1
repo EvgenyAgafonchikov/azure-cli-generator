@@ -455,11 +455,14 @@ ${invoke_local_param_code_content}
         $invoke_cmdlt_source_template += "            if ("
         for ($i2 = 0; $i2 -lt $paramLocalNameList.Count; $i2++)
         {
-            if ($i2 -gt 0)
+            if ($paramLocalNameList[$i2] -ne 'expand')
             {
-                $invoke_cmdlt_source_template += " && ";
+                if ($i2 -gt 0)
+                {
+                    $invoke_cmdlt_source_template += " && ";
+                }
+                $invoke_cmdlt_source_template += "!string.IsNullOrEmpty(" + $paramLocalNameList[$i2] + ")"
             }
-            $invoke_cmdlt_source_template += "!string.IsNullOrEmpty(" + $paramLocalNameList[$i2] + ")"
         }
         $invoke_cmdlt_source_template += ")" + $NEW_LINE;
         $invoke_cmdlt_source_template += "            {" + $NEW_LINE;
@@ -608,9 +611,14 @@ function Get-ArgumentListCmdletCode
             $paramTypeName = "Microsoft.Rest.Azure.OData.ODataQuery<${opSingularName}>";
             $code += "            ${paramTypeName} " + $methodParam.Name + " = new ${paramTypeName}();" + $NEW_LINE;
         }
+        elseif ($paramTypeName.EndsWith('?'))
+        {
+            # Case 2.1.4: Nullable type
+            $code += "            ${paramTypeName} " + $methodParam.Name + " = (${paramTypeName}) null;" + $NEW_LINE;
+        }
         else
         {
-            # Case 2.1.4: Most General Constructor Case
+            # Case 2.1.5: Most General Constructor Case
             $code += "            ${paramTypeName} " + $methodParam.Name + " = ${paramCtorCode};" + $NEW_LINE;
         }
     }
@@ -668,14 +676,13 @@ function Get-VerbNounCmdletCode
     $shortNounName = Get-ShortNounName $opSingularName;
 
     $mapped_noun_str = 'AzureRm' + $shortNounName + $mapped_verb_term_suffix;
+    $mapped_noun_str = Get-PowershellNoun $OperationName $mapped_noun_str;
     $verb_cmdlet_name = $mapped_verb_name + $mapped_noun_str;
 
     # 1. Start
     $code = "";
     
     # 2. Body
-    $mapped_noun_str = $mapped_noun_str.Replace("VMSS", "Vmss");
-    
     # Iterate through Param List
     $methodParamList = $MethodInfo.GetParameters();
     $paramNameList = @();
