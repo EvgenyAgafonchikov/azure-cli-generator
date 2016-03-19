@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0"
+         DefaultTargets="Build"
+         xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <Import Project="$(EnvironmentConfig)" />
+  <!-- 
+    For authoring documentation please see here:
+    http://nuproj.codeplex.com/wikipage?title=Authoring&referringTitle=Documentation 
+    
+    Additional information can be found at http://nuproj.codeplex.com/documentation
+    
+    All packages are defaulted to output directory:
+    <NupkgOutputDir>$(BinariesDirectory)\packages</NupkgOutputDir>
+  -->
+  <!-- Nuget generation properties -->
+  <PropertyGroup>
+    <Id>AzureRT.Compute.Automation.Toolkit</Id>
+    <Title>AzureRT.Compute.Automation.Toolkit</Title>
+    
+    <!-- These Properties should also be able to set the PackageVersion to 1.2.3.4 -->
+    <PackageVersion>0.1.0.0</PackageVersion>
+    <BuildVersion>0.1.0.0</BuildVersion>
+    
+    <Authors>phuang</Authors>
+    <Owners>phuang</Owners>
+    <Description>AzureRT.Compute.Automation.Toolkit</Description>
+    <ReleaseNotes>AzureRT.Compute.Automation.Toolkit</ReleaseNotes>
+    <Summary>AzureRT.Compute.Automation.Toolkit</Summary>
+    <ProjectUrl>http://www.microsoft.com</ProjectUrl>
+    <LicenseUrl>http://www.microsoft.com/license</LicenseUrl>
+    <Copyright>Copyright (c) Microsoft Corporation</Copyright>
+    <RequireLicenseAcceptance>False</RequireLicenseAcceptance>
+    <Tags>AzureRT.Compute.Automation.Toolkit</Tags>
+    <GenerateSymbolPackage>True</GenerateSymbolPackage>
+  </PropertyGroup>
+  <ItemGroup>
+    <File Include="$(MSBuildThisFileDirectory)Data\*.ps1">
+      <TargetPath>scripts\Automation</TargetPath>
+    </File>
+    <File Include="$(MSBuildThisFileDirectory)Data\*.ps1">
+      <TargetPath>scripts\Data</TargetPath>
+    </File>
+    <File Include="$(MSBuildThisFileDirectory)Configuration\*.json">
+      <TargetPath>scripts\Configuration</TargetPath>
+    </File>
+  </ItemGroup>
+
+  <Import Project="$(PkgNuProj)\NuProj.Targets" />
+  
+  <!-- This target should also be able to set the PackageVersion to 1.2.3.4 -->
+  <Target Name="BeforeVersion" BeforeTargets="_GetVersionInfo">
+    <PropertyGroup>
+      <BuildVersion>0.1.0.0</BuildVersion>
+    </PropertyGroup>
+  </Target>
+  
+</Project>
