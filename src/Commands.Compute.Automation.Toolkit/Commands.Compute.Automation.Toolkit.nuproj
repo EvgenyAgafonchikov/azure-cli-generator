@@ -19,8 +19,8 @@
     <Title>AzureRT.Compute.Automation.Toolkit</Title>
     
     <!-- These Properties should also be able to set the PackageVersion to 1.2.3.4 -->
-    <PackageVersion>0.1.0.0</PackageVersion>
-    <BuildVersion>0.1.0.0</BuildVersion>
+    <PackageVersion>0.1.0.1</PackageVersion>
+    <BuildVersion>0.1.0.1</BuildVersion>
     
     <Authors>phuang</Authors>
     <Owners>phuang</Owners>
@@ -35,7 +35,7 @@
     <GenerateSymbolPackage>True</GenerateSymbolPackage>
   </PropertyGroup>
   <ItemGroup>
-    <File Include="$(MSBuildThisFileDirectory)Data\*.ps1">
+    <File Include="$(MSBuildThisFileDirectory)Automation\*.ps1">
       <TargetPath>scripts\Automation</TargetPath>
     </File>
     <File Include="$(MSBuildThisFileDirectory)Data\*.ps1">
@@ -51,7 +51,7 @@
   <!-- This target should also be able to set the PackageVersion to 1.2.3.4 -->
   <Target Name="BeforeVersion" BeforeTargets="_GetVersionInfo">
     <PropertyGroup>
-      <BuildVersion>0.1.0.0</BuildVersion>
+      <BuildVersion>0.1.0.1</BuildVersion>
     </PropertyGroup>
   </Target>
   
