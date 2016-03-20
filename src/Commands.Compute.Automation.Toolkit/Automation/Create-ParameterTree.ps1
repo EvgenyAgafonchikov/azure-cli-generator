@@ -156,8 +156,8 @@ function Create-ParameterTreeImpl
                 $can_write = ($itemProp.GetSetMethod() -ne $null) -and $itemProp.CanWrite;
                 $nodeProp = @{ Name = $itemProp.Name; Type = $itemProp.PropertyType; CanWrite = $can_write};
                 $treeNode.Properties += $nodeProp;
-
-                if ($itemProp.PropertyType.FullName.StartsWith($NameSpace + "."))
+                
+                if ($itemProp.PropertyType.FullName.StartsWith($NameSpace + ".") -and (-not $itemProp.PropertyType.FullName.EndsWith("Types")))
                 {
                     # Model Class Type - Recursive Call
                     $subTreeNode = Create-ParameterTreeImpl $itemProp.Name $itemProp.PropertyType $TypeList $treeNode ($Depth + 1);
@@ -186,14 +186,21 @@ function Create-ParameterTreeImpl
                 }
                 else
                 {
-                    if ($nodeProp["Type"].IsEquivalentTo([System.Nullable[long]]) -or
+                    if ($nodeProp["Type"].IsEquivalentTo([System.Nullable[long]]) -or `
                         $nodeProp["Type"].IsEquivalentTo([System.Nullable[bool]]))
                     {
                         $nodeProp["IsPrimitive"] = $true;
+                        $primitiveSuffix = " `'";
+                    }
+                    elseif (($nodeProp["Type"].BaseType -ne $null -and $nodeProp["Type"].BaseType.IsEquivalentTo([enum])) -or `
+                             $nodeProp["Type"].FullName -like "System.Nullable*$NameSpace.*Types*")
+                    {
+                        $nodeProp["IsPrimitive"] = $true;
+                        $primitiveSuffix = " `'";
                     }
 
                     # Primitive Type, e.g. int, string, Dictionary<string, string>, etc.
-                    Write-Verbose ($padding + '-' + $nodeProp["Name"] + " : " + $nodeProp["Type"]);
+                    Write-Verbose ($padding + '-' + $nodeProp["Name"] + " : " + $nodeProp["Type"] + $primitiveSuffix);
                 }
             }
 

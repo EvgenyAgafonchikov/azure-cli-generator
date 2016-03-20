@@ -554,7 +554,7 @@ function Generate-PowershellParameterCommandImpl
                         }
                         else
                         {
-                            if ($propertyItem["Type"] -like "*$ModelNameSpace*")
+                            if ($propertyItem["Type"] -like "*$ModelNameSpace*" -and ($propertyItem["Type"] -notlike "*$ModelNameSpace*Types*"))
                             {
 
                                 $subsub = Get-SpecificSubNode $nonSingleSubNode $propertyItem["Name"];
