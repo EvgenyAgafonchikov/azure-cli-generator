@@ -1,7 +1,7 @@
 {
   "info": {
       "title": "Microsoft.Azure.Management.Compute",
-      "version": "11.3.0-prerelease",
+      "version": "12.0.0-prerelease",
       "description": "Virtual Machine Scale Sets"
   },
   "produces": [
@@ -34,6 +34,16 @@
           },
           "friends": [
             "PowerOff"
+          ]
+        },
+		{
+          "name": "DeleteInstances",
+          "cmdlet": {
+            "verb": "Remove",
+            "suffix": ""
+          },
+          "friends": [
+            "Delete"
           ]
         },
         {
@@ -77,12 +87,35 @@
           "cmdlet": {
             "skip": true
           }
+        },
+        {
+          "name": "Delete",
+          "cmdlet": {
+            "skip": true
+          }
         }
+      ],
+      "nounMappings": [
+        { "from": "Reimage", "to": "" },
+        { "from": "Instances", "to": "" },
+        { "from": "Listener", "to": "WinRMListener" },
+        { "from": "SkusList", "to": "Sku" },
+        { "from": "PublicKey", "to": "SshPublicKey" }
       ]
     },
     {
       "name": "VirtualMachineScaleSetVMs",
       "methods": [
+        {
+          "name": "Deallocate",
+          "cmdlet": {
+            "verb": "Stop",
+            "suffix": ""
+          },
+          "friends": [
+            "PowerOff"
+          ]
+        },
         {
           "name": "PowerOff",
           "cmdlet": {
@@ -107,28 +140,13 @@
             "skip": true
           }
         }
-      ]
-    },
-    {
-      "name": "VirtualMachines",
-      "methods": [
-        { "name": "Capture", "cmdlet": { "skip": true },"command": { "skip": true } },
-        { "name": "CreateOrUpdate", "cmdlet": { "skip": true },"command": { "skip": true } },
-        { "name": "Deallocate", "cmdlet": { "skip": true },"command": { "skip": true } },
-        { "name": "Delete", "cmdlet": { "skip": true },"command": { "skip": true } },
-        { "name": "Generalize", "cmdlet": { "skip": true },"command": { "skip": true } },
-        { "name": "Get", "cmdlet": { "skip": true },"command": { "skip": true } },
-        { "name": "List", "cmdlet": { "skip": true },"command": { "skip": true } },
-        { "name": "ListAll", "cmdlet": { "skip": true },"command": { "skip": true } },
-        { "name": "ListAllNext", "cmdlet": { "skip": true },"command": { "skip": true } },
-        { "name": "ListAvailableSizes", "cmdlet": { "skip": true },"command": { "skip": true } },
-        { "name": "ListAvailableSizesNext", "cmdlet": { "skip": true },"command": { "skip": true } },
-        { "name": "ListNext", "cmdlet": { "skip": true },"command": { "skip": true } },
-        { "name": "PowerOff", "cmdlet": { "skip": true },"command": { "skip": true } },
-        { "name": "Redeploy", "cmdlet": { "skip": true },"command": { "skip": true } },
-        { "name": "Restart", "cmdlet": { "skip": true },"command": { "skip": true } },
-        { "name": "Start", "cmdlet": { "skip": true },"command": { "skip": true } }
+      ],
+      "nounMappings": [
+        { "from": "Reimage", "to": "" }
       ]
     }
+  ],
+  "nounMappings": [
+    { "from": "VMSS", "to": "Vmss" }
   ]
 }

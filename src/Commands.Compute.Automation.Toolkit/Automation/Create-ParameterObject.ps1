@@ -86,6 +86,14 @@ function Create-ParameterObjectImpl
         # Dictionary in client library always consists of string key & values.
         $obj = New-Object 'System.Collections.Generic.Dictionary[string,string]';
     }
+    elseif ($typeInfo.FullName -like 'System.Nullable*Microsoft.*Azure.Management.*.*Types*')
+    {
+        $obj = $null;
+    }
+    elseif ($typeInfo.FullName -like 'Microsoft.*Azure.Management.*.*Types')
+    {
+        $obj = $null;
+    }
     elseif ($typeInfo.FullName -like 'System.Nullable*')
     {
         $obj = $null;

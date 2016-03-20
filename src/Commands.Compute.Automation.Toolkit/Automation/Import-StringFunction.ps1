@@ -318,20 +318,19 @@ function Get-SingularNoun
     {
         return $noun;
     }
-
     if ($noun.ToLower().EndsWith("address"))
     {
         return $noun;
     }
-
+    if ($noun.EndsWith("ses"))
+    {
+        return $noun.Substring(0, $noun.Length - 2);
+    }
     if ($noun.EndsWith("s"))
     {
         return $noun.Substring(0, $noun.Length - 1);
     }
-    else
-    {
-        return $noun;
-    }
+    return $noun;
 }
 
 function Get-ComponentName
@@ -349,4 +348,34 @@ function Get-ComponentName
     }
     
     return $clientNS.Substring($clientNS.LastIndexOf('.') + 1);
+}
+
+function Get-PowershellNoun
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [string]$operationName,
+
+        [Parameter(Mandatory = $true)]
+        [string]$originalNoun
+    )
+
+    $returnNoun = $originalNoun;
+    foreach($nounMap in $configJsonObject.nounMappings)
+    {
+        $returnNoun = $returnNoun.Replace($nounMap.from, $nounMap.to);
+    }
+    foreach ($op in $configJsonObject.operations)
+    {
+        $objectName = Get-SingularNoun $op.name;
+        if ($operationName.Equals($op.name) -or $operationName.Equals($objectName))
+        {
+            foreach($nounMap in $op.nounMappings)
+            {
+                $returnNoun = $returnNoun.Replace($nounMap.from, $nounMap.to);
+            }
+        }
+    }
+    return $returnNoun
 }

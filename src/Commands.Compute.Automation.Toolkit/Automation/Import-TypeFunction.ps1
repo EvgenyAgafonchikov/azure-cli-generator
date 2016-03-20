@@ -135,7 +135,7 @@ function Contains-OnlyComplexFields
         [System.String]$namespace
     )
 
-    if ($parameterType -eq $null)
+    if (($parameterType -eq $null) -or $parameterType.IsEnum)
     {
         return $false;
     }
@@ -176,7 +176,7 @@ function Get-SpecificSubNode
 
     foreach ($subNode in $TreeNode.SubNodes)
     {
-         Write-Verbose ('SpecificSubNode $subNode = ' + $subNode);
+         #Write-Verbose ('SpecificSubNode $subNode = ' + $subNode);
          if ($subNode.Name -eq $typeName)
          {
               return $subNode;
@@ -226,16 +226,26 @@ function Get-NormalizedTypeName
         [System.Reflection.TypeInfo]$parameter_type
     )
 
-    if ($parameter_type.IsGenericType -and $parameter_type.GenericTypeArguments.Count -eq 1)
+    $underlying_type = [System.Nullable]::GetUnderlyingType($parameter_type);
+    if ($underlying_type -ne $null)
     {
-        $generic_item_type = $parameter_type.GenericTypeArguments[0];
+        $main_type = $underlying_type;
+    }
+    else
+    {
+        $main_type = $parameter_type;
+    }
+
+    if ($main_type.IsGenericType -and $main_type.GenericTypeArguments.Count -eq 1)
+    {
+        $generic_item_type = $main_type.GenericTypeArguments[0];
         if (($generic_item_type.FullName -eq 'System.String') -or ($generic_item_type.Name -eq 'string'))
         {
             return 'System.Collections.Generic.IList<string>';
         }
     }
 
-    [string]$inputName = $parameter_type.FullName;
+    [string]$inputName = $main_type.FullName;
     
     if ([string]::IsNullOrEmpty($inputName))
     {
@@ -255,19 +265,19 @@ function Get-NormalizedTypeName
     }
     elseif ($inputName -eq 'System.DateTime')
     {
-        return 'DateTime';
+        $outputName = 'DateTime';
     }
     elseif ($inputName -eq 'System.Int32')
     {
-        return 'int';
+        $outputName = 'int';
     }
     elseif ($inputName -eq 'System.UInt32')
     {
-        return 'uint';
+        $outputName = 'uint';
     }
     elseif ($inputName -eq 'System.Char')
     {
-        return 'char';
+        $outputName = 'char';
     }
     elseif ($inputName.StartsWith($clientModelNameSpacePrefix))
     {
@@ -275,6 +285,11 @@ function Get-NormalizedTypeName
     }
 
     $outputName = $outputName.Replace('+', '.');
+
+    if ($underlying_type -ne $null)
+    {
+        $outputName += '?';
+    }
 
     return $outputName;
 }
@@ -868,7 +883,7 @@ function Find-MatchedMethod
             }
         }
     }
-    
+
     return $null;
 }
 

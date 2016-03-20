@@ -95,7 +95,7 @@ function Create-ParameterTreeImpl
         }
         else
         {
-            if ($TypeInfo.FullName -like "Microsoft.*Azure.Management.*.*" -and (-not ($typeInfo.FullName -like "Microsoft.*Azure.Management.*.SubResource")))
+            if ((-not $TypeInfo.IsEnum) -and $TypeInfo.FullName -like "Microsoft.*Azure.Management.*.*" -and (-not ($typeInfo.FullName -like "Microsoft.*Azure.Management.*.SubResource")))
             {
                 $TypeList.Add($TypeInfo.FullName, $TypeInfo);
             }
@@ -156,8 +156,8 @@ function Create-ParameterTreeImpl
                 $can_write = ($itemProp.GetSetMethod() -ne $null) -and $itemProp.CanWrite;
                 $nodeProp = @{ Name = $itemProp.Name; Type = $itemProp.PropertyType; CanWrite = $can_write};
                 $treeNode.Properties += $nodeProp;
-                
-                if ($itemProp.PropertyType.FullName.StartsWith($NameSpace + ".") -and (-not $itemProp.PropertyType.FullName.EndsWith("Types")))
+
+                if ((-not $itemProp.PropertyType.IsEnum) -and $itemProp.PropertyType.FullName.StartsWith($NameSpace + "."))
                 {
                     # Model Class Type - Recursive Call
                     $subTreeNode = Create-ParameterTreeImpl $itemProp.Name $itemProp.PropertyType $TypeList $treeNode ($Depth + 1);
@@ -195,6 +195,7 @@ function Create-ParameterTreeImpl
                     elseif (($nodeProp["Type"].BaseType -ne $null -and $nodeProp["Type"].BaseType.IsEquivalentTo([enum])) -or `
                              $nodeProp["Type"].FullName -like "System.Nullable*$NameSpace.*Types*")
                     {
+                        #$nodeProp["Type"] = [string];
                         $nodeProp["IsPrimitive"] = $true;
                         $primitiveSuffix = " `'";
                     }
