@@ -1117,7 +1117,7 @@ function displayImpl(o, key, depth, arr) {
   }
   else {
     arr.push(makeTuple(key, o ? o.toString() : '', depth));
-    return depth * 2 + (key ? key.length : 0);
+    return depth * 2 + (key ? key.toString().length : 0);
   }
 }
 
@@ -1127,7 +1127,8 @@ function display(cli, o) {
   for (var t in arr) {
     var prebuf = new Array(arr[t].depth * 2).join(' ');
     var key = arr[t].key ? arr[t].key : '';
-    var postbuf = new Array(width - (prebuf.length + key.length)).join(' ');
+    var postLen = width - (prebuf.length + key.length);
+    var postbuf = new Array(postLen > 0 ? postLen : 0).join(' ');
     var str = prebuf + capitalize(key) + postbuf;
     if (arr[t].value) {
       str += ' : ' + arr[t].value;

@@ -243,7 +243,13 @@ function Generate-CliParameterCommandImpl
         # Patch Operation Setup
         $code += "    options.operation = 'replace';" + $NEW_LINE;
         $code += "    options.path = ${pathToTreeNode};" + $NEW_LINE;
-            
+
+        # Validate Path Object Exists
+        $code += "    var error = jsonpatch.validate([{op: 'remove', path: options.path}], parametersObj);" + $NEW_LINE;
+        $code += "    if (!(typeof error === 'undefined')) {" + $NEW_LINE;
+        $code += "      jsonpatch.apply(parametersObj, [{op: 'add', path: options.path, value: {}}]);" + $NEW_LINE;
+        $code += "    }" + $NEW_LINE;
+
         # 1.3 For List Item
         if ($TreeNode.IsListItem)
         {
