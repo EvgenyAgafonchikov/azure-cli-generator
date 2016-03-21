@@ -246,7 +246,7 @@ function Generate-CliParameterCommandImpl
 
         # Validate Path Object Exists
         $code += "    var error = jsonpatch.validate([{op: 'remove', path: options.path}], parametersObj);" + $NEW_LINE;
-        $code += "    if (!(typeof error === 'undefined')) {" + $NEW_LINE;
+        $code += "    if (typeof error !== 'undefined') {" + $NEW_LINE;
         $code += "      jsonpatch.apply(parametersObj, [{op: 'add', path: options.path, value: {}}]);" + $NEW_LINE;
         $code += "    }" + $NEW_LINE;
 
