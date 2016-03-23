@@ -933,6 +933,11 @@ function Process-ReturnType
     {
         return @($result, $allrt);
     }
+    
+    if ($rt.FullName -like "System.Collections.Generic.IEnumerable*")
+    {
+        $rt = $rt.GenericTypeArguments[0];
+    }
 
     $xml = '<Name>' + $rt.FullName + '</Name>';
     $xml += '<ViewSelectedBy><TypeName>' + $rt.FullName + '</TypeName></ViewSelectedBy>' + [System.Environment]::NewLine;
