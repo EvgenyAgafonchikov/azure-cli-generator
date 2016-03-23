@@ -229,6 +229,7 @@ function Get-InvokeMethodCmdletCode
 
         $param_name = Get-CamelCaseName $pt.Name;
         $expose_param_name = $param_name;
+        $is_manatory = (-not $pt.IsOptional).ToString().ToLower();
 
         $param_type_full_name = Get-NormalizedTypeName $pt.ParameterType;
 
@@ -263,7 +264,7 @@ function Get-InvokeMethodCmdletCode
             {
                 ParameterSetName = "InvokeByDynamicParameters",
                 Position = $param_index,
-                Mandatory = false
+                Mandatory = $is_manatory
             });
             p${param_name}.Attributes.Add(new AllowNullAttribute());
             dynamicParameters.Add(`"${expose_param_name}`", p${param_name});
@@ -786,7 +787,18 @@ function Get-VerbNounCmdletCode
 
         $param_name = Get-CamelCaseName $pt.Name;
         $expose_param_name = $param_name;
-
+        if ($friendMethodName -eq "GetInstanceView")
+        {
+            $is_manatory = "false";
+        }
+        elseif (($MethodInfo.Name.ToString() -eq "DeleteInstances") -and ($param_name -eq "InstanceIds"))
+        {
+            $is_manatory = "false";
+        }
+        else
+        {
+            $is_manatory = (-not $pt.IsOptional).ToString().ToLower();
+        }
         $param_type_full_name = Get-NormalizedTypeName $pt.ParameterType;
 
         if ($expose_param_name -like '*Parameters')
@@ -820,7 +832,7 @@ function Get-VerbNounCmdletCode
             {
                 ParameterSetName = "InvokeByDynamicParameters",
                 Position = $param_index,
-                Mandatory = false
+                Mandatory = $is_manatory
             });
 "@;
             if ($FriendMethodInfo -ne $null)
@@ -831,7 +843,7 @@ function Get-VerbNounCmdletCode
             {
                 ParameterSetName = "InvokeByDynamicParametersForFriendMethod",
                 Position = $param_index,
-                Mandatory = false
+                Mandatory = $is_manatory
             });
 "@;
             }
@@ -926,7 +938,7 @@ function Get-VerbNounCmdletCode
         $friend_code = "";
         if ($FriendMethodInfo.Name -eq 'PowerOff')
         {
-            $param_name = $expose_param_name = 'StayProvision';
+            $param_name = $expose_param_name = 'StayProvisioned';
         }
         else
         {

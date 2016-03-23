@@ -106,15 +106,17 @@
     {
       "name": "VirtualMachineScaleSetVMs",
       "methods": [
+	    {
+          "name": "Get",
+          "friends": [
+            "GetInstanceView"
+          ]
+        },
         {
           "name": "Deallocate",
           "cmdlet": {
-            "verb": "Stop",
-            "suffix": ""
-          },
-          "friends": [
-            "PowerOff"
-          ]
+            "skip": true
+          }
         },
         {
           "name": "PowerOff",
@@ -136,6 +138,24 @@
         },
         {
           "name": "ListNext",
+          "cmdlet": {
+            "skip": true
+          }
+        },
+		{
+          "name": "Restart",
+          "cmdlet": {
+            "skip": true
+          }
+        },
+		{
+          "name": "Start",
+          "cmdlet": {
+            "skip": true
+          }
+        },
+		{
+          "name": "Delete",
           "cmdlet": {
             "skip": true
           }
