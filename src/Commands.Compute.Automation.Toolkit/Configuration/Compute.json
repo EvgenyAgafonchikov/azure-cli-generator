@@ -36,7 +36,7 @@
             "PowerOff"
           ]
         },
-		{
+    {
           "name": "DeleteInstances",
           "cmdlet": {
             "verb": "Remove",
