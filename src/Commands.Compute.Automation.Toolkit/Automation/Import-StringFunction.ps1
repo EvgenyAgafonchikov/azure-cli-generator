@@ -322,6 +322,10 @@ function Get-SingularNoun
     {
         return $noun;
     }
+    if ($noun.EndsWith("CreateOrUpdateParameters"))
+    {
+        return $noun.Substring(0, $noun.Length - 24);
+    }
     if ($noun.EndsWith("ses"))
     {
         return $noun.Substring(0, $noun.Length - 2);

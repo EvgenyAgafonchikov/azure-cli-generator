@@ -46,7 +46,10 @@ param
     [bool]$CombineGetAndListAll = $false,
 
     [Parameter(Mandatory = $false)]
-    [bool]$CombineDeleteAndDeleteInstances = $false
+    [bool]$CombineDeleteAndDeleteInstances = $false,
+
+    [Parameter(Mandatory = $false)]
+    [bool]$GenerateArgumentListParameter = $false
 )
 
 . "$PSScriptRoot\Import-StringFunction.ps1";
@@ -728,7 +731,14 @@ function Get-VerbNounCmdletCode
     $shortNounName = Get-ShortNounName $opSingularName;
 
     $mapped_noun_str = 'AzureRm' + $shortNounName + $mapped_verb_term_suffix;
-    $mapped_noun_str = Get-PowershellNoun $OperationName $mapped_noun_str;
+    if ($mapped_verb_name -eq "Update" -and $mapped_noun_str.EndsWith("VMSSInstances"))
+    {
+        $mapped_noun_str = $mapped_noun_str.Replace("VMSSInstances", "VmssInstance");
+    }
+    else
+    {
+        $mapped_noun_str = Get-PowershellNoun $OperationName $mapped_noun_str;
+    }
     $verb_cmdlet_name = $mapped_verb_name + $mapped_noun_str;
 
     # 1. Start
@@ -897,9 +907,11 @@ function Get-VerbNounCmdletCode
         }
     }
 
-    $param_name = $expose_param_name = 'ArgumentList';
-    $param_type_full_name = 'object[]';
-    $dynamic_param_assignment_code_lines +=
+    if ($GenerateArgumentListParameter)
+    {
+        $param_name = $expose_param_name = 'ArgumentList';
+        $param_type_full_name = 'object[]';
+        $dynamic_param_assignment_code_lines +=
 @"
             var p${param_name} = new RuntimeDefinedParameter();
             p${param_name}.Name = `"${expose_param_name}`";
@@ -911,9 +923,9 @@ function Get-VerbNounCmdletCode
                 Mandatory = true
             });
 "@;
-    if ($FriendMethodInfo -ne $null)
-    {
-        $dynamic_param_assignment_code_lines +=
+        if ($FriendMethodInfo -ne $null)
+        {
+            $dynamic_param_assignment_code_lines +=
 @"
             p${param_name}.Attributes.Add(new ParameterAttribute
             {
@@ -922,16 +934,39 @@ function Get-VerbNounCmdletCode
                 Mandatory = true
             });
 "@;
-    }
-
-    $dynamic_param_assignment_code_lines +=
+        }
+        $dynamic_param_assignment_code_lines +=
 @"
             p${param_name}.Attributes.Add(new AllowNullAttribute());
             dynamicParameters.Add(`"${expose_param_name}`", p${param_name});
 
 "@;
+    }
 
     $dynamic_param_assignment_code = [string]::Join($NEW_LINE, $dynamic_param_assignment_code_lines);
+    if ($methodName -eq "Reimage")
+    {
+        $add_switch_param_code = "";
+        $param_name = $expose_param_name = $methodName;
+        $param_type_full_name = 'SwitchParameter';
+        $add_switch_param_code +=
+@"
+            var p${param_name} = new RuntimeDefinedParameter();
+            p${param_name}.Name = `"${expose_param_name}`";
+            p${param_name}.ParameterType = typeof($param_type_full_name);
+            p${param_name}.Attributes.Add(new ParameterAttribute
+            {
+                ParameterSetName = "InvokeByDynamicParameters",
+                Position = $param_index,
+                Mandatory = true
+            });
+            p${param_name}.Attributes.Add(new AllowNullAttribute());
+            dynamicParameters.Add(`"${expose_param_name}`", p${param_name});
+
+"@;
+        $dynamic_param_assignment_code += $NEW_LINE;
+        $dynamic_param_assignment_code += $add_switch_param_code;
+    }
 
     if ($FriendMethodInfo -ne $null)
     {
@@ -1023,6 +1058,11 @@ $dynamic_param_assignment_code
 
     # 3. End
     $code += "";
+    if ($methodName -eq "CreateOrUpdate")
+    {
+        $update_code = $code.Replace("New", "Update");
+    }
+    $code += $update_code
 
     return $code;
 }

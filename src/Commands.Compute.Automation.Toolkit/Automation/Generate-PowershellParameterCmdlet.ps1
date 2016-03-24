@@ -268,7 +268,10 @@ function Get-ParameterCode
         [int] $index,
 
         [Parameter(Mandatory = $false)]
-        [bool] $make_null = $false
+        [bool] $make_null = $false,
+
+        [Parameter(Mandatory = $false)]
+        [bool] $mandatory = $false
     )
 
     $p_type = Get-ArrayType $parameter["Type"];
@@ -283,12 +286,13 @@ function Get-ParameterCode
     }
 
     $p_name = $parameter["Name"];
+    $is_mandatory = $mandatory.ToString().ToLower();
 
     $return_code =
 @"
 
         [Parameter(
-            Mandatory = false,
+            Mandatory = $is_mandatory,
             Position = $index,
             ValueFromPipelineByPropertyName = true)]
         public $p_type $p_name { get; set; }
@@ -412,7 +416,14 @@ function Write-PowershellCmdlet
 
     if ($cmdlet_verb.Equals("New"))
     {
-        $cmdlet_noun += "Config";
+        if ($cmdlet_noun.EndsWith("Configuration"))
+        {
+            $cmdlet_noun = $cmdlet_noun.Replace("Configuration", "Config");
+        }
+        else
+        {
+            $cmdlet_noun += "Config";
+        }
     }
 
     if (($cmdlet_verb.Equals("Add") -or $cmdlet_verb.Equals("Remove")) -and $cmdlet_noun.EndsWith('s'))
@@ -446,7 +457,7 @@ namespace ${ps_generated_cmdlet_namespace}
 @"
 
         [Parameter(
-            Mandatory = false,
+            Mandatory = true,
             Position = 0,
             ValueFromPipeline = true,
             ValueFromPipelineByPropertyName = true)]
@@ -460,7 +471,14 @@ namespace ${ps_generated_cmdlet_namespace}
             $j = $i + 1;
             if ($cmdlet_verb.Equals("Remove"))
             {
-                $cmdlet_class_code += Get-ParameterCode $Parameters[$i] $j $true;
+                if ($Parameters[$i].Name -eq "Name")
+                {
+                    $cmdlet_class_code += Get-ParameterCode $Parameters[$i] $j $true $true;
+                }
+                else
+                {
+                    Write-Verbose("Skipping this parameter for Remove: " + $Parameters[$i].Name);
+                }
             }
             else
             {
@@ -968,47 +986,51 @@ namespace ${ps_generated_cmdlet_namespace}
                 $array_parent = Get-ArrayParent $chain;
                 $assign = Get-AssignCode $p $false;
 
-                if ($array_parent -ne $TreeNode.Name)
+                if ($thisProperty -eq "Name")
                 {
-                    $middle = $array_parent.TrimStart($TreeNode.Name);
 
-                    if ($i -eq 0)
+                    if ($array_parent -ne $TreeNode.Name)
                     {
-                        $cmdlet_code_remove_body +=
+                        $middle = $array_parent.TrimStart($TreeNode.Name);
+
+                        if ($i -eq 0)
+                        {
+                            $cmdlet_code_remove_body +=
 @"
 
-                    (this.${thisProperty} == null || e${middle}.${property} == ${assign})
+                    (e${middle}.${property} == ${assign})
 
 "@;
+                        }
+                        else
+                        {
+
+                            $cmdlet_code_remove_body +=
+@"
+                    && (e${middle}.${property} == ${assign})
+
+"@;
+                        }
                     }
                     else
                     {
-
-                        $cmdlet_code_remove_body +=
-@"
-                    && (this.${thisProperty} == null || e${middle}.${property} == ${assign})
-
-"@;
-                    }
-                }
-                else
-                {
-                    if ($i -eq 0)
-                    {
-                        $cmdlet_code_remove_body +=
+                        if ($i -eq 0)
+                        {
+                            $cmdlet_code_remove_body +=
 @"
 
-                    (this.${thisProperty} == null || e.${property} == ${assign})
+                    (e.${property} == ${assign})
 
 "@;
-                    }
-                    else
-                    {
-                        $cmdlet_code_remove_body +=
+                        }
+                        else
+                        {
+                            $cmdlet_code_remove_body +=
 @"
-                    && (this.${thisProperty} == null || e.${property} == ${assign})
+                    && (e.${property} == ${assign})
 
 "@;
+                        }
                     }
                 }
             }
@@ -1147,5 +1169,12 @@ Write-PowershellCmdlet $verb $OutputFolder $TreeNode $Parameters $ModelNameSpace
 
 if ($verb.Equals("Add"))
 {
-    Write-PowershellCmdlet "Remove" $OutputFolder $TreeNode $Parameters $ModelNameSpace $ObjectName $TypeBinding;
+    if ($TreeNode.Name.Equals("AdditionalUnattendContent") -or $TreeNode.Name.Equals("Listeners") -or $TreeNode.Name.Equals("Secrets") -or $TreeNode.Name.Equals("PublicKeys"))
+    {
+        Write-Verbose("Skipping to generate Remove- cmdlets for this object: " + $TreeNode.Name);
+    }
+    else
+    {
+        Write-PowershellCmdlet "Remove" $OutputFolder $TreeNode $Parameters $ModelNameSpace $ObjectName $TypeBinding;
+    }
 }
