@@ -63,8 +63,8 @@ if (-not [string]::IsNullOrEmpty($ConfigPath))
 {
     $lines = Get-Content -Path $ConfigPath;
     $configJsonObject = ConvertFrom-Json ([string]::Join('', $lines));
-    $global:cli_sample_code_lines = @();
-    $global:ps_sample_code_lines = @();
+    $global:cli_sample_code_lines = '';
+    $global:ps_sample_code_lines = '';
 
     $operationSettings = @{};
     $cliOperationSettings = @{};

@@ -1259,7 +1259,6 @@ function Generate-CliFunctionCommandImpl
     $code += "  .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
 
     $option_str_items += "--parameter-file `$f";
-    $option_str_items += "--subscription `$s";
 
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
     {
@@ -1529,9 +1528,9 @@ function Generate-CliFunctionCommandImpl
             $code += $cmdlet_tree_code + $NEW_LINE;
             
             # 3.3.4 Parameter Sample Commands
-            $global:cli_sample_code_lines += "azure ${cliMethodOption} ${cliParamCmdSubCatName} generate ${NEW_LINE}--parameter-file `$f" + $NEW_LINE;
+            $global:cli_sample_code_lines += "azure ${cliCategoryName} ${cliParamCmdSubCatName} generate ${NEW_LINE}--parameter-file `$f" + $NEW_LINE;
             $global:cli_sample_code_lines += $NEW_LINE;
-            $global:cli_sample_code_lines += "azure ${cliMethodOption} ${cliParamCmdSubCatName} patch ${NEW_LINE}--parameter-file `$f" + $NEW_LINE;
+            $global:cli_sample_code_lines += "azure ${cliCategoryName} ${cliParamCmdSubCatName} patch ${NEW_LINE}--parameter-file `$f" + $NEW_LINE;
             $global:cli_sample_code_lines += $NEW_LINE;
 
             break;
