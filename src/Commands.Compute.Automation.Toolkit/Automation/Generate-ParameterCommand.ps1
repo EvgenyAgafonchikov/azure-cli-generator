@@ -199,6 +199,8 @@ function Generate-CliParameterCommandImpl
         $code += "  .description(`$('Set ${treeNodeCliOptionName} in ${cliParamCmdSubCatName} string or files, e.g. \r\n${sampleJsonText}\r\n" + $CLI_HELP_MSG + "'))" + $NEW_LINE;
         $code += "  .usage('[options]')" + $NEW_LINE;
         $code += "  .option('--parameter-file <parameter-file>', `$('The parameter file path.'))" + $NEW_LINE;
+        $setSampleCode = "azure ${cliParamCmdTopCatName} ${cliParamCmdSubCatName} ${treeNodeCliOptionName} ${action_category_name}" + $NEW_LINE;
+        $setSampleCode += "--parameter-file `$f" + $NEW_LINE;
 
         # 1.1 For List Item
         if ($indexerParamList.Count -gt 0)
@@ -207,14 +209,17 @@ function Generate-CliParameterCommandImpl
             {
                 $indexerOptionName = Get-CliOptionName $indexerParamName;
                 $code += "  .option('--$indexerOptionName <$indexerOptionName>', `$('Indexer: $indexerOptionName.'))" + $NEW_LINE;
+                $setSampleCode += "--$indexerOptionName `$i" + $NEW_LINE;
             }
             
             if ($indexerParamList -contains 'index')
             {
                 $code += "  .option('--value <value>', `$('The input string value for the indexed item.'))" + $NEW_LINE;
+                $setSampleCode += "--value `$v" + $NEW_LINE;
             }
         }
         $code += "  .option('--parse', `$('Parse the input string, i.e. str, for parameters to a JSON object, e.g. JSON.parse(str).'))" + $NEW_LINE;
+        $setSampleCode += "--parse" + $NEW_LINE;
 
         # 1.2 For Each Property, Set the Option
         foreach ($propertyItem in $TreeNode.Properties)
@@ -222,6 +227,7 @@ function Generate-CliParameterCommandImpl
             $n1 = Get-CliOptionName $propertyItem["Name"];
             $n2 = Get-CliNormalizedName $propertyItem["Name"];
             $code += "  .option('--${n1} <${n2}>', `$('Set the ${n1} value.'))" + $NEW_LINE;
+            $setSampleCode += "--${n1} `$${n2}" + $NEW_LINE;
         }
         # Function Execute Body
         $code += "  .execute(function(options, _) {" + $NEW_LINE;
@@ -307,6 +313,9 @@ function Generate-CliParameterCommandImpl
 
         $code += "  });" + $NEW_LINE;
         $code += "" + $NEW_LINE;
+        
+        # 1.5 Sample Command
+        $global:cli_sample_code_lines += $setSampleCode + $NEW_LINE;
     }
 
     # 2. Parameter Remove Command
@@ -325,6 +334,8 @@ function Generate-CliParameterCommandImpl
     $code += "  .description(`$('Remove ${treeNodeCliOptionName} in ${cliParamCmdSubCatName} string or files, e.g. \r\n${sampleJsonText}\r\n" + $CLI_HELP_MSG + "'))" + $NEW_LINE;
     $code += "  .usage('[options]')" + $NEW_LINE;
     $code += "  .option('--parameter-file <parameter-file>', `$('The parameter file path.'))" + $NEW_LINE;
+    $removeSampleCode = "azure ${cliParamCmdTopCatName} ${cliParamCmdSubCatName} ${treeNodeCliOptionName} ${action_category_name}" + $NEW_LINE;
+    $removeSampleCode += "--parameter-file `$f" + $NEW_LINE;
 
     # 2.1 For List Item
     if ($indexerParamList.Count -gt 0)
@@ -333,6 +344,7 @@ function Generate-CliParameterCommandImpl
         {
             $indexerOptionName = Get-CliOptionName $indexerParamName;
             $code += "  .option('--$indexerOptionName <$indexerOptionName>', `$('Indexer: $indexerOptionName.'))" + $NEW_LINE;
+            $removeSampleCode += "--$indexerOptionName `$p${indexerOptionName}" + $NEW_LINE;
         }
     }
 
@@ -342,6 +354,7 @@ function Generate-CliParameterCommandImpl
         $code += "  .option('--" + (Get-CliOptionName $propertyItem["Name"]) + "',";
         $code += " `$('Remove the " + (Get-CliOptionName $propertyItem["Name"]);
         $code += " value.'))" + $NEW_LINE;
+        $removeSampleCode += "--" + (Get-CliOptionName $propertyItem["Name"]) + $NEW_LINE;
     }
 
     # 2.3 Function Definition
@@ -406,6 +419,9 @@ function Generate-CliParameterCommandImpl
     $code += "    cli.output.verbose(`'=====================================`');" + $NEW_LINE;
     $code += "  });" + $NEW_LINE;
     
+    # 2.4 Sample Remove Command
+    $global:cli_sample_code_lines += $removeSampleCode + $NEW_LINE;
+
     # 3. Recursive Calls for All Sub-Nodes
     foreach ($subNode in $TreeNode.SubNodes)
     {

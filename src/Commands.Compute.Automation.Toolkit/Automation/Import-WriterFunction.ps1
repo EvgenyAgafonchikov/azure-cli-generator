@@ -1048,6 +1048,13 @@ function Write-CLICommandFile
 // Changes to this file may cause incorrect behavior and will be lost if the
 // code is regenerated.
 
+/*
+
+Generated Command List:
+
+${global:cli_sample_code_lines}
+*/
+
 'use strict';
 
 var fs = require('fs');

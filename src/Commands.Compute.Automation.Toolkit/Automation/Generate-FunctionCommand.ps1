@@ -1218,6 +1218,7 @@ function Generate-CliFunctionCommandImpl
     #$code += "  .description(`$('Commands to manage your $cliOperationDescription by the ${cliMethodOption} method.${xmlHelpText}'))" + $NEW_LINE;
     $code += "  .description(`$('${xmlHelpText}'))" + $NEW_LINE;
     $code += "  .usage('[options]${usageParamsString}')" + $NEW_LINE;
+    $option_str_items = @();
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
     {
         # Parameter Declaration - For Each Method Parameter
@@ -1226,6 +1227,7 @@ function Generate-CliFunctionCommandImpl
         if ($allStringFieldCheck[$optionParamName])
         {
             [System.Type]$optionParamType = $methodParamTypeDict[$optionParamName];
+            $subIndex = 0;
             foreach ($propItem in $optionParamType.GetProperties())
             {
                 [System.Reflection.PropertyInfo]$propInfoItem = $propItem;
@@ -1236,6 +1238,8 @@ function Generate-CliFunctionCommandImpl
                     $cli_shorthand_str = "-" + $cli_shorthand_str + ", ";
                 }
                 $code += "  .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_name}'))" + $NEW_LINE;
+                $option_str_items += "--${cli_option_name} `$p${index}${subIndex}";
+                $subIndex++;
             }
         }
         else
@@ -1247,11 +1251,15 @@ function Generate-CliFunctionCommandImpl
                 $cli_shorthand_str = "-" + $cli_shorthand_str + ", ";
             }
             $code += "  .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_name}'))" + $NEW_LINE;
+            $option_str_items += "--${cli_option_name} `$p${index}";
         }
     }
     $code += "  .option('--parameter-file <parameter-file>', `$('the input parameter file'))" + $NEW_LINE;
     $code += "  .option('-s, --subscription <subscription>', `$('the subscription identifier'))" + $NEW_LINE;
     $code += "  .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
+
+    $option_str_items += "--parameter-file `$f";
+    $option_str_items += "--subscription `$s";
 
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
     {
@@ -1413,6 +1421,10 @@ function Generate-CliFunctionCommandImpl
     }
     $code += "  });" + $NEW_LINE;
 
+    # 3.2.8 Sample Code;
+    $global:cli_sample_code_lines += "azure ${cliCategoryName} ${cliMethodOption} ${NEW_LINE}" + ([string]::Join($NEW_LINE, $option_str_items)) + $NEW_LINE;
+    $global:cli_sample_code_lines += $NEW_LINE;
+
     # 3.3 Parameters
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
     {
@@ -1515,6 +1527,12 @@ function Generate-CliFunctionCommandImpl
 
             # 3.3.3 Parameter Commands
             $code += $cmdlet_tree_code + $NEW_LINE;
+            
+            # 3.3.4 Parameter Sample Commands
+            $global:cli_sample_code_lines += "azure ${cliMethodOption} ${cliParamCmdSubCatName} generate ${NEW_LINE}--parameter-file `$f" + $NEW_LINE;
+            $global:cli_sample_code_lines += $NEW_LINE;
+            $global:cli_sample_code_lines += "azure ${cliMethodOption} ${cliParamCmdSubCatName} patch ${NEW_LINE}--parameter-file `$f" + $NEW_LINE;
+            $global:cli_sample_code_lines += $NEW_LINE;
 
             break;
         }
