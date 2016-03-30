@@ -19,8 +19,8 @@
     <Title>AzureRT.Compute.Automation.Toolkit</Title>
     
     <!-- These Properties should also be able to set the PackageVersion to 1.2.3.4 -->
-    <PackageVersion>0.1.0.3</PackageVersion>
-    <BuildVersion>0.1.0.3</BuildVersion>
+    <PackageVersion>0.1.0.4</PackageVersion>
+    <BuildVersion>0.1.0.4</BuildVersion>
     
     <Authors>phuang</Authors>
     <Owners>phuang</Owners>
@@ -51,7 +51,7 @@
   <!-- This target should also be able to set the PackageVersion to 1.2.3.4 -->
   <Target Name="BeforeVersion" BeforeTargets="_GetVersionInfo">
     <PropertyGroup>
-      <BuildVersion>0.1.0.3</BuildVersion>
+      <BuildVersion>0.1.0.4</BuildVersion>
     </PropertyGroup>
   </Target>
   
