@@ -851,7 +851,7 @@ namespace ${ps_generated_cmdlet_namespace}
                     $new_code = $cmdlet_new_single_object_code[$array_parent];
                     $cmdlet_new_single_object_code.Remove($array_parent);
                     $cmdlet_add_single_object_code.Remove($array_parent);
-
+                    $main_object = $TreeNode.Name;
                     $var_name = $chain[$chain.Length - 2] + "." + ${var_name};
                     $cmdlet_code_add_body +=
 @"
@@ -862,6 +862,7 @@ namespace ${ps_generated_cmdlet_namespace}
                 {
                     ${new_code}
                     v${array_parent}.${property} = element;
+                    v${main_object}.${array_parent}.Add(v${array_parent});
                 }
             }
 
