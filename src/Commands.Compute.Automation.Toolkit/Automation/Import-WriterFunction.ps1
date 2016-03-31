@@ -256,7 +256,10 @@ function Write-InvokeCmdletFile
         $invoke_cmdlet_method_code,
 
         [Parameter(Mandatory = $True)]
-        $dynamic_param_method_code
+        $dynamic_param_method_code,
+
+        [Parameter(Mandatory = $false)]
+        [bool] $generate_cmdlet = $true
     )
 
     $indents = " " * 8;
@@ -386,6 +389,11 @@ ${operations_code}                    default : WriteWarning(`"Cannot find the m
     # $invoke_cmdlet_method_code_content = ([string]::Join($NEW_LINE, $invoke_cmdlet_method_code));
     # $dynamic_param_method_code_content = ([string]::Join($NEW_LINE, $dynamic_param_method_code));
 
+    if (-not $generate_cmdlet)
+    {
+        $skip = "//";
+    }
+
     $cmdlet_source_code_text =
 @"
 ${code_common_header}
@@ -394,7 +402,7 @@ $code_using_strs
 
 namespace ${code_common_namespace}
 {
-    [Cmdlet(${cmdlet_verb_code}, `"${cmdlet_noun}`", DefaultParameterSetName = `"$dynamic_param_set_name`")]
+    ${skip}[Cmdlet(${cmdlet_verb_code}, `"${cmdlet_noun}`", DefaultParameterSetName = `"$dynamic_param_set_name`")]
     [OutputType(typeof(${normalized_output_type_name}))]
     public partial class $cmdlet_class_name : $base_cmdlet_name, IDynamicParameters
     {

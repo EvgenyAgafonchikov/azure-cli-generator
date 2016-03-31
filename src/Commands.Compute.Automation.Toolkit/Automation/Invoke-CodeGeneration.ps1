@@ -430,9 +430,17 @@ else
             }
         }
 
-        Write-InvokeCmdletFile $invoke_cmdlet_file_name $invoke_cmdlet_class_name $auto_base_cmdlet_name $clientClassType $filtered_types $invoke_cmdlet_method_code $dynamic_param_method_code;
-        Write-InvokeParameterCmdletFile $parameter_cmdlet_file_name $parameter_cmdlet_class_name $auto_base_cmdlet_name $clientClassType $filtered_types $parameter_cmdlet_method_code;
-        Write-NewParameterObjectCmdletFile $new_object_cmdlet_file_name $new_object_cmdlet_class_name $auto_base_cmdlet_name $clientClassType $filtered_types $parameter_cmdlet_method_code;
+        $generate_invoke_cmdlet = $false; # Skip generating invoke cmdlets by setting this value to false.
+        if ($generate_invoke_cmdlet)
+        {
+            Write-InvokeCmdletFile $invoke_cmdlet_file_name $invoke_cmdlet_class_name $auto_base_cmdlet_name $clientClassType $filtered_types $invoke_cmdlet_method_code $dynamic_param_method_code;
+            Write-InvokeParameterCmdletFile $parameter_cmdlet_file_name $parameter_cmdlet_class_name $auto_base_cmdlet_name $clientClassType $filtered_types $parameter_cmdlet_method_code;
+            Write-NewParameterObjectCmdletFile $new_object_cmdlet_file_name $new_object_cmdlet_class_name $auto_base_cmdlet_name $clientClassType $filtered_types $parameter_cmdlet_method_code;
+        }
+        else
+        {
+            Write-InvokeCmdletFile $invoke_cmdlet_file_name $invoke_cmdlet_class_name $auto_base_cmdlet_name $clientClassType $filtered_types $invoke_cmdlet_method_code $dynamic_param_method_code $generate_invoke_cmdlet;
+        }
     }
 
     # XML 
