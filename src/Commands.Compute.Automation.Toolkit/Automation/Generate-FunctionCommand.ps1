@@ -836,13 +836,16 @@ function Get-VerbNounCmdletCode
                  $dynamic_param_assignment_code_lines += "            p${param_name}.ParameterType = typeof($param_type_full_name);";
             }
 
+            $allow_piping = ($param_type_full_name -eq "VirtualMachineScaleSet").ToString().ToLower();
+
             $dynamic_param_assignment_code_lines +=
 @"
             p${param_name}.Attributes.Add(new ParameterAttribute
             {
                 ParameterSetName = "InvokeByDynamicParameters",
                 Position = $param_index,
-                Mandatory = $is_manatory
+                Mandatory = $is_manatory,
+                ValueFromPipeline = $allow_piping
             });
 "@;
             if ($FriendMethodInfo -ne $null)
@@ -853,7 +856,8 @@ function Get-VerbNounCmdletCode
             {
                 ParameterSetName = "InvokeByDynamicParametersForFriendMethod",
                 Position = $param_index,
-                Mandatory = $is_manatory
+                Mandatory = $is_manatory,
+                ValueFromPipeline = $allow_piping
             });
 "@;
             }
