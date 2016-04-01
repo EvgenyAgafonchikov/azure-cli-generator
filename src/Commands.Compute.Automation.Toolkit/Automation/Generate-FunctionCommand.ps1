@@ -1355,7 +1355,14 @@ function Generate-CliFunctionCommandImpl
         $cliMethodFuncName = $cliMethodName;
     }
 
-    $code += "    var result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(";
+    if ($cliOperationName -like "containerService*" -or $cliOperationName -like "usage*")
+    {
+        $code += "    var result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}Operations.${cliMethodFuncName}(";
+    }
+    else
+    {
+        $code += "    var result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(";
+    }
 
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
     {

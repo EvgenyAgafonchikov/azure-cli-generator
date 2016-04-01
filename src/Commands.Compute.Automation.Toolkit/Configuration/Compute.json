@@ -152,6 +152,12 @@
       "nounMappings": [
         { "from": "AvailabilitySets", "to": "availset" }
       ]
+    },
+    {
+      "name": "ContainerService",
+      "nounMappings": [
+        { "from": "ContainerService", "to": "container" }
+      ]
     }
   ],
   "nounMappings": [
