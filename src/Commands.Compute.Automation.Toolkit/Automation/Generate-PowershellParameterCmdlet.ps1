@@ -131,6 +131,28 @@ function Is-ValueType
     return $false;
 }
 
+function Is-SimpleType
+{
+    param(
+        [Parameter(Mandatory = $True)]
+        [string] $type
+    )
+
+    if ($type.Contains("bool"))
+    {
+        return $True;
+    }
+    if ($type.Contains("int"))
+    {
+        return $True;
+    }
+    if ($type.Contains("string"))
+    {
+        return $True;
+    }
+    return $false;
+}
+
 function Is-DictionaryType
 {
     param(
@@ -528,18 +550,18 @@ namespace ${ps_generated_cmdlet_namespace}
 "@;
             }
 
-
             for ($i = 1; $i -lt $chain.Count; $i++)
             {
                 $c = $chain[$i];
-
                 $new_obj += "." + $c;
                 $var_name = "v" + $new_obj;
 
                 if(-not $object_list.Contains($new_obj))
                 {
                     $object_list += $new_obj;
-                    $type = $TypeBinding[$c];
+                    $type = Get-ListType $TypeBinding[$c];
+                    $lala = $TypeBinding[$c].ToString()
+                    $single_type = Get-SingleType $TypeBinding[$c];
 
                     $cmdlet_new_object_code +=
 @"
@@ -548,6 +570,11 @@ namespace ${ps_generated_cmdlet_namespace}
             ${var_name} = new ${type}();
 
 "@;
+                    if ($TypeBinding[$c].ToString().StartsWith("Array:"))
+                    {
+                        $new_code = "var v${c} = new ${single_type}();";
+                        $cmdlet_new_single_object_code.Add($c, $new_code);
+                    }
                 }
             }
         }
@@ -590,7 +617,6 @@ namespace ${ps_generated_cmdlet_namespace}
             v${is_parent_list}.${c} = new ${type}();
 
 "@;
-
                         }
 
                         if ($TypeBinding[$c].ToString().StartsWith("Array:"))
@@ -599,7 +625,6 @@ namespace ${ps_generated_cmdlet_namespace}
 
                             $cmdlet_new_single_object_code.Add($c, $new_code);
                         }
-
                     }
 
                     if ($TypeBinding[$c].ToString().StartsWith("Array:"))
@@ -767,22 +792,47 @@ namespace ${ps_generated_cmdlet_namespace}
         {
 "@;
 
-        $cmdlet_code_body += $cmdlet_new_object_code;
+        $cmdlet_code_body += $cmdlet_new_object_code + "`r`n";
 
         foreach($p in $Parameters)
         {
             if (-not [System.String]::IsNullOrEmpty($p["Chain"]))
             {
+                $thisType = $p["Type"];
                 $var_name = Get-VariableName $p["Chain"];
                 $property = $p["OriginalName"];
-                $thisProperty = $p["Name"];
-                $assign = Get-AssignCode $p;
+                $is_simple = Is-SimpleType $thisType.ToString();
 
-                $cmdlet_code_body +=
+                if ($thisType.ToString().StartsWith("Array:") -and $is_simple)
+                {
+                    $chain = $p["Chain"];
+                    $array_parent = Get-ArrayParent $chain;
+                    $new_code = $cmdlet_new_single_object_code[$array_parent];
+                    $thisProperty = $p["Name"];
+                    $cmdlet_code_body +=
+@"
+
+            if (this.${thisProperty} != null)
+            {
+                foreach (var element in this.${thisProperty})
+                {
+                    ${new_code}
+                    v${array_parent}.${property} = element;
+                    ${var_name}.Add(v${array_parent});
+                }
+            }
+
+"@;
+                }
+                else
+                {
+                    $assign = Get-AssignCode $p;
+                    $cmdlet_code_body +=
 @"
             ${var_name}.${property} = ${assign};
 
 "@;
+                }
             }
         }
 

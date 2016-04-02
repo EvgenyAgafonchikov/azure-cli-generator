@@ -567,6 +567,7 @@ function Generate-PowershellParameterCommandImpl
                             if (($propertyItem["Type"] -like "*$ModelNameSpace*") -and (-not ($propertyItem["Type"] -like "System.Nullable*")) -and (-not $propertyItem["Type"].IsEnum))
                             {
                                 $subsub = Get-SpecificSubNode $nonSingleSubNode $propertyItem["Name"];
+                                $type_binding = AddTo-HashTable $type_binding $subsub.Name $subsub.TypeInfo;
                                 $nonSingleComlexResult = Get-NonSingleComplexDescendant $subsub $chain;
                                 $realsubsub = $nonSingleComlexResult["Node"];
                                 $chain = $nonSingleComlexResult["Chain"];
