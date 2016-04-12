@@ -186,14 +186,22 @@ function Create-ParameterTreeImpl
                 }
                 else
                 {
-                    if ($nodeProp["Type"].IsEquivalentTo([System.Nullable[long]]) -or
+                    if ($nodeProp["Type"].IsEquivalentTo([System.Nullable[long]]) -or `
                         $nodeProp["Type"].IsEquivalentTo([System.Nullable[bool]]))
                     {
                         $nodeProp["IsPrimitive"] = $true;
+                        $primitiveSuffix = " `'";
+                    }
+                    elseif (($nodeProp["Type"].BaseType -ne $null -and $nodeProp["Type"].BaseType.IsEquivalentTo([enum])) -or `
+                             $nodeProp["Type"].FullName -like "System.Nullable*$NameSpace.*Types*")
+                    {
+                        #$nodeProp["Type"] = [string];
+                        $nodeProp["IsPrimitive"] = $true;
+                        $primitiveSuffix = " `'";
                     }
 
                     # Primitive Type, e.g. int, string, Dictionary<string, string>, etc.
-                    Write-Verbose ($padding + '-' + $nodeProp["Name"] + " : " + $nodeProp["Type"]);
+                    Write-Verbose ($padding + '-' + $nodeProp["Name"] + " : " + $nodeProp["Type"] + $primitiveSuffix);
                 }
             }
 

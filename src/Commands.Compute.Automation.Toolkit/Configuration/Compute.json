@@ -106,67 +106,18 @@
     {
       "name": "VirtualMachineScaleSetVMs",
       "methods": [
-        {
-          "name": "Get",
-          "friends": [
-            "GetInstanceView"
-          ]
-        },
-        {
-          "name": "Deallocate",
-          "cmdlet": {
-            "skip": true
-          }
-        },
-        {
-          "name": "PowerOff",
-          "cmdlet": {
-            "skip": true
-          }
-        },
-        {
-          "name": "GetInstanceView",
-          "cmdlet": {
-            "skip": true
-          }
-        },
-        {
-          "name": "List",
-          "cmdlet": {
-            "skip": true
-          }
-        },
-        {
-          "name": "ListNext",
-          "cmdlet": {
-            "skip": true
-          }
-        },
-        {
-          "name": "Restart",
-          "cmdlet": {
-            "skip": true
-          }
-        },
-        {
-          "name": "Start",
-          "cmdlet": {
-            "skip": true
-          }
-        },
-        {
-          "name": "Delete",
-          "cmdlet": {
-            "skip": true
-          }
-        }
+        { "name": "GetInstanceView", "cmdlet": { "skip": true } },
+        { "name": "List", "cmdlet": { "skip": true } },
+        { "name": "ListNext", "cmdlet": { "skip": true } },
+        { "name": "Start", "cmdlet": { "skip": true } },
+        { "name": "Restart", "cmdlet": { "skip": true } },
+        { "name": "Delete", "cmdlet": { "skip": true } },
+        { "name": "Deallocate", "cmdlet": { "skip": true, "verb": "Stop", "suffix": "" }, "friends": [ "PowerOff" ] },
+        { "name": "PowerOff", "cmdlet": { "skip": true } }
       ],
       "nounMappings": [
         { "from": "Reimage", "to": "" }
       ]
-    },
-    {
-      "name": "ContainerService"
     }
   ],
   "nounMappings": [

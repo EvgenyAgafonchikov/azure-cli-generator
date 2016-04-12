@@ -453,7 +453,7 @@ function Write-PowershellCmdlet
         $cmdlet_noun = $cmdlet_noun.Substring(0, $cmdlet_noun.Length - 1);
     }
 
-    $cmdlet_noun = Get-PowershellNoun $objectName $cmdlet_noun;
+    $cmdlet_noun = Get-MappedNoun $objectName $cmdlet_noun;
     $cmdlet_class_name = $cmdlet_verb + $cmdlet_noun + "Command";
     $cmdlet_class_code =
 @"

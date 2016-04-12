@@ -120,6 +120,7 @@ function Get-CliCategoryName
     }
     else
     {
+        $inName = Get-MappedNoun $inName $inName;
         $outName = Get-CliOptionName $inName;
     }
 
@@ -354,7 +355,7 @@ function Get-ComponentName
     return $clientNS.Substring($clientNS.LastIndexOf('.') + 1);
 }
 
-function Get-PowershellNoun
+function Get-MappedNoun
 {
     param
     (

@@ -154,7 +154,7 @@ function Write-BaseCmdletFile
 
         $operation_get_template = 
 @"
-        public I${opShortName}Operations ${opShortName}Client
+        public I${opShortName}Operations $($opShortName)Client
         {
             get
             {
@@ -292,7 +292,7 @@ function Write-InvokeCmdletFile
                 continue;
             }
 
-            $invoke_param_set_name = $op_short_name + $method.Name.Replace('Async', '');
+            $invoke_param_set_name = (Get-SingularNoun $op_short_name) + $method.Name.Replace('Async', '');
             $all_method_names += $invoke_param_set_name;
         }
     }
@@ -321,19 +321,6 @@ $validate_all_method_names_code
     $operations_code = "";
     foreach ($method_name in $all_method_names)
     {
-        if ($method_name.Contains("ScaleSets"))
-        {
-            $method_name = $method_name.Replace("ScaleSets", "ScaleSet");
-        }
-        elseif ($method_name.Contains("ScaleSetVMs"))
-        {
-            $method_name = $method_name.Replace("ScaleSetVMs", "ScaleSetVM");
-        }
-        elseif ($method_name.Contains("VirtualMachines"))
-        {
-            $method_name = $method_name.Replace("VirtualMachines", "VirtualMachine");
-        }
-    
         $operation_code_template =
 @"
                     case `"${method_name}`" :
@@ -497,7 +484,7 @@ function Write-InvokeParameterCmdletFile
                 continue;
             }
 
-            $invoke_param_set_name = $op_short_name + $method.Name.Replace('Async', '');
+            $invoke_param_set_name = (Get-SingularNoun $op_short_name) + $method.Name.Replace('Async', '');
             $all_method_names += $invoke_param_set_name;
 
             [System.Reflection.ParameterInfo]$parameter_type_info = (Get-MethodComplexParameter $method $clientNameSpace);
@@ -550,26 +537,9 @@ $validate_all_method_names_code
     $operations_code = "";
     foreach ($method_name in $all_method_names)
     {
-        if ($method_name.Contains("ScaleSets"))
-        {
-            $singular_method_name = $method_name.Replace("ScaleSets", "ScaleSet");
-        }
-        elseif ($method_name.Contains("ScaleSetVMs"))
-        {
-            $singular_method_name = $method_name.Replace("ScaleSetVMs", "ScaleSetVM");
-        }
-        elseif ($method_name.Contains("VirtualMachines"))
-        {
-            $singular_method_name = $method_name.Replace("VirtualMachines", "VirtualMachine");
-        }
-        else
-        {
-            $singular_method_name = $method_name;
-        }
-        
         $operation_code_template =
 @"
-                        case `"${method_name}`" : WriteObject(Create${singular_method_name}Parameters(), true); break;
+                        case `"${method_name}`" : WriteObject(Create${method_name}Parameters(), true); break;
 "@;
         $operations_code += $operation_code_template + $NEW_LINE;
     }
@@ -941,6 +911,11 @@ function Process-ReturnType
     {
         return @($result, $allrt);
     }
+    
+    if ($rt.FullName -like "System.Collections.Generic.IEnumerable*")
+    {
+        $rt = $rt.GenericTypeArguments[0];
+    }
 
     $xml = '<Name>' + $rt.FullName + '</Name>';
     $xml += '<ViewSelectedBy><TypeName>' + $rt.FullName + '</TypeName></ViewSelectedBy>' + [System.Environment]::NewLine;
@@ -1081,6 +1056,13 @@ function Write-CLICommandFile
 // Changes to this file may cause incorrect behavior and will be lost if the
 // code is regenerated.
 
+/*
+
+Generated Command List:
+
+${global:cli_sample_code_lines}
+*/
+
 'use strict';
 
 var fs = require('fs');
@@ -1125,7 +1107,7 @@ function displayImpl(o, key, depth, arr) {
   }
   else {
     arr.push(makeTuple(key, o ? o.toString() : '', depth));
-    return depth * 2 + (key ? key.length : 0);
+    return depth * 2 + (key ? key.toString().length : 0);
   }
 }
 
@@ -1135,7 +1117,8 @@ function display(cli, o) {
   for (var t in arr) {
     var prebuf = new Array(arr[t].depth * 2).join(' ');
     var key = arr[t].key ? arr[t].key : '';
-    var postbuf = new Array(width - (prebuf.length + key.length)).join(' ');
+    var postLen = width - (prebuf.length + key.length);
+    var postbuf = new Array(postLen > 0 ? postLen : 0).join(' ');
     var str = prebuf + capitalize(key) + postbuf;
     if (arr[t].value) {
       str += ' : ' + arr[t].value;

@@ -62,7 +62,15 @@ function Create-ParameterObjectImpl
     {
         $obj = 0;
     }
+    elseif ($typeInfo.FullName -eq 'System.Int64')
+    {
+        $obj = 0;
+    }
     elseif ($typeInfo.FullName -eq 'System.UInt32')
+    {
+        $obj = 0;
+    }
+    elseif ($typeInfo.FullName -eq 'System.UInt64')
     {
         $obj = 0;
     }
@@ -85,6 +93,14 @@ function Create-ParameterObjectImpl
     {
         # Dictionary in client library always consists of string key & values.
         $obj = New-Object 'System.Collections.Generic.Dictionary[string,string]';
+    }
+    elseif ($typeInfo.FullName -like 'System.Nullable*Microsoft.*Azure.Management.*.*Types*')
+    {
+        $obj = $null;
+    }
+    elseif ($typeInfo.FullName -like 'Microsoft.*Azure.Management.*.*Types')
+    {
+        $obj = $null;
     }
     elseif ($typeInfo.FullName -like 'System.Nullable*')
     {

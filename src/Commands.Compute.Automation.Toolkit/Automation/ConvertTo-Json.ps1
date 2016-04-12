@@ -112,6 +112,9 @@ else
     $jsonText = $newJsonText.Replace("`r`n`r`n", "`r`n");
 }
 
+#$jsonText = $jsonText.Replace(":null", ":`"`"");
+$jsonText = $jsonText.Replace(":0", ":`"`"");
+
 # Change the JSON fields to use lower cases, e.g. {"Say":"Hello World!"} => {"say":"Hello World!"}
 $lowerCaseJsonText = $jsonText;
 $letterA = [int]([char]'A');
