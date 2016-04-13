@@ -539,7 +539,7 @@ namespace ${ps_generated_cmdlet_namespace}
 @"
 
             // ${new_obj}
-            var ${var_name} = new ${type}();
+            ${type} ${var_name} = null;
 
 "@;
 
@@ -548,6 +548,15 @@ namespace ${ps_generated_cmdlet_namespace}
 
                 ${new_obj} = ${var_name},
 "@;
+
+                $new_code =
+@"
+                if (${var_name} == null)
+                {
+                    ${var_name} = new ${type}();
+                }
+"@;
+                $cmdlet_new_single_object_code.Add($new_obj, $new_code);
             }
 
             for ($i = 1; $i -lt $chain.Count; $i++)
@@ -560,20 +569,21 @@ namespace ${ps_generated_cmdlet_namespace}
                 {
                     $object_list += $new_obj;
                     $type = Get-ListType $TypeBinding[$c];
-                    $lala = $TypeBinding[$c].ToString()
                     $single_type = Get-SingleType $TypeBinding[$c];
-
-                    $cmdlet_new_object_code +=
+                    $new_code =
 @"
 
-            // ${c}
-            ${var_name} = new ${type}();
-
+                if (${var_name} == null)
+                {
+                    ${var_name} = new ${type}();
+                }
 "@;
+                    $cmdlet_new_single_object_code.Add($c, $new_code);
+
                     if ($TypeBinding[$c].ToString().StartsWith("Array:"))
                     {
                         $new_code = "var v${c} = new ${single_type}();";
-                        $cmdlet_new_single_object_code.Add($c, $new_code);
+                        $cmdlet_new_single_object_code.Add($c + "obj", $new_code);
                     }
                 }
             }
@@ -796,31 +806,39 @@ namespace ${ps_generated_cmdlet_namespace}
 
         foreach($p in $Parameters)
         {
-            if (-not [System.String]::IsNullOrEmpty($p["Chain"]))
+            $chain = $p["Chain"];
+            if (-not [System.String]::IsNullOrEmpty($chain))
             {
                 $thisType = $p["Type"];
-                $var_name = Get-VariableName $p["Chain"];
+                $var_name = Get-VariableName $chain;
                 $property = $p["OriginalName"];
                 $is_simple = Is-SimpleType $thisType.ToString();
+                $new_code = '';
+
+                foreach($link in $chain)
+                {
+                    $new_code += $cmdlet_new_single_object_code[$link];
+                }
 
                 if ($thisType.ToString().StartsWith("Array:") -and $is_simple)
                 {
-                    $chain = $p["Chain"];
                     $array_parent = Get-ArrayParent $chain;
-                    $new_code = $cmdlet_new_single_object_code[$array_parent];
+                    $new_obj_code = $cmdlet_new_single_object_code[$array_parent + "obj"];
                     $thisProperty = $p["Name"];
                     $cmdlet_code_body +=
 @"
 
             if (this.${thisProperty} != null)
             {
+${new_code}
                 foreach (var element in this.${thisProperty})
                 {
-                    ${new_code}
+                    ${new_obj_code}
                     v${array_parent}.${property} = element;
                     ${var_name}.Add(v${array_parent});
                 }
             }
+
 
 "@;
                 }
@@ -829,7 +847,12 @@ namespace ${ps_generated_cmdlet_namespace}
                     $assign = Get-AssignCode $p;
                     $cmdlet_code_body +=
 @"
-            ${var_name}.${property} = ${assign};
+            if (${assign} != null)
+            {
+${new_code}
+                ${var_name}.${property} = ${assign};
+            }
+
 
 "@;
                 }
