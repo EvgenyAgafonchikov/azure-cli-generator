@@ -797,7 +797,7 @@ function Get-VerbNounCmdletCode
 
         $param_name = Get-CamelCaseName $pt.Name;
         $expose_param_name = $param_name;
-        if ($friendMethodName -eq "GetInstanceView")
+        if ($MethodInfo.Name.ToString() -eq "Get")
         {
             $is_manatory = "false";
         }
