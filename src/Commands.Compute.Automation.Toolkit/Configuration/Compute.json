@@ -118,7 +118,13 @@
       "nounMappings": [
         { "from": "Reimage", "to": "" }
       ]
-    }
+    },
+	{
+	  "name": "ContainerService",
+	  "methods": [
+	    { "name": "List", "cmdlet": { "skip": true } }
+	  ]
+	}
   ],
   "nounMappings": [
     { "from": "VMSS", "to": "Vmss" }
