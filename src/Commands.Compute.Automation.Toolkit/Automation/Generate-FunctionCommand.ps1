@@ -1315,6 +1315,7 @@ function Generate-CliFunctionCommandImpl
                     $code += "      for (var item in ${cli_param_name}ValArr) {" + $NEW_LINE;
                     $code += "        ${cli_param_name}Obj.push(${cli_param_name}ValArr[item]);" + $NEW_LINE;
                     $code += "      }" + $NEW_LINE;
+                    $code += "      ${cli_param_name}Obj = { `"${cli_param_name}`" : ${cli_param_name}Obj};" + $NEW_LINE;
                 }
                 else
                 {
