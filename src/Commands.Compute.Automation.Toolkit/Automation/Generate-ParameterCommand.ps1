@@ -43,30 +43,30 @@ $NEW_LINE = "`r`n";
 $CLI_HELP_MSG = "         There are two sets of commands:\r\n" `
               + "           1) function commands that are used to manage Azure resources in the cloud, and \r\n" `
               + "           2) parameter commands that generate & edit input files for the other set of commands.\r\n" `
-              + "         For example, \'vmss get/list/stop\' are the function commands that call get, list and stop operations of \r\n" `
-              + "         virtual machine scale set, whereas \'vmss config * generate/set/remove/add\' commands \r\n" `
-              + "         are used to configure the input parameter file. The \'vmss create-or-update\' command takes a parameter \r\n" `
+              + "         For example, \'vmss show/list/stop\' are the function commands that call get, list and stop operations of \r\n" `
+              + "         virtual machine scale set, whereas \'vmss config * generate/create/set/delete/add\' commands \r\n" `
+              + "         are used to configure the input parameter file. The \'vmss config\' command takes a parameter \r\n" `
               + "         file as for the VM scale set configuration, and creates it online.";
 
 function Get-ParameterCommandCategoryDescription
 {
     param
     (
-        # e.g. 'virtual machine scale set'
+        # e.g. 'vmss', 'container', etc.
         [Parameter(Mandatory = $true)]
-        [string]$OperationName,
-        
-        # e.g. 'create-or-update-parameters'
-        [Parameter(Mandatory = $true)]
-        [string]$FunctionParamName,
+        [string]$CategoryName,
 
-        # e.g. 'set', 'add', or 'delete'
+        # e.g. 'ssh', 'sku', 'capacity', etc.
         [Parameter(Mandatory = $true)]
-        [string]$ConfigVerb
+        [string]$ComponentName,
+
+        # e.g. 'config', 'create-or-update-parameters'
+        [Parameter(Mandatory = $true)]
+        [string]$FunctionParamName
     )
 
-    $description = "Commands to ${ConfigVerb} components ";
-    $description += "of ${OperationName} in ${FunctionParamName} file.";
+    $description = "Commands to configure ${ComponentName} ";
+    $description += "of ${CategoryName} in ${FunctionParamName} file.";
 
     return $description;
 }
@@ -97,7 +97,7 @@ function Generate-CliParameterCommandImpl
     # i.e. 'vmss'
     $cliParamCmdTopCatName = Get-CliCategoryName $OperationName;
     # i.e. 'create-or-update-parameters'
-    if ($MethodName -eq "createOrUpdate")
+    if ($MethodName -eq "createOrUpdate" -or $MethodName -eq "create")
     {
         $cliParamCmdSubCatName = 'config';
     }
@@ -194,7 +194,7 @@ function Generate-CliParameterCommandImpl
         #$code += "  .description(`$('Commands to manage parameter for your ${opCliOptionName}.'));" + $NEW_LINE;
         $code += "  .description(`$('Commands to manage configuration of ${opCliOptionName} in the parameter file.'));" + $NEW_LINE;
         $code += "  var ${params_generate_category_var_name} = ${params_category_var_name}.category('${treeNodeCliOptionName}')" + $NEW_LINE;
-        $code += "  .description(`$('" + (Get-ParameterCommandCategoryDescription $opCliOptionName $cliParamCmdSubCatName $action_category_name) +"'));" + $NEW_LINE;
+        $code += "  .description(`$('" + (Get-ParameterCommandCategoryDescription ${cliParamCmdTopCatName} ${treeNodeCliOptionName} ${cliParamCmdSubCatName}) +"'));" + $NEW_LINE;
         $code += "  ${params_generate_category_var_name}.command('${action_category_name}')" + $NEW_LINE;
         $code += "  .description(`$('Set ${treeNodeCliOptionName} in ${cliParamCmdSubCatName} string or files, e.g. \r\n${sampleJsonText}\r\n" + $CLI_HELP_MSG + "'))" + $NEW_LINE;
         $code += "  .usage('[options]')" + $NEW_LINE;
@@ -329,7 +329,7 @@ function Generate-CliParameterCommandImpl
     #$code += "  .description(`$('Commands to manage parameter for your ${opCliOptionName}.'));" + $NEW_LINE;
     $code += "  .description(`$('Commands to manage configuration of ${opCliOptionName} in the parameter file.'));" + $NEW_LINE;
     $code += "  var ${params_generate_category_var_name} = ${params_category_var_name}.category('${treeNodeCliOptionName}')" + $NEW_LINE;
-    $code += "  .description(`$('" + (Get-ParameterCommandCategoryDescription $opCliOptionName $cliParamCmdSubCatName $action_category_name) +"'));" + $NEW_LINE;
+    $code += "  .description(`$('" + (Get-ParameterCommandCategoryDescription ${cliParamCmdTopCatName} ${treeNodeCliOptionName} ${cliParamCmdSubCatName}) +"'));" + $NEW_LINE;
     $code += "  ${params_generate_category_var_name}.command('${action_category_name}')" + $NEW_LINE;
     $code += "  .description(`$('Remove ${treeNodeCliOptionName} in ${cliParamCmdSubCatName} string or files, e.g. \r\n${sampleJsonText}\r\n" + $CLI_HELP_MSG + "'))" + $NEW_LINE;
     $code += "  .usage('[options]')" + $NEW_LINE;

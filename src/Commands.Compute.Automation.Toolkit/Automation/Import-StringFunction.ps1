@@ -67,6 +67,55 @@ function Get-CamelCaseName
     return $outputName;
 }
 
+function Get-CliMethodMappedParameterName
+{
+    param
+    (
+        # Sample: 'resourceGroupName' => 'resourceGroup', 'containerServiceName' => 'name', etc.
+        [Parameter(Mandatory = $true)]
+        [string]$inputName,
+
+        [Parameter(Mandatory = $false)]
+        [int]$index = -1
+    )
+
+    if ($inputName -eq 'resourceGroupName')
+    {
+        return 'resourceGroup';
+    }
+    elseif ($inputName -notlike 'VMName' -and $inputName -like "*name" -and $index -eq 1)
+    {
+        return 'name';
+    }
+    else
+    {
+        return $inputName;
+    }
+}
+
+function Get-CliMethodMappedFunctionName
+{
+    param
+    (
+        # Sample: 'createOrUpdate' => 'create', 'get' => 'show', etc.
+        [Parameter(Mandatory = $true)]
+        [string]$inputName
+    )
+
+    if ($inputName -eq 'createOrUpdate')
+    {
+        return 'create';
+    }
+    elseif ($inputName -eq 'get')
+    {
+        return 'show';
+    }
+    else
+    {
+        return $inputName;
+    }
+}
+
 function Get-CliNormalizedName
 {
     # Samples: 'VMName' to 'vmName', 
@@ -224,7 +273,7 @@ function Get-CliShorthandName
         [string]$inName
     )
 
-    if ($inName -eq 'ResourceGroupName')
+    if ($inName -eq 'ResourceGroupName' -or $inName -eq 'ResourceGroup')
     {
         $outName = 'g';
     }
