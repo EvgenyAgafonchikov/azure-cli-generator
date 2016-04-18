@@ -836,7 +836,7 @@ function Get-VerbNounCmdletCode
                  $dynamic_param_assignment_code_lines += "            p${param_name}.ParameterType = typeof($param_type_full_name);";
             }
 
-            $allow_piping = ($param_type_full_name -eq "VirtualMachineScaleSet").ToString().ToLower();
+            $allow_piping = ($param_type_full_name -eq $opSingularName).ToString().ToLower();
 
             $dynamic_param_assignment_code_lines +=
 @"
