@@ -731,14 +731,7 @@ function Get-VerbNounCmdletCode
     $shortNounName = Get-ShortNounName $opSingularName;
 
     $mapped_noun_str = 'AzureRm' + $shortNounName + $mapped_verb_term_suffix;
-    if ($mapped_verb_name -eq "Update" -and $mapped_noun_str.EndsWith("VMSSInstances"))
-    {
-        $mapped_noun_str = $mapped_noun_str.Replace("VMSSInstances", "VmssInstance");
-    }
-    else
-    {
-        $mapped_noun_str = Get-MappedNoun $OperationName $mapped_noun_str;
-    }
+    $mapped_noun_str = Get-MappedNoun $OperationName $mapped_noun_str;
     $verb_cmdlet_name = $mapped_verb_name + $mapped_noun_str;
 
     # 1. Start
@@ -1112,6 +1105,7 @@ function Generate-CliFunctionCommandImpl
 
     # 3. CLI Code
     # 3.1 Types
+    $methodParamIndex = 0;
     foreach ($paramItem in $methodParameters)
     {
         [System.Type]$paramType = $paramItem.ParameterType;
@@ -1134,7 +1128,13 @@ function Generate-CliFunctionCommandImpl
         else
         {
             # Record the Normalized Parameter Name, i.e. 'vmName' => 'VMName', 'resourceGroup' => 'ResourceGroup', etc.
-            $methodParamNameList += (Get-CamelCaseName $paramItem.Name);
+            $methodParamName = (Get-CamelCaseName $paramItem.Name);
+            # Limit the changes only for ACS for now
+            if ($OperationName -like "ContainerService*")
+            {
+                $methodParamName = (Get-CliMethodMappedParameterName $methodParamName $methodParamIndex);
+            }
+            $methodParamNameList += $methodParamName;
             $methodParamTypeDict.Add($paramItem.Name, $paramType);
             $allStringFields = Contains-OnlyStringFields $paramType;
             $allStringFieldCheck.Add($paramItem.Name, $allStringFields);
@@ -1157,6 +1157,7 @@ function Generate-CliFunctionCommandImpl
                 $cmdlet_tree_code = (. $PSScriptRoot\Generate-ParameterCommand.ps1 -CmdletTreeNode $cmdlet_tree -Operation $opShortName -ModelNameSpace $ModelNameSpace -MethodName $methodName -OutputFolder $FileOutputFolder);
             }
         }
+        $methodParamIndex += 1;
     }
     
     # 3.2 Functions
@@ -1170,7 +1171,16 @@ function Generate-CliFunctionCommandImpl
     # 3.2.3 Normalize the CLI Method Name, i.e. CreateOrUpdate => createOrUpdate, ListAll => listAll
     $cliMethodName = Get-CliNormalizedName $methodName;
     $cliCategoryVarName = $cliOperationName + $methodName;
-    $cliMethodOption = Get-CliOptionName $methodName;
+    # Use Mapped CLI Method Name for ACS for now
+    if ($OperationName -like "ContainerService*")
+    {
+        $mappedMethodName = Get-CliMethodMappedFunctionName $methodName;
+    }
+    else
+    {
+        $mappedMethodName = $methodName;
+    }
+    $cliMethodOption = Get-CliOptionName $mappedMethodName;
 
     # 3.2.4 Compute the CLI Command Description, i.e. VirtualMachineScaleSet => virtual machine scale set
     $cliOperationDescription = (Get-CliOptionName $OperationName).Replace('-', ' ');
@@ -1275,6 +1285,7 @@ function Generate-CliFunctionCommandImpl
     $code += "  .description(`$('${xmlHelpText}'))" + $NEW_LINE;
     $code += "  .usage('[options]${usageParamsString}')" + $NEW_LINE;
     $option_str_items = @();
+    $use_input_parameter_file = $false;
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
     {
         # Parameter Declaration - For Each Method Parameter
@@ -1306,12 +1317,24 @@ function Generate-CliFunctionCommandImpl
             {
                 $cli_shorthand_str = "-" + $cli_shorthand_str + ", ";
             }
-            $code += "  .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_name}'))" + $NEW_LINE;
+            $cli_option_help_text = $cli_option_name;
+            if ($cli_option_name -eq 'parameters')
+            {
+                $cli_option_help_text = 'A string of parameters in JSON format';
+                $use_input_parameter_file = $true;
+            }
+            $code += "  .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
+            $option_str_items += "--${cli_option_name} `$p${index}";
             $option_str_items += "--${cli_option_name} `$p${index}";
         }
     }
-    $code += "  .option('--parameter-file <parameter-file>', `$('the input parameter file'))" + $NEW_LINE;
-    $code += "  .option('-s, --subscription <subscription>', `$('the subscription identifier'))" + $NEW_LINE;
+
+    if ($use_input_parameter_file)
+    {
+        $code += "  .option('--parameter-file <parameter-file>', `$('The text file that contains input parameter object in JSON format'))" + $NEW_LINE;
+        $option_str_items += "--parameter-file `$f";
+    }
+    $code += "  .option('-s, --subscription <subscription>', `$('The subscription identifier'))" + $NEW_LINE;
     $code += "  .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
 
     $option_str_items += "--parameter-file `$f";
@@ -1371,6 +1394,15 @@ function Generate-CliFunctionCommandImpl
                     $code += "      for (var item in ${cli_param_name}ValArr) {" + $NEW_LINE;
                     $code += "        ${cli_param_name}Obj.push(${cli_param_name}ValArr[item]);" + $NEW_LINE;
                     $code += "      }" + $NEW_LINE;
+
+                    if ($cliMethodName -like "Start" -or `
+                        $cliMethodName -like "Restart" -or `
+                        $cliMethodName -like "PowerOff" -or `
+                        $cliMethodName -like "Deallocate" -or `
+                        $cliMethodName -like "Stop")
+                    {
+                        $code += "      ${cli_param_name}Obj = { '${cli_param_name}' : ${cli_param_name}Obj};" + $NEW_LINE;
+                    }
                 }
                 else
                 {
@@ -1500,7 +1532,7 @@ function Generate-CliFunctionCommandImpl
         $cli_param_name = Get-CliNormalizedName $methodParamNameList[$index];
         if ($cli_param_name -eq 'Parameters')
         {
-            if ( $cliMethodOption -eq "create-or-update")
+            if ($cliMethodOption -eq "create-or-update" -or $cliMethodOption -eq "create")
             {
                 $cliParamCmdSubCatName = 'config';
             }
@@ -1510,7 +1542,14 @@ function Generate-CliFunctionCommandImpl
             }
 
             $params_category_var_name = "${cliCategoryVarName}${cliMethodName}Parameters" + $index;
-            $action_category_name = 'generate';
+            if ($OperationName -like "ContainerService*")
+            {
+                $action_category_name = 'create';
+            }
+            else
+            {
+                $action_category_name = 'generate';
+            }
             $params_generate_category_var_name = "${cliCategoryVarName}${cliMethodName}Generate" + $index;
 
             # 3.3.1 Parameter Generate Command

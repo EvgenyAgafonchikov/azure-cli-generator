@@ -176,6 +176,7 @@ function Get-SpecificSubNode
 
     foreach ($subNode in $TreeNode.SubNodes)
     {
+         #Write-Verbose ('SpecificSubNode $subNode = ' + $subNode);
          if ($subNode.Name -eq $typeName)
          {
               return $subNode;

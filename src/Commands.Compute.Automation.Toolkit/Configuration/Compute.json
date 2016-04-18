@@ -1,8 +1,8 @@
 {
   "info": {
-      "title": "Microsoft.Azure.Management.Compute",
-      "version": "12.0.0-prerelease",
-      "description": "Virtual Machine Scale Sets"
+    "title": "Microsoft.Azure.Management.Compute",
+    "version": "12.0.0-prerelease",
+    "description": "Virtual Machine Scale Sets"
   },
   "produces": [
     {
@@ -123,8 +123,46 @@
 	  "name": "ContainerService",
 	  "methods": [
 	    { "name": "List", "cmdlet": { "skip": true } }
-	  ]
+	  ],
+	  "nounMappings": [
+        { "from": "ContainerService", "to": "container" }
+      ]
 	}
+    },
+    {
+      "name": "VirtualMachines",
+      "methods": [
+        { "name": "Capture", "cmdlet": { "skip": true }, "command": { "skip": true } },
+        { "name": "CreateOrUpdate", "cmdlet": { "skip": true }, "command": { "skip": true } },
+        { "name": "Deallocate", "cmdlet": { "skip": true }, "command": { "skip": true } },
+        { "name": "Delete", "cmdlet": { "skip": true }, "command": { "skip": true } },
+        { "name": "Generalize", "cmdlet": { "skip": true }, "command": { "skip": true } },
+        { "name": "Get", "cmdlet": { "skip": true }, "command": { "skip": true } },
+        { "name": "List", "cmdlet": { "skip": true }, "command": { "skip": true } },
+        { "name": "ListAll", "cmdlet": { "skip": true }, "command": { "skip": true } },
+        { "name": "ListAllNext", "cmdlet": { "skip": true }, "command": { "skip": true } },
+        { "name": "ListAvailableSizes", "cmdlet": { "skip": true }, "command": { "skip": true } },
+        { "name": "ListAvailableSizesNext", "cmdlet": { "skip": true }, "command": { "skip": true } },
+        { "name": "ListNext", "cmdlet": { "skip": true }, "command": { "skip": true } },
+        { "name": "PowerOff", "cmdlet": { "skip": true }, "command": { "skip": true } },
+        { "name": "Redeploy", "cmdlet": { "skip": true }, "command": { "skip": false } },
+        { "name": "Restart", "cmdlet": { "skip": true }, "command": { "skip": true } },
+        { "name": "Start", "cmdlet": { "skip": true }, "command": { "skip": true } }
+      ]
+    },
+    {
+      "name": "AvailabilitySets",
+      "methods": [
+        { "cmdlet": { "skip": true }, "command": { "skip": true }, "name": "CreateOrUpdate" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true }, "name": "Get" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true }, "name": "List" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true }, "name": "Delete" },
+        { "cmdlet": { "skip": true }, "command": { "skip": false }, "name": "ListAvailableSizes" }
+      ],
+      "nounMappings": [
+        { "from": "AvailabilitySets", "to": "availset" }
+      ]
+    }
   ],
   "nounMappings": [
     { "from": "VMSS", "to": "Vmss" }
