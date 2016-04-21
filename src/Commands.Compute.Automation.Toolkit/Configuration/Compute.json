@@ -119,12 +119,12 @@
         { "from": "Reimage", "to": "" }
       ]
     },
-	{
-	  "name": "ContainerService",
-	  "methods": [
-	    { "name": "List", "cmdlet": { "skip": true } }
-	  ],
-	  "nounMappings": [
+    {
+      "name": "ContainerService",
+      "methods": [
+        { "name": "List", "cmdlet": { "skip": true } }
+      ],
+      "nounMappings": [
         { "from": "ContainerService", "to": "container" }
       ]
     },
