@@ -1325,7 +1325,6 @@ function Generate-CliFunctionCommandImpl
             }
             $code += "  .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
             $option_str_items += "--${cli_option_name} `$p${index}";
-            $option_str_items += "--${cli_option_name} `$p${index}";
         }
     }
 
@@ -1336,8 +1335,6 @@ function Generate-CliFunctionCommandImpl
     }
     $code += "  .option('-s, --subscription <subscription>', `$('The subscription identifier'))" + $NEW_LINE;
     $code += "  .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
-
-    $option_str_items += "--parameter-file `$f";
 
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
     {
