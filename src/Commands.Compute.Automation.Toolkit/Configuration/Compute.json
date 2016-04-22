@@ -130,7 +130,8 @@
     },
     {
       "name": "VirtualMachines",
-      "methods": [
+      "methods": 
+      [
         { "name": "Capture", "cmdlet": { "skip": true }, "command": { "skip": true } },
         { "name": "CreateOrUpdate", "cmdlet": { "skip": true }, "command": { "skip": true } },
         { "name": "Deallocate", "cmdlet": { "skip": true }, "command": { "skip": true } },

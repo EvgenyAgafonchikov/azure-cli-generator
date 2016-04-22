@@ -1,0 +1,59 @@
+{
+  "info": 
+  {
+    "title": "Microsoft.WindowsAzure.Management.Compute",
+    "version": "12.8.0",
+    "description": "Microsoft Azure Service Management"
+  },
+  "produces": 
+  [
+    {
+      "name": "PowerShell",
+      "flavor": "Invoke"
+    },
+    {
+      "name": "CLI",
+      "flavor": "Verb"
+    }
+  ],
+  "operations":
+  [
+    {
+      "name": "Deployment",
+      "methods": 
+      [
+        { "cmdlet": { "skip": true }, "command": { "skip": false }, "name": "AbortMigration" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "ChangeConfigurationByName" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "ChangeConfigurationBySlot" },
+        { "cmdlet": { "skip": true }, "command": { "skip": false }, "name": "CommitMigration" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "Create" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "DeleteByName" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "DeleteBySlot" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "DeleteRoleInstanceByDeploymentName" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "DeleteRoleInstanceByDeploymentSlot" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "GetByName" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "GetBySlot" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "GetPackageByName" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "GetPackageBySlot" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "ListEvents" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "ListEventsBySlot" },
+        { "cmdlet": { "skip": true }, "command": { "skip": false }, "name": "PrepareMigration" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "RebootRoleInstanceByDeploymentName" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "RebootRoleInstanceByDeploymentSlot" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "RebuildRoleInstanceByDeploymentName" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "RebuildRoleInstanceByDeploymentSlot" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "ReimageRoleInstanceByDeploymentName" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "ReimageRoleInstanceByDeploymentSlot" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "RollbackUpdateOrUpgradeByDeploymentName" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "RollbackUpdateOrUpgradeByDeploymentSlot" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "Swap" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "UpdateStatusByDeploymentName" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "UpdateStatusByDeploymentSlot" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "UpgradeByName" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "UpgradeBySlot" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "WalkUpgradeDomainByDeploymentName" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "WalkUpgradeDomainByDeploymentSlot" }
+      ]
+    }
+  ]
+}
