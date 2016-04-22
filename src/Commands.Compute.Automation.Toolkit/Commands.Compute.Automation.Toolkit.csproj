@@ -62,6 +62,9 @@
     <None Include="Configuration\Compute.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Configuration\Migration.Network.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Configuration\Network.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

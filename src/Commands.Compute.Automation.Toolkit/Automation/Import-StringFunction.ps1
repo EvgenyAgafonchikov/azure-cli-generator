@@ -167,6 +167,10 @@ function Get-CliCategoryName
     {
         $outName = 'vm';
     }
+    elseif ($inName -eq 'ContainerService')
+    {
+        $outName = 'acs';
+    }
     else
     {
         $inName = Get-MappedNoun $inName $inName;

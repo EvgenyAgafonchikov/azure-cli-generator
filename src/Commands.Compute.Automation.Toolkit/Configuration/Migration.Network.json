@@ -1,0 +1,34 @@
+{
+  "info": 
+  {
+    "title": "Microsoft.WindowsAzure.Management.Network",
+    "version": "0.0.1",
+    "description": "Microsoft Azure Service Management"
+  },
+  "produces": 
+  [
+    {
+      "name": "PowerShell",
+      "flavor": "Invoke"
+    },
+    {
+      "name": "CLI",
+      "flavor": "Verb"
+    }
+  ],
+  "operations":
+  [
+    {
+      "name": "Network",
+      "methods": 
+      [
+        { "cmdlet": { "skip": true }, "command": { "skip": false }, "name": "AbortMigration" },
+        { "cmdlet": { "skip": true }, "command": { "skip": false }, "name": "CommitMigration" },
+        { "cmdlet": { "skip": true }, "command": { "skip": false }, "name": "PrepareMigration" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "List" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "SetConfiguration" },
+        { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "GetConfiguration" }
+      ]
+    }
+  ]
+}
