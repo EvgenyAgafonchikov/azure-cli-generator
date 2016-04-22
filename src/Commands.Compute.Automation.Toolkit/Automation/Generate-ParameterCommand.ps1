@@ -89,8 +89,12 @@ function Generate-CliParameterCommandImpl
     # i.e. VirtualMachineScaleSetExtensionProfile
     $cliCodeParamSuffix = $OperationName + $TreeNode.Name;
     $cliCodeParamPrefix = 'parameters';
-    # i.e. --extension-profile
+    # i.e. extension-profile, container-service, virtual-machine, etc.
     $treeNodeCliOptionName = Get-CliOptionName $TreeNode.Name;
+    if ($treeNodeCliOptionName -eq "container-service")
+    {
+        $treeNodeCliOptionName = 'containerservice'
+    }
     # i.e. --virtual-machine-scale-set
     $opCliOptionName = Get-CliOptionName $OperationName;
     

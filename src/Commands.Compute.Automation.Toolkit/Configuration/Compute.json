@@ -121,11 +121,9 @@
     },
     {
       "name": "ContainerService",
-      "methods": [
+      "methods": 
+      [
         { "name": "List", "cmdlet": { "skip": true } }
-      ],
-      "nounMappings": [
-        { "from": "ContainerService", "to": "container" }
       ]
     },
     {

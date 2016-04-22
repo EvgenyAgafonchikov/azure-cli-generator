@@ -1129,11 +1129,7 @@ function Generate-CliFunctionCommandImpl
         {
             # Record the Normalized Parameter Name, i.e. 'vmName' => 'VMName', 'resourceGroup' => 'ResourceGroup', etc.
             $methodParamName = (Get-CamelCaseName $paramItem.Name);
-            # Limit the changes only for ACS for now
-            if ($OperationName -like "ContainerService*")
-            {
-                $methodParamName = (Get-CliMethodMappedParameterName $methodParamName $methodParamIndex);
-            }
+            $methodParamName = (Get-CliMethodMappedParameterName $methodParamName $methodParamIndex);
             $methodParamNameList += $methodParamName;
             $methodParamTypeDict.Add($paramItem.Name, $paramType);
             $allStringFields = Contains-OnlyStringFields $paramType;
@@ -1171,15 +1167,7 @@ function Generate-CliFunctionCommandImpl
     # 3.2.3 Normalize the CLI Method Name, i.e. CreateOrUpdate => createOrUpdate, ListAll => listAll
     $cliMethodName = Get-CliNormalizedName $methodName;
     $cliCategoryVarName = $cliOperationName + $methodName;
-    # Use Mapped CLI Method Name for ACS for now
-    if ($OperationName -like "ContainerService*")
-    {
-        $mappedMethodName = Get-CliMethodMappedFunctionName $methodName;
-    }
-    else
-    {
-        $mappedMethodName = $methodName;
-    }
+    $mappedMethodName = Get-CliMethodMappedFunctionName $methodName;
     $cliMethodOption = Get-CliOptionName $mappedMethodName;
 
     # 3.2.4 Compute the CLI Command Description, i.e. VirtualMachineScaleSet => virtual machine scale set
@@ -1539,14 +1527,7 @@ function Generate-CliFunctionCommandImpl
             }
 
             $params_category_var_name = "${cliCategoryVarName}${cliMethodName}Parameters" + $index;
-            if ($OperationName -like "ContainerService*")
-            {
-                $action_category_name = 'create';
-            }
-            else
-            {
-                $action_category_name = 'generate';
-            }
+            $action_category_name = 'create';
             $params_generate_category_var_name = "${cliCategoryVarName}${cliMethodName}Generate" + $index;
 
             # 3.3.1 Parameter Generate Command
