@@ -178,7 +178,11 @@ else
     $parameter_cmdlet_method_code = @();
     $all_return_type_names = @();
     $formatXml = "";
-    $cliCommandCodeMainBody = "";
+    
+    # CLI Code Elements by Operation
+    $cli_code_operation_list = @();
+    $cli_code_for_each_operation = @();
+    $cli_sample_for_each_operation = @();
 
     # Write Operation Cmdlet Files
     $operation_type_count = 0;
@@ -192,6 +196,11 @@ else
         Write-Verbose $BAR_LINE;
         Write-Verbose ("Chapter ${operation_type_count_roman_index}. " + $operation_nomalized_name + " (${operation_type_count}/${total_operation_type_count}) ");
         Write-Verbose $BAR_LINE;
+
+        # Prepare CLI code main body
+        $cliCommandCodeMainBody = "";
+        $global:cli_sample_code_lines = '';
+        $cli_code_operation_list += $operation_nomalized_name;
     
         $opShortName = Get-OperationShortName $operation_type.Name;
         if ($opShortName.EndsWith("ScaleSets"))
@@ -443,6 +452,9 @@ else
         {
             Write-InvokeCmdletFile $invoke_cmdlet_file_name $invoke_cmdlet_class_name $auto_base_cmdlet_name $clientClassType $filtered_types $invoke_cmdlet_method_code $dynamic_param_method_code $generate_invoke_cmdlet;
         }
+
+        $cli_code_for_each_operation += $cliCommandCodeMainBody;
+        $cli_sample_for_each_operation += $global:cli_sample_code_lines;
     }
 
     # XML 
@@ -456,7 +468,21 @@ else
     # CLI
     if ($cliCommandFlavor -eq 'Verb')
     {
-        Write-CLICommandFile $outFolder $cliCommandCodeMainBody;
+        $cli_code_body_index = 0;
+        foreach ($cli_code_body in $cli_code_for_each_operation)
+        {
+            if ($cli_code_body -eq $null)
+            {
+                continue;
+            }
+
+            Write-CLICommandFile $outFolder `
+                                 $cli_code_body `
+                                 $cli_sample_for_each_operation[$cli_code_body_index] `
+                                 $component_name `
+                                 $cli_code_operation_list[$cli_code_body_index];
+            $cli_code_body_index += 1;
+        }
     }
 
     Write-Verbose $BAR_LINE;

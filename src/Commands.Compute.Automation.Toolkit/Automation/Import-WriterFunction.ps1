@@ -1019,20 +1019,76 @@ function Write-XmlFormatFile
 # Sample: NewAzureVirtualMachineCreateParameters.cs
 function Write-CLICommandFile
 {
-    param(
-        [Parameter(Mandatory = $True)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
         [string]$fileOutputFolder,
 
-        [Parameter(Mandatory = $True)]
-        $commandCodeLines
+        [Parameter(Mandatory = $true)]
+        $commandCodeLines,
+        
+        [Parameter(Mandatory = $true)]
+        $sample_code_lines,
+
+        [Parameter(Mandatory = $false)]
+        [string]$componentName,
+
+        [Parameter(Mandatory = $false)]
+        [string]$operationName
     )
+
+    $fileName = 'cli.js';
+    $subFolder = '/';
+    if ($operationName -ne $null)
+    {
+        $fileName = (Get-CamelCaseName $operationName $false) + '._js';
+    }
+
+    if ($componentName -ne $null)
+    {
+        $subFolder += (Get-CamelCaseName $componentName $false) + '/';
+    }
     
-    $fileFullPath = $fileOutputFolder + '/' + 'cli.js';
+    if (-not (Test-Path ($fileOutputFolder + $subFolder)))
+    {
+        mkdir -Force ($fileOutputFolder + $subFolder);
+    }
+
+    $fileFullPath = $fileOutputFolder + $subFolder + $fileName;
 
     Write-Verbose "=============================================";
     Write-Verbose "Writing CLI Command File: ";
     Write-Verbose $fileFullPath;
     Write-Verbose "=============================================";
+
+    $import_fs = $false;
+    $import_jsonpatch = $false;
+    $define_beautify = $false;
+    $define_display = $false;
+
+    # Check Required Packages or Functions
+    foreach ($code_line in $commandCodeLines)
+    {
+        if ($code_line -like "*fs.*")
+        {
+            $import_fs = $true;
+        }
+
+        if ($code_line -like "*jsonpatch.*")
+        {
+            $import_jsonpatch = $true;
+        }
+        
+        if ($code_line -like "*beautify(*")
+        {
+            $define_beautify = $true;
+        }
+        
+            if ($code_line -like "*display(*")
+        {
+            $define_display = $true;
+        }
+    }
 
     $codeContent = 
 @"
@@ -1060,24 +1116,47 @@ function Write-CLICommandFile
 
 Generated Command List:
 
-${global:cli_sample_code_lines}
+${sample_code_lines}
 */
 
 'use strict';
+"@;
 
-var fs = require('fs');
-var jsonpatch = require('fast-json-patch');
+    if ($import_fs)
+    {
+        $codeContent += "var fs = require('fs');" + $NEW_LINE;
+    }
+    
+    if ($import_jsonpatch)
+    {
+        $codeContent += "var jsonpatch = require('fast-json-patch');" + $NEW_LINE;
+    }
+
+    $codeContent +=
+@"
 
 var profile = require('../../../util/profile');
 var utils = require('../../../util/utils');
 
 var $ = utils.getLocaleString;
+"@;
 
+    if ($define_beautify)
+    {
+        $codeContent +=
+@"
 function beautify(jsonText) {
   var obj = JSON.parse(jsonText);
   return JSON.stringify(obj, null, 2);
 }
 
+"@;
+    }
+    
+    if ($define_display)
+    {
+        $codeContent +=
+@"
 function capitalize(str) {
   if (str && str.length >= 1) {
     return str.charAt(0).toUpperCase() + str.slice(1);
@@ -1126,7 +1205,11 @@ function display(cli, o) {
     cli.output.data(str);
   }
 }
+"@;
+    }
 
+    $codeContent +=
+@"
 exports.init = function (cli) {
 
 $commandCodeLines
