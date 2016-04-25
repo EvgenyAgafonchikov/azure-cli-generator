@@ -28,6 +28,10 @@
         { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "List" },
         { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "SetConfiguration" },
         { "cmdlet": { "skip": true }, "command": { "skip": true },  "name": "GetConfiguration" }
+      ],
+      "nounMappings": 
+      [
+        { "from": "VirtualNetwork", "to": "VNet" }
       ]
     }
   ]

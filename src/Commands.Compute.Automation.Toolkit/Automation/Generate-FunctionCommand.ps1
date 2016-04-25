@@ -1198,7 +1198,12 @@ function Generate-CliFunctionCommandImpl
     {
         # Use Invoke Category for RDFE APIs
         $invoke_category_desc = "Commands to invoke service management operations.";
-        $invoke_category_code = ".category('invoke').description('${invoke_category_desc}')";
+        $asmTopCatName = Get-CliCategoryName $componentName;
+        $invoke_category_code = ".category('" + $asmTopCatName + "').description('${invoke_category_desc}')";
+        if ($componentName -eq 'Network')
+        {
+            $cliCategoryName = 'vnet';
+        }
     }
     
     $code += "  var $cliCategoryVarName = cli${invoke_category_code}.category('${cliCategoryName}')" + $NEW_LINE;
@@ -1428,13 +1433,21 @@ function Generate-CliFunctionCommandImpl
         $cliMethodFuncName = $cliMethodName;
     }
 
-    if ($cliOperationName -like "containerService*" -or $cliOperationName -like "usage*")
+    
+    if ($ModelNameSpace.Contains(".WindowsAzure."))
     {
-        $code += "    var result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}Operations.${cliMethodFuncName}(";
+        $code += "    var result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}s.${cliMethodFuncName}(";
     }
     else
     {
-        $code += "    var result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(";
+        if ($cliOperationName -like "containerService*" -or $cliOperationName -like "usage*")
+        {
+            $code += "    var result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}Operations.${cliMethodFuncName}(";
+        }
+        else
+        {
+            $code += "    var result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(";
+        }
     }
 
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)

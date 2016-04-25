@@ -159,7 +159,8 @@ function Generate-CliParameterCommandImpl
     {
         # 0.1 Use Invoke Category for RDFE APIs
         $invoke_category_desc = "Commands to invoke service management operations.";
-        $invoke_category_code = ".category('invoke').description('${invoke_category_desc}')";
+        $asmTopCatName = Get-CliCategoryName $cliParamCmdTopCatName;
+        $invoke_category_code = ".category('" + $asmTopCatName + "').description('${invoke_category_desc}')";
     }
     
     # 0.2 Construct Sample JSON Parameter Body for Help Messages

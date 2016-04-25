@@ -47,6 +47,11 @@ function Get-CamelCaseName
         $prefix = 'dns';
         $suffix = $inputName.Substring($prefix.Length);
     }
+    elseif ($inputName -like "vnet*")
+    {
+        $prefix = 'vnet';
+        $suffix = $inputName.Substring($prefix.Length);
+    }
     else
     {
         $prefix = $inputName.Substring(0, 1);
@@ -84,6 +89,18 @@ function Get-CliMethodMappedParameterName
         return 'resourceGroup';
     }
     elseif ($inputName -notlike 'VMName' -and $inputName -like "*name" -and $index -eq 1)
+    {
+        return 'name';
+    }
+    elseif ($inputName -like 'VirtualNetworkName' -and $index -eq 0)
+    {
+        return 'name';
+    }
+    elseif ($inputName -like 'VirtualNetworkName' -and $index -gt 0)
+    {
+        return 'vnetName';
+    }
+    elseif ($inputName -like 'deploymentName' -and $index -eq 1)
     {
         return 'name';
     }
@@ -232,7 +249,7 @@ function Get-CliOptionName
                 $outName += '-';
             }
 
-            [string[]]$abbrWords = @('VM', 'IP', 'RM', 'OS', 'NAT', 'IDs', 'DNS');
+            [string[]]$abbrWords = @('VM', 'IP', 'RM', 'OS', 'NAT', 'IDs', 'DNS', 'VNet', 'SubNet');
             $matched = $false;
             foreach ($matchedAbbr in $abbrWords)
             {
