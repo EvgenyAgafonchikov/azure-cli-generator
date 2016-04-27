@@ -1199,6 +1199,10 @@ function Generate-CliFunctionCommandImpl
         # Use Invoke Category for RDFE APIs
         $invoke_category_desc = "Commands to invoke service management operations.";
         $asmTopCatName = Get-CliCategoryName $componentName;
+        if ($asmTopCatName -eq 'compute')
+        {
+            $asmTopCatName = 'service';
+        }
         $invoke_category_code = ".category('" + $asmTopCatName + "').description('${invoke_category_desc}')";
         if ($componentName -eq 'Network')
         {
