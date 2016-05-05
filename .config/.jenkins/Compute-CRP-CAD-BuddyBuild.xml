@@ -1,0 +1,5 @@
+<WorkflowConfig>
+    <Imports>
+        <PathUri GitRepoName="EngSys-DevServices-EngPipe" GitBranchName="master" GitOriginServer="http://vstfrd:8080/Azure/One/_git/">src/Jenkins/Definitions/BuddyBuildBT.xml</PathUri>
+    </Imports>
+</WorkflowConfig>
