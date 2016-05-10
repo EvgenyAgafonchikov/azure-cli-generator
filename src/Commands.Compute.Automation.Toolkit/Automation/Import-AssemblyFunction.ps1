@@ -35,8 +35,23 @@ function Get-AzureNameSpace
 
     [System.Reflection.Assembly]$assembly = Load-AssemblyFile $dllPath;
 
+    try
+    {
+        $types = $assembly.GetTypes()
+    }
+    catch
+    {
+        # Surface the specific loader error
+        $loaderEx = $_.Exception.InnerException.LoaderExceptions[0]
+        if ($loaderEx)
+        {
+            throw $_.Exception.Message + " " + $loaderEx
+        }
+        throw
+    }
+
     $clientNameSpace = $null;
-    foreach ($type in $assembly.GetTypes())
+    foreach ($type in $types)
     {
         [System.Type]$type = $type;
         if ($type.Namespace -like "Microsoft.*Azure.Management.*" -and `
