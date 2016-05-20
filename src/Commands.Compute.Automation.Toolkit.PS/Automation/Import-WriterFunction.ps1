@@ -1112,14 +1112,9 @@ function Write-CLICommandFile
 // Changes to this file may cause incorrect behavior and will be lost if the
 // code is regenerated.
 
-/*
-
-Generated Command List:
-
-${sample_code_lines}
-*/
-
 'use strict';
+
+
 "@;
 
     if ($import_fs)
@@ -1137,8 +1132,10 @@ ${sample_code_lines}
 
 var profile = require('../../../util/profile');
 var utils = require('../../../util/utils');
-
+var util = require('util');
 var $ = utils.getLocaleString;
+
+
 "@;
 
     if ($define_beautify)
@@ -1157,59 +1154,17 @@ function beautify(jsonText) {
     {
         $codeContent +=
 @"
-function capitalize(str) {
-  if (str && str.length >= 1) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-  else {
-    return str;
-  }
-}
 
 function makeTuple(k, v, d) {
   return { key : k, value : v, depth : d };
 }
 
-function displayImpl(o, key, depth, arr) {
-  if ((!!o) && (o.constructor === Object || o.constructor === Array)) {
-    arr.push(makeTuple(key, '', depth));
-    var len = 0;
-    Object.keys(o).forEach(function(k1) {
-      var v1 = o[k1];
-      var p1 = o.constructor === Array ? '#' : '';
-      var w = displayImpl(v1, p1 + k1, depth + 1, arr);
-      if (w > len) {
-        len = w;
-      }
-    });
-    return len;
-  }
-  else {
-    arr.push(makeTuple(key, o ? o.toString() : '', depth));
-    return depth * 2 + (key ? key.toString().length : 0);
-  }
-}
-
-function display(cli, o) {
-  var arr = [];
-  var width = displayImpl(o, '', 0, arr);
-  for (var t in arr) {
-    var prebuf = new Array(arr[t].depth * 2).join(' ');
-    var key = arr[t].key ? arr[t].key : '';
-    var postLen = width - (prebuf.length + key.length);
-    var postbuf = new Array(postLen > 0 ? postLen : 0).join(' ');
-    var str = prebuf + capitalize(key) + postbuf;
-    if (arr[t].value) {
-      str += ' : ' + arr[t].value;
-    }
-    cli.output.data(str);
-  }
-}
 "@;
     }
 
     $codeContent +=
 @"
+
 exports.init = function (cli) {
 
 $commandCodeLines

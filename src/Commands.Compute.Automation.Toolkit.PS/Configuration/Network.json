@@ -6,16 +6,11 @@
   },
   "produces": [
     {
-      "name": "PowerShell",
-      "flavor": "Verb"
-    },
-    {
       "name": "CLI",
       "flavor": "Verb"
     }
   ],
   "operations": [
-    { "name": "PublicIPAddresses" },
-    { "name": "VirtualNetworks" }
+    { "name": "PublicIPAddresses" }
   ]
 }

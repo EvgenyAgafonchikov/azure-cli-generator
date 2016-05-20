@@ -240,9 +240,6 @@ function Generate-CliParameterCommandImpl
         $code += "    }" + $NEW_LINE;
         $code += "" + $NEW_LINE;
         # Option Parameters Setup
-        $code += "    cli.output.verbose(`'=====================================`');" + $NEW_LINE;
-        $code += "    cli.output.verbose(`'Reading file content from: \`"`' + options.parameterFile + `'\`"`');" + $NEW_LINE;
-        $code += "    cli.output.verbose(`'=====================================`');" + $NEW_LINE;
         $code += "    var fileContent = fs.readFileSync(options.parameterFile, 'utf8');" + $NEW_LINE;
         $code += "    var parametersObj = JSON.parse(fileContent);" + $NEW_LINE;
         $code += "    cli.output.verbose(`'JSON object:`');" + $NEW_LINE;
@@ -283,10 +280,6 @@ function Generate-CliParameterCommandImpl
             $paramName = (Get-CliNormalizedName $propertyItem["Name"]);
             $code += "    ${defTypePrefix}paramPath = " + "options.path" + " + `'/`' + " + "`'" + ${paramName} + "`';" + $NEW_LINE;
             $code += "    if (options.${paramName}) {" + $NEW_LINE;
-            $code += "      cli.output.verbose(`'================================================`');" + $NEW_LINE;
-            $code += "      cli.output.verbose(`'Path  : `' + paramPath);" + $NEW_LINE;
-            $code += "      cli.output.verbose(`'Value : `' + options.${paramName});" + $NEW_LINE;
-            $code += "      cli.output.verbose(`'================================================`');" + $NEW_LINE;
             $code += "      if (options.parse && options.${paramName}) {" + $NEW_LINE;
             $code += "        options.${paramName} = JSON.parse(options.${paramName});" + $NEW_LINE;
             $code += "      }" + $NEW_LINE;

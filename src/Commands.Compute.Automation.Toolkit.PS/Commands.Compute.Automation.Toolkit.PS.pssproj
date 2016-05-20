@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>6CAFC0C6-A428-4d30-A9F9-700E829FEA51</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>MyApplication</RootNamespace>
+    <AssemblyName>MyApplication</AssemblyName>
+    <Name>Commands.Compute.Automation.Toolkit.PS</Name>
+    <DebugArguments>-dllFileFullPath D:\Projects\Nodejs\azure-powershell-1.4.0\ResourceManager\AzureResourceManager\AzureRM.Network\Microsoft.Azure.Management.Network.dll -outFolder "D:\Projects\Nodejs\generated-out\" -ConfigPath "D:\Projects\Nodejs\compute-automation-toolkit\src\Commands.Compute.Automation.Toolkit.PS\Configuration\Network.json"</DebugArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Automation\" />
+    <Folder Include="Configuration\" />
+    <Folder Include="Data\" />
+    <Folder Include="Publish\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Automation\ConvertTo-Json.ps1" />
+    <Compile Include="Automation\Create-ParameterObject.ps1" />
+    <Compile Include="Automation\Create-ParameterTree.ps1" />
+    <Compile Include="Automation\Generate-CliDeleteCommand.ps1" />
+    <Compile Include="Automation\Generate-CliListCommand.ps1" />
+    <Compile Include="Automation\Generate-CliShowCommand.ps1" />
+    <Compile Include="Automation\Generate-CliCreateCommand.ps1" />
+    <Compile Include="Automation\Generate-FunctionCommand.ps1" />
+    <Compile Include="Automation\Generate-ParameterCommand.ps1" />
+    <Compile Include="Automation\Generate-PowershellParameterCmdlet.ps1" />
+    <Compile Include="Automation\Import-AssemblyFunction.ps1" />
+    <Compile Include="Automation\Import-CommonVariables.ps1" />
+    <Compile Include="Automation\Import-OperationFunction.ps1" />
+    <Compile Include="Automation\Import-StringFunction.ps1" />
+    <Compile Include="Automation\Import-TypeFunction.ps1" />
+    <Compile Include="Automation\Import-WriterFunction.ps1" />
+    <Compile Include="Automation\Invoke-CodeGeneration.ps1" />
+    <Compile Include="Data\Replace-VersionHeader.ps1" />
+    <Compile Include="Publish\CopyTo-HyakSpecFolder.ps1" />
+    <Compile Include="Publish\Publish-HyakSpecAndSdk.ps1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Configuration\Compute.json" />
+    <Content Include="Configuration\Migration.json" />
+    <Content Include="Configuration\Migration.Network.json" />
+    <Content Include="Configuration\Network.json" />
+    <Content Include="Configuration\RDFE.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Name>Microsoft.CSharp</Name>
+      <AssemblyName>Microsoft.CSharp.dll</AssemblyName>
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Microsoft.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+      <Name>System</Name>
+      <AssemblyName>System.dll</AssemblyName>
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+      <Name>System.Core</Name>
+      <AssemblyName>System.Core.dll</AssemblyName>
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+      <Name>System.Data</Name>
+      <AssemblyName>System.Data.dll</AssemblyName>
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+      <Name>System.Data.DataSetExtensions</Name>
+      <AssemblyName>System.Data.DataSetExtensions.dll</AssemblyName>
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Data.DataSetExtensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+      <Name>System.Xml</Name>
+      <AssemblyName>System.XML.dll</AssemblyName>
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.XML.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+      <Name>System.Xml.Linq</Name>
+      <AssemblyName>System.Xml.Linq.dll</AssemblyName>
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Xml.Linq.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Target Name="Build" />
+</Project>
