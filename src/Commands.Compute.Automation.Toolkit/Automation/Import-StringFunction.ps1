@@ -96,6 +96,10 @@ function Get-CliMethodMappedParameterName
     {
         return 'name';
     }
+    elseif ($inputName -like 'StorageAccountName' -and $index -eq 0)
+    {
+        return 'name';
+    }
     elseif ($inputName -like 'VirtualNetworkName' -and $index -gt 0)
     {
         return 'vnetName';
