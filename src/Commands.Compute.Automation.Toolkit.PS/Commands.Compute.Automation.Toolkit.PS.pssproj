@@ -34,6 +34,7 @@
     <Folder Include="Publish\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Automation\CommonVars.ps1" />
     <Compile Include="Automation\ConvertTo-Json.ps1" />
     <Compile Include="Automation\Create-ParameterObject.ps1" />
     <Compile Include="Automation\Create-ParameterTree.ps1" />
@@ -44,6 +45,7 @@
     <Compile Include="Automation\Generate-FunctionCommand.ps1" />
     <Compile Include="Automation\Generate-ParameterCommand.ps1" />
     <Compile Include="Automation\Generate-PowershellParameterCmdlet.ps1" />
+    <Compile Include="Automation\Helpers.ps1" />
     <Compile Include="Automation\Import-AssemblyFunction.ps1" />
     <Compile Include="Automation\Import-CommonVariables.ps1" />
     <Compile Include="Automation\Import-OperationFunction.ps1" />

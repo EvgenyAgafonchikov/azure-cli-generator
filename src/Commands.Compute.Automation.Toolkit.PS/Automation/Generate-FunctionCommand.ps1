@@ -1076,36 +1076,38 @@ else
 {
 
 	switch ($MethodInfo.Name) {
-		# TODO uncomment
-  #   "CreateOrUpdate" {
-		# $code = (. $PSScriptRoot\Generate-CliCreateCommand.ps1 -OperationName $OperationName `
-  #                                                                    -MethodInfo $MethodInfo `
-  #                                                                    -ModelNameSpace $ModelClassNameSpace  `
-	 #                                                                 -FileOutputFolder $FileOutputFolder);
-		# break;
-	 #}
-     "Get" {
-		 $code = (. $PSScriptRoot\Generate-CliShowCommand.ps1 -OperationName $OperationName `
-                                                                      -MethodInfo $MethodInfo `
-                                                                      -ModelNameSpace $ModelClassNameSpace  `
-	                                                                  -FileOutputFolder $FileOutputFolder);
-		 break;
-	 }
-	"Delete" {
-		 $code = (. $PSScriptRoot\Generate-CliDeleteCommand.ps1 -OperationName $OperationName `
-                                                                      -MethodInfo $MethodInfo `
-                                                                      -ModelNameSpace $ModelClassNameSpace  `
-	                                                                  -FileOutputFolder $FileOutputFolder);
-		 break;
-	 }
-		"List" {
-		 $code = (. $PSScriptRoot\Generate-CliListCommand.ps1 -OperationName $OperationName `
-                                                                      -MethodInfo $MethodInfo `
-                                                                      -ModelNameSpace $ModelClassNameSpace  `
-	                                                                  -FileOutputFolder $FileOutputFolder);
-		 break;
-	 }
-     default {""; break}
+			# TODO uncomment
+	  #   "CreateOrUpdate" {
+			# $code = (. $PSScriptRoot\Generate-CliCreateCommand.ps1 -OperationName $OperationName `
+	  #                                                                    -MethodInfo $MethodInfo `
+	  #                                                                    -ModelNameSpace $ModelClassNameSpace  `
+		 #                                                                 -FileOutputFolder $FileOutputFolder);
+			# break;
+		 #}
+		 "Get" {
+			 $code = (. $PSScriptRoot\Generate-CliShowCommand.ps1 -OperationName $OperationName `
+																		  -MethodInfo $MethodInfo `
+																		  -ModelNameSpace $ModelClassNameSpace  `
+																		  -FileOutputFolder $FileOutputFolder);
+			 break;
+		 }
+		"Delete" {
+			 $code = (. $PSScriptRoot\Generate-CliDeleteCommand.ps1 -OperationName $OperationName `
+																		  -MethodInfo $MethodInfo `
+																		  -ModelNameSpace $ModelClassNameSpace  `
+																		  -FileOutputFolder $FileOutputFolder);
+			 break;
+		 }
+<#			"List" {
+			 $code = (. $PSScriptRoot\Generate-CliListCommand.ps1 -OperationName $OperationName `
+																		  -MethodInfo $MethodInfo `
+																		  -ModelNameSpace $ModelClassNameSpace  `
+																		  -FileOutputFolder $FileOutputFolder);
+			 break;
+		 }#>
+		 default {
+			 return ""
+		 }
      }
 
 

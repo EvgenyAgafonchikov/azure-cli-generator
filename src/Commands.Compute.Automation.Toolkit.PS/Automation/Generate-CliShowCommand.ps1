@@ -16,9 +16,11 @@
         [string]$FileOutputFolder = $null
     )
 
+. "$PSScriptRoot\CommonVars.ps1"
 . "$PSScriptRoot\Import-StringFunction.ps1";
 . "$PSScriptRoot\Import-TypeFunction.ps1";
 . "$PSScriptRoot\Import-WriterFunction.ps1";
+. "$PSScriptRoot\Helpers.ps1";
 
     # Skip Pagination Function
     if (CheckIf-PaginationMethod $MethodInfo)
@@ -26,75 +28,43 @@
         return;
     }
 
-    $methodParameters = $MethodInfo.GetParameters();
-    $methodName = ($MethodInfo.Name.Replace('Async', ''));
-    
-    $methodParamNameList = @();
-    $methodParamTypeDict = @{};
-    $allStringFieldCheck = @{};
-    $oneStringListCheck = @{};
+	$code = "";
 
-    $componentName = Get-ComponentName $ModelClassNameSpace;
-    $componentNameInLowerCase = $componentName.ToLower();
-    
-    # i.e. --virtual-machine-scale-set
-    $opCliOptionName = Get-CliOptionName $OperationName;
-
-	  # 3. CLI Code
-    # 3.1 Types
-    $methodParamIndex = 0;
-    foreach ($paramItem in $methodParameters)
+    if ($ModelNameSpace -like "*.WindowsAzure.*")
     {
-        [System.Type]$paramType = $paramItem.ParameterType;
-        if (($paramType.Name -like "I*Operations") -or ($paramItem.Name -eq 'expand'))
+        # Use Invoke Category for RDFE APIs
+        $invoke_category_desc = "Commands to invoke service management operations.";
+        $asmTopCatName = Get-CliCategoryName $componentName;
+        if ($asmTopCatName -eq 'compute')
         {
-            continue;
+            $asmTopCatName = 'service';
         }
-        else
+        $invoke_category_code = ".category('" + $asmTopCatName + "').description('${invoke_category_desc}')";
+        if ($componentName -eq 'Network')
         {
-            # Record the Normalized Parameter Name, i.e. 'vmName' => 'VMName', 'resourceGroup' => 'ResourceGroup', etc.
-            $methodParamName = (Get-CamelCaseName $paramItem.Name);
-            $methodParamName = (Get-CliMethodMappedParameterName $methodParamName $methodParamIndex);
-            $methodParamNameList += $methodParamName;
-            $methodParamTypeDict.Add($paramItem.Name, $paramType);
-            $allStringFields = Contains-OnlyStringFields $paramType;
-            $allStringFieldCheck.Add($paramItem.Name, $allStringFields);
-            $oneStringList = Contains-OnlyStringList $paramType;
-            $oneStringListCheck.Add($paramItem.Name, $oneStringList);
+            $cliCategoryName = 'vnet';
         }
-        $methodParamIndex += 1;
     }
-    
-    # 3.2 Functions
-    
-    # 3.2.1 Compute the CLI Category Name, i.e. VirtualMachineScaleSet => vmss, VirtualMachineScaleSetVM => vmssvm
-    $cliCategoryName = Get-CliCategoryName $OperationName;
-    
-    # 3.2.2 Compute the CLI Operation Name, i.e. VirtualMachineScaleSets => virtualMachineScaleSets, VirtualMachineScaleSetVM => virtualMachineScaleSetVMs
-    $cliOperationName = Get-CliNormalizedName $OperationName;
-    
-    # 3.2.3 Normalize the CLI Method Name, i.e. CreateOrUpdate => createOrUpdate, ListAll => listAll
-    $cliMethodName = Get-CliNormalizedName $methodName;
-    $mappedMethodName = Get-CliMethodMappedFunctionName $methodName;
-    $cliMethodOption = Get-CliOptionName $mappedMethodName;
 
-    # 3.2.4 Compute the CLI Command Description, i.e. VirtualMachineScaleSet => virtual machine scale set
-    $cliOperationDescription = (Get-CliOptionName $OperationName).Replace('-', ' ');
-    
-	#
-	# Category declaration
-	#
-    $code += "
-	 var network = cli.category(`'network-autogen`')
-       .description(`$('Commands to manage network resources'));
+    # Set Required Parameters
+    $requireParams = @();
+    $requireParamNormalizedNames = @();
+	$require = Update-RequiredParameters $methodParamNameList $methodParamTypeDict $allStringFieldCheck;
+	$requireParams = $require.requireParams;
+	$requireParamNormalizedNames = $require.requireParamNormalizedNames;
 
-	";
+    $requireParamsString = $null;
+    $usageParamsString = $null;
+    $optionParamString = $null;
+    if ($requireParams.Count -gt 0)
+    {
+        $requireParamsJoinStr = "] [";
+        $requireParamsString = " [" + ([string]::Join($requireParamsJoinStr, $requireParams)) + "]";
 
-    $code +=
-	 "var $cliOperationName = network.category('${cliCategoryName}')
-	   .description(`$('Commands to manage ${cliOperationDescription}'));
-	 
-	 ";
+        $usageParamsJoinStr = "> <";
+        $usageParamsString = " <" + ([string]::Join($usageParamsJoinStr, $requireParams)) + ">";
+        $optionParamString = ([string]::Join(", ", $requireParamNormalizedNames)) + ", ";
+    }
 
 	#
 	# Command declaration
@@ -109,11 +79,12 @@
 	#
     $option_str_items = @();
     $use_input_parameter_file = $false;
+
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
     {
         [string]$optionParamName = $methodParamNameList[$index];
         $optionShorthandStr = $null;
-		
+
         $cli_option_name = Get-CliOptionName $optionParamName;
         $cli_shorthand_str = Get-CliShorthandName $optionParamName;
         if ($cli_shorthand_str -ne '')
@@ -124,29 +95,21 @@
         $code += "       .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
         $option_str_items += "--${cli_option_name} `$p${index}";
     }
+
     $code += "       .option('-s, --subscription <subscription>', `$('the subscription identifier'))" + $NEW_LINE;
     $code += "       .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
 
-	#
 	# Prompting options
-	#
-    for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
-    {
-        [string]$optionParamName = $methodParamNameList[$index];
-        [string]$cli_option_name = Get-CliOptionName $optionParamName;
-
-        $cli_param_name = Get-CliNormalizedName $optionParamName;         
-        $code +=  "         ${cli_param_name} = cli.interaction.promptIfNotGiven(`$('${cli_option_name} : '), ${cli_param_name}, _);" + $NEW_LINE;        
-    }
+	$code += Get-PromptingOptionsCode $methodParamNameList;
 
     #
 	# API call using SDK
 	#
 	$cliMethodFuncName = $cliMethodName;
-    $code += "         
+    $code += "
          var subscription = profile.current.getSubscription(options.subscription);
          var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
-		
+
          var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), name));
          var result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(";
 
@@ -163,7 +126,7 @@
 	# Print result to CLI
 	#
 
-	$code += " 
+	$code += "
          progress.end();
 
          cli.interaction.formatOutput(result, function (result) {
@@ -173,13 +136,12 @@
 		     }
 		   }
          });
-
     ";
 
     #
 	# End of command declaration
 	#
-    $code += "  });" + $NEW_LINE;
+    $code += "  });";
 
 
     return $code;
