@@ -70,10 +70,9 @@
 	# Command declaration
 	#
     $code +=
-	"${cliOperationName}.command('${cliMethodOption}${requireParamsString}')
-	   .description(`$('Delete a ${cliOperationDescription}'))
-	   .usage('[options]${usageParamsString}')" + $NEW_LINE;
-
+	"  ${cliOperationName}.command('${cliMethodOption}${requireParamsString}')
+    .description(`$('Delete a ${cliOperationDescription}'))
+    .usage('[options]${usageParamsString}')" + $NEW_LINE;
 
 	#
 	# Options declaration
@@ -92,18 +91,18 @@
             $cli_shorthand_str = "-" + $cli_shorthand_str + ", ";
         }
         $cli_option_help_text = "the ${cli_option_name} of ${cliOperationDescription}";
-        $code += "       .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
+        $code += "    .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
         $option_str_items += "--${cli_option_name} `$p${index}";
     }
 
 	if ($cliMethodOption.ToLower() -like "delete") {
-		$code += "       .option('-q, --quiet', `$('quiet mode, do not ask for delete confirmation'))" + $NEW_LINE;
+		$code += "    .option('-q, --quiet', `$('quiet mode, do not ask for delete confirmation'))" + $NEW_LINE;
 	}
-    $code += "       .option('-s, --subscription <subscription>', `$('the subscription identifier'))" + $NEW_LINE;
-    $code += "       .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
+    $code += "    .option('-s, --subscription <subscription>', `$('the subscription identifier'))" + $NEW_LINE;
+    $code += "    .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
 
 	# Prompting options
-	$code += Get-PromptingOptionsCode $methodParamNameList;
+	$code += Get-PromptingOptionsCode $methodParamNameList 6;
 
     #
 	# API call using SDK
@@ -114,53 +113,50 @@
 		$cliMethodFuncName += "Method";
 	}
     $code += "
-		var subscription = profile.current.getSubscription(options.subscription);
-		var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
+      var subscription = profile.current.getSubscription(options.subscription);
+      var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
 
-		var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), name));
-	    var result;"
+      var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), name));
+      var result;"
 
 $code +=
 	"
-    try {
-      result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.get("
+      try {
+        result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.get("
 	$code += Get-ParametersString $methodParamNameList;
     $code += ", null, _);";
 
 	$code+= "
-    } catch (e) {
-      if (e.statusCode === 404) {
+      } catch (e) {
+        if (e.statusCode === 404) {
           throw new Error(util.format(`$('A public ip address with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
-      }
-      throw e;
-    } finally {
-      progress.end();
-    }";
+        }
+        throw e;
+      } finally {
+        progress.end();
+      }";
 
-	#$code += Get-ParametersString $methodParamNameList;
-    #$code += ", _);";
 
-#TODO: replace possible hardcode in this part e.g. 'name'
 	$code += "
-		if (!options.quiet && !cli.interaction.confirm(util.format(`$('Delete $cliOperationDescription `"%s`"? [y/n] '), name), _)) {
-			return;
-		}
+      if (!options.quiet && !cli.interaction.confirm(util.format(`$('Delete $cliOperationDescription `"%s`"? [y/n] '), name), _)) {
+        return;
+      }
 
-		var progress = cli.interaction.progress(util.format(`$('Deleting $cliOperationDescription `"%s`"'), name));
-		try {
-			 ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(";
+      var progress = cli.interaction.progress(util.format(`$('Deleting $cliOperationDescription `"%s`"'), name));
+      try {
+        ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(";
 	$code += Get-ParametersString $methodParamNameList;
 	$code += ", _);";
 
 	$code += "
-		} finally {
-		  progress.end();
-		}
-	"
+      } finally {
+        progress.end();
+      }
+"
 
     #
 	# End of command declaration
 	#
-    $code += "  });" + $NEW_LINE;
+    $code += "    });" + $NEW_LINE;
 
     return $code;

@@ -202,12 +202,15 @@ else
         $cli_code_operation_list += $operation_nomalized_name;
 
 		$operationNormalizedName = Get-CliNormalizedName $operation_nomalized_name
-		$operationCliName = Get-CliOptionName $operation_nomalized_name
+		$operationCliName = Get-SingularNoun (Get-CliOptionName $operation_nomalized_name);
 		$cliOperationDescription = (Get-CliOptionName $operation_nomalized_name).Replace('-', ' ');
-		$cliCommandCodeMainBody += "var network = cli.category(`'network-autogen`')
-		  .description(`$('Commands to manage network resources'));" + $NEW_LINE;
-		$cliCommandCodeMainBody += "var $operationNormalizedName = network.category('$operationCliName')
-		  .description(`$('Commands to manage $cliOperationDescription'));"
+		$cliOperationDescription = Get-SingularNoun $cliOperationDescription;
+		$cliCommandCodeMainBody += "  var network = cli.category(`'network-autogen`')
+    .description(`$('Commands to manage network resources'));
+" + $NEW_LINE;
+		$cliCommandCodeMainBody += "  var $operationNormalizedName = network.category('$operationCliName')
+    .description(`$('Commands to manage $cliOperationDescription'));
+" + $NEW_LINE;
 
 $code +=
         $opShortName = Get-OperationShortName $operation_type.Name;

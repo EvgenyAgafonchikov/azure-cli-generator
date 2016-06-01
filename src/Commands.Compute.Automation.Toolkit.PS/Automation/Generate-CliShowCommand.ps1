@@ -70,9 +70,9 @@
 	# Command declaration
 	#
     $code += 
-	"${cliOperationName}.command('${cliMethodOption}${requireParamsString}')
-	   .description(`$('Get a ${cliOperationDescription}'))
-	   .usage('[options]${usageParamsString}')" + $NEW_LINE;
+	"  ${cliOperationName}.command('${cliMethodOption}${requireParamsString}')
+    .description(`$('Get a ${cliOperationDescription}'))
+    .usage('[options]${usageParamsString}')" + $NEW_LINE;
 
 	#
 	# Options declaration
@@ -92,63 +92,57 @@
             $cli_shorthand_str = "-" + $cli_shorthand_str + ", ";
         }
         $cli_option_help_text = "the ${cli_option_name} of ${cliOperationDescription}";
-        $code += "       .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
+        $code += "    .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
         $option_str_items += "--${cli_option_name} `$p${index}";
     }
 
-    $code += "       .option('-s, --subscription <subscription>', `$('the subscription identifier'))" + $NEW_LINE;
-    $code += "       .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
+    $code += "    .option('-s, --subscription <subscription>', `$('the subscription identifier'))" + $NEW_LINE;
+    $code += "    .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
 
 	# Prompting options
-	$code += Get-PromptingOptionsCode $methodParamNameList;
+	$code += Get-PromptingOptionsCode $methodParamNameList 6;
 
     #
 	# API call using SDK
 	#
 	$cliMethodFuncName = $cliMethodName;
     $code += "
-         var subscription = profile.current.getSubscription(options.subscription);
-         var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
+      var subscription = profile.current.getSubscription(options.subscription);
+      var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
 
-         var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), name));
-         var result;"
+      var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), name));
+      var result;"
 
 $code +=
 	"
-    try {
-      result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}("
+      try {
+        result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}("
 	$code += Get-ParametersString $methodParamNameList;
     $code += ", null, _);";
 
 	$code+= "
-    } catch (e) {
-      if (e.statusCode === 404) {
-		progress.end();
-        cli.output.warn(util.format(`$('A public ip address with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
-        return;
-      }
-      throw e;
-    } finally {
-      progress.end();
-    }";
+      } catch (e) {
+        if (e.statusCode === 404) {
+          progress.end();
+          cli.output.warn(util.format(`$('A public ip address with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
+          cli.interaction.formatOutput(result, traverse);
+          return;
+        }
+        throw e;
+      } finally {
+        progress.end();
+      }";
 
 	#
 	# Print publicIp to CLI
 	#
 	$code += "
-         cli.interaction.formatOutput(result, function (result) {
-		   for (var property in result) {
-		     if (result.hasOwnProperty(property)) {
-			   cli.output.nameValue(property, result[property]);
-		     }
-		   }
-         });
-    ";
+      cli.interaction.formatOutput(result, traverse);
+";
 
     #
 	# End of command declaration
 	#
-    $code += "  });";
-
+    $code += "    });";
 
     return $code;

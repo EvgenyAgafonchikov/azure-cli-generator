@@ -87,7 +87,7 @@ function Update-RequiredParameters($methodParamNameList, $methodParamTypeDict, $
 	return $Return;
 }
 
-function Get-PromptingOptionsCode($methodParamNameList)
+function Get-PromptingOptionsCode($methodParamNameList, $spaceLength)
 {
 	$result = "";
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
@@ -96,7 +96,7 @@ function Get-PromptingOptionsCode($methodParamNameList)
         [string]$cli_option_name = Get-CliOptionName $optionParamName;
 
         $cli_param_name = Get-CliNormalizedName $optionParamName;
-        $result +=  "		${cli_param_name} = cli.interaction.promptIfNotGiven(`$('${cli_option_name} : '), ${cli_param_name}, _);" + $NEW_LINE;
+        $result += (" " * $spaceLength) + "${cli_param_name} = cli.interaction.promptIfNotGiven(`$('${cli_option_name} : '), ${cli_param_name}, _);" + $NEW_LINE;
     }
 	return $result;
 }

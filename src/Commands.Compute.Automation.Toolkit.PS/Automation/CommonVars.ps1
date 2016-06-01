@@ -21,10 +21,10 @@
 
     # 3. CLI Code
     # 3.1 Types
-	$params = Get-ParametersNames $methodParameters;
-	$methodParamNameList = $params.methodParamNameList;
-	$methodParamTypeDict = $params.methodParamTypeDict;
-	$allStringFieldCheck = $params.allStringFieldCheck;
+    $params = Get-ParametersNames $methodParameters;
+    $methodParamNameList = $params.methodParamNameList;
+    $methodParamTypeDict = $params.methodParamTypeDict;
+    $allStringFieldCheck = $params.allStringFieldCheck;
 
     # 3.2 Functions
     # 3.2.1 Compute the CLI Category Name, i.e. VirtualMachineScaleSet => vmss, VirtualMachineScaleSetVM => vmssvm
@@ -40,3 +40,4 @@
 
     # 3.2.4 Compute the CLI Command Description, i.e. VirtualMachineScaleSet => virtual machine scale set
     $cliOperationDescription = (Get-CliOptionName $OperationName).Replace('-', ' ');
+    $cliOperationDescription = Get-SingularNoun $cliOperationDescription;

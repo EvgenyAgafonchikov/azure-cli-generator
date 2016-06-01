@@ -1130,11 +1130,11 @@ function Write-CLICommandFile
     $codeContent +=
 @"
 
+var __ = require('underscore');
 var profile = require('../../../util/profile');
 var utils = require('../../../util/utils');
 var util = require('util');
 var $ = utils.getLocaleString;
-
 
 "@;
 
@@ -1165,10 +1165,76 @@ function makeTuple(k, v, d) {
     $codeContent +=
 @"
 
+// TODO: move to utils
+function getHumanReadableFromCamelCase(inName) {
+  if (!inName)
+  {
+    return inName;
+  }
+
+  var varName = inName;
+  var outName = "";
+
+  var i = 0;
+  while (i < varName.length) {
+    if (i == 0 || varName[i] == varName[i].toUpperCase()) {
+      if (i > 0) {
+        outName += ' ';
+      }
+
+      var abbrWords =['VM', 'IP', 'RM', 'OS', 'NAT', 'IDs', 'DNS', 'VNet', 'SubNet'];
+      var matched = false;
+      var matchedAbbr = "";
+      abbrWords.every(function(item, index, arr) {
+        if (varName.substring(i).lastIndexOf(item, 0) === 0) {
+          matched = true;
+          matchedAbbr = item;
+          return false;
+        }
+        return true
+      });
+
+      if (matched) {
+        outName += matchedAbbr;
+        i = i + matchedAbbr.length;
+      }
+      else
+      {
+        var j = i + 1;
+        while ((j < varName.length) && varName[j] == varName[j].toLowerCase())
+        {
+          j++;
+        }
+        outName += varName.substring(i, j);
+        i = j;
+      }
+    }
+    else
+    {
+      i++;
+    }
+  }
+
+  return outName;
+}
+
+  function showKeyValue(key,value) {
+    cli.output.nameValue(utils.capitalizeFirstLetter(getHumanReadableFromCamelCase(key)), value);
+  }
+
+  function traverse(obj) {
+    for (var i in obj) {
+      if (typeof(obj[i]) != `"object`") {
+        showKeyValue.apply(this,[i, obj[i]]);
+      }
+      if (obj[i] !== null && typeof(obj[i])==`"object`") {
+        traverse(obj[i], showKeyValue);
+      }
+    }
+  }
+
 exports.init = function (cli) {
-
 $commandCodeLines
-
 };
 "@;
 
