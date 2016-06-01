@@ -111,24 +111,31 @@
          var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
 
          var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), name));
-         var result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(";
+         var result;"
 
-    for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
-    {
-        # Function Call - For Each Method Parameter
-        $cli_param_name = Get-CliNormalizedName $methodParamNameList[$index];
-        $code += "${cli_param_name}";
-        $code += ", ";
-    }
-    $code += "_);";
+$code +=
+	"
+    try {
+      result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}("
+	$code += Get-ParametersString $methodParamNameList;
+    $code += ", null, _);";
+
+	$code+= "
+    } catch (e) {
+      if (e.statusCode === 404) {
+		progress.end();
+        cli.output.warn(util.format(`$('A public ip address with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
+        return;
+      }
+      throw e;
+    } finally {
+      progress.end();
+    }";
 
 	#
-	# Print result to CLI
+	# Print publicIp to CLI
 	#
-
 	$code += "
-         progress.end();
-
          cli.interaction.formatOutput(result, function (result) {
 		   for (var property in result) {
 		     if (result.hasOwnProperty(property)) {

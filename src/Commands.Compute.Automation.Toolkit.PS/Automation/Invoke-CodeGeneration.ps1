@@ -114,7 +114,6 @@ if (-not [string]::IsNullOrEmpty($ConfigPath))
         }
     }
 }
-
 # Import functions and variables
 . "$PSScriptRoot\Import-AssemblyFunction.ps1";
 . "$PSScriptRoot\Import-CommonVariables.ps1";
@@ -202,17 +201,15 @@ else
         $global:cli_sample_code_lines = '';
         $cli_code_operation_list += $operation_nomalized_name;
 
+		$operationNormalizedName = Get-CliNormalizedName $operation_nomalized_name
+		$operationCliName = Get-CliOptionName $operation_nomalized_name
+		$cliOperationDescription = (Get-CliOptionName $operation_nomalized_name).Replace('-', ' ');
 		$cliCommandCodeMainBody += "var network = cli.category(`'network-autogen`')
-	   .description(`$('Commands to manage network resources'));
-var $cliOperationName = network.category('${cliCategoryName}')
-	   .description(`$('Commands to manage ${cliOperationDescription}'));";
+		  .description(`$('Commands to manage network resources'));" + $NEW_LINE;
+		$cliCommandCodeMainBody += "var $operationNormalizedName = network.category('$operationCliName')
+		  .description(`$('Commands to manage $cliOperationDescription'));"
 
 $code +=
-	   "var network = cli.category(`'network-autogen`')
-	   .description(`$('Commands to manage network resources'));
-	   var $cliOperationName = network.category('${cliCategoryName}')
-	   .description(`$('Commands to manage ${cliOperationDescription}'))" + $NEW_LINE;
-    
         $opShortName = Get-OperationShortName $operation_type.Name;
         if ($opShortName.EndsWith("ScaleSets"))
         {
@@ -270,7 +267,6 @@ $code +=
             {
                 $methodAnnotationSuffix = ' *';
             }
-
             Write-Verbose ($methodInfo.Name + $methodAnnotationSuffix);
 
             $qualified_methods += $mtItem;
@@ -494,6 +490,7 @@ $code +=
             $cli_code_body_index += 1;
         }
     }
+
 
     Write-Verbose $BAR_LINE;
     Write-Verbose "Finished.";

@@ -57,6 +57,8 @@ function Get-ParametersNames($methodParameters)
 
 function Update-RequiredParameters($methodParamNameList, $methodParamTypeDict, $allStringFieldCheck)
 {
+	$requireParams = @();
+	$requireParamNormalizedNames = @()
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
     {
         # Parameter Declaration - For Each Method Parameter

@@ -16,7 +16,7 @@
         [string]$FileOutputFolder = $null
     )
 
-. "$PSScriptRoot\CommonVars.ps1"
+. "$PSScriptRoot\CommonVars.ps1";
 . "$PSScriptRoot\Import-StringFunction.ps1";
 . "$PSScriptRoot\Import-TypeFunction.ps1";
 . "$PSScriptRoot\Import-WriterFunction.ps1";
@@ -71,7 +71,7 @@
 	#
     $code +=
 	"${cliOperationName}.command('${cliMethodOption}${requireParamsString}')
-	   .description(`$('Get a ${cliOperationDescription}'))
+	   .description(`$('Delete a ${cliOperationDescription}'))
 	   .usage('[options]${usageParamsString}')" + $NEW_LINE;
 
 
@@ -113,21 +113,35 @@
 	{
 		$cliMethodFuncName += "Method";
 	}
-    $code += "         
+    $code += "
 		var subscription = profile.current.getSubscription(options.subscription);
 		var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
 
-		var publicIp = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.get("
+		var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), name));
+	    var result;"
 
+$code +=
+	"
+    try {
+      result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.get("
 	$code += Get-ParametersString $methodParamNameList;
-    $code += ", _);";
+    $code += ", null, _);";
+
+	$code+= "
+    } catch (e) {
+      if (e.statusCode === 404) {
+          throw new Error(util.format(`$('A public ip address with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
+      }
+      throw e;
+    } finally {
+      progress.end();
+    }";
+
+	#$code += Get-ParametersString $methodParamNameList;
+    #$code += ", _);";
 
 #TODO: replace possible hardcode in this part e.g. 'name'
 	$code += "
-		if (!publicIp) {
-			throw new Error(util.format(`$('A public ip address with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
-		}
-
 		if (!options.quiet && !cli.interaction.confirm(util.format(`$('Delete $cliOperationDescription `"%s`"? [y/n] '), name), _)) {
 			return;
 		}
