@@ -28,7 +28,7 @@
         return;
     }
 
-	$code = $NEW_LINE;
+    $code = $NEW_LINE;
 
     if ($ModelNameSpace -like "*.WindowsAzure.*")
     {
@@ -49,34 +49,28 @@
     # Set Required Parameters
     $requireParams = @();
     $requireParamNormalizedNames = @();
-	$require = Update-RequiredParameters $methodParamNameList $methodParamTypeDict $allStringFieldCheck;
-	$requireParams = $require.requireParams;
-	$requireParamNormalizedNames = $require.requireParamNormalizedNames;
+    $require = Update-RequiredParameters $methodParamNameList $methodParamTypeDict $allStringFieldCheck;
+    $requireParams = $require.requireParams;
+    $requireParamNormalizedNames = $require.requireParamNormalizedNames;
 
     $requireParamsString = $null;
     $usageParamsString = $null;
     $optionParamString = $null;
-    if ($requireParams.Count -gt 0)
-    {
-        $requireParamsJoinStr = "] [";
-        $requireParamsString = " [" + ([string]::Join($requireParamsJoinStr, $requireParams)) + "]";
-        
-        $usageParamsJoinStr = "> <";
-        $usageParamsString = " <" + ([string]::Join($usageParamsJoinStr, $requireParams)) + ">";
-        $optionParamString = ([string]::Join(", ", $requireParamNormalizedNames)) + ", ";
-    }
+    $requireParamsString = Get-RequireParamsString $requireParams;
+    $usageParamsString = Get-UsageParamsString $requireParams;
+    $optionParamString = ([string]::Join(", ", $requireParamNormalizedNames)) + ", ";
 
-	#
-	# Command declaration
-	#
+    #
+    # Command declaration
+    #
     $code +=
-	"  ${cliOperationName}.command('${cliMethodOption}${requireParamsString}')
+    "  ${cliOperationName}.command('${cliMethodOption}${requireParamsString}')
     .description(`$('Delete a ${cliOperationDescription}'))
     .usage('[options]${usageParamsString}')" + $NEW_LINE;
 
-	#
-	# Options declaration
-	#
+    #
+    # Options declaration
+    #
     $option_str_items = @();
     $use_input_parameter_file = $false;
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
@@ -95,49 +89,33 @@
         $option_str_items += "--${cli_option_name} `$p${index}";
     }
 
-	if ($cliMethodOption.ToLower() -like "delete") {
-		$code += "    .option('-q, --quiet', `$('quiet mode, do not ask for delete confirmation'))" + $NEW_LINE;
-	}
-    $code += "    .option('-s, --subscription <subscription>', `$('the subscription identifier'))" + $NEW_LINE;
+    $code += Get-CommonOptions $cliMethodOption;
     $code += "    .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
-
-	# Prompting options
-	$code += Get-PromptingOptionsCode $methodParamNameList 6;
+    # Prompting options
+    $code += Get-PromptingOptionsCode $methodParamNameList 6;
 
     #
-	# API call using SDK
-	#
-	$cliMethodFuncName = $cliMethodName;
-	if ($cliMethodFuncName -eq "delete")
-	{
-		$cliMethodFuncName += "Method";
-	}
+    # API call using SDK
+    #
+    $cliMethodFuncName = $cliMethodName;
+    if ($cliMethodFuncName -eq "delete")
+    {
+        $cliMethodFuncName += "Method";
+    }
+    $resultVarName = "result";
     $code += "
       var subscription = profile.current.getSubscription(options.subscription);
       var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
+      var ${resultVarName};"
 
-      var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), name));
-      var result;"
+    $code += Get-SafeGetFunction $componentNameInLowerCase $cliOperationName $methodParamNameList $resultVarName $cliOperationDescription;
 
-$code +=
-	"
-      try {
-        result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.get("
-	$code += Get-ParametersString $methodParamNameList;
-    $code += ", null, _);";
+    $code += "
+      if (!result) {
+        throw new Error(util.format(`$('A public ip address with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
+      }" + $NEW_LINE;
 
-	$code+= "
-      } catch (e) {
-        if (e.statusCode === 404) {
-          throw new Error(util.format(`$('A public ip address with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
-        }
-        throw e;
-      } finally {
-        progress.end();
-      }";
-
-
-	$code += "
+    $code += "
       if (!options.quiet && !cli.interaction.confirm(util.format(`$('Delete $cliOperationDescription `"%s`"? [y/n] '), name), _)) {
         return;
       }
@@ -145,18 +123,17 @@ $code +=
       var progress = cli.interaction.progress(util.format(`$('Deleting $cliOperationDescription `"%s`"'), name));
       try {
         ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(";
-	$code += Get-ParametersString $methodParamNameList;
-	$code += ", _);";
+    $code += Get-ParametersString $methodParamNameList;
+    $code += ", _);";
 
-	$code += "
+    $code += "
       } finally {
         progress.end();
-      }
-"
+      }" + $NEW_LINE;
 
     #
-	# End of command declaration
-	#
+    # End of command declaration
+    #
     $code += "    });" + $NEW_LINE;
 
     return $code;

@@ -1,0 +1,35 @@
+{
+    "name" : "MyGateway2",
+    "type" : "Microsoft.Network/virtualNetworkGateways",
+    "location" : "westeurope",
+    "provisioningState" : "Updating",
+    "resourceGuid" : "a0410bee-7954-4a45-b076-5b4110cfa473",
+    "ipConfigurations" : [{
+        "name" : "ip-config",
+        "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-2/providers/Microsoft.Network/virtualNetworkGateways/MyGateway2/ipConfigurations/ip-config",
+        "provisioningState" : "Updating",
+        "privateIPAddress" : "10.2.0.11",
+        "privateIPAllocationMethod" : "Static",
+        "publicIPAddress" : {
+            "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-2/providers/Microsoft.Network/publicIPAddresses/IPForGateway2"
+        },
+        "subnet" : {
+            "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-2/providers/Microsoft.Network/virtualNetworks/VnetForGateway2/subnets/GatewaySubnet"
+        }
+    }],
+    "sku" : {
+        "name" : "Basic",
+        "tier" : "Basic",
+        "capacity" : 2
+    },
+    "gatewayType" : "Vpn",
+    "vpnType" : "RouteBased",
+    "enableBgp" : false,
+    "vpnClientConfiguration" : {
+        "vpnClientAddressPool" : {
+            "addressPrefixes" : []
+        },
+        "vpnClientRootCertificates" : [],
+        "vpnClientRevokedCertificates" : []
+    }
+}

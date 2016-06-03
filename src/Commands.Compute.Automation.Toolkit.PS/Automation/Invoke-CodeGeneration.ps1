@@ -204,7 +204,6 @@ else
 		$operationNormalizedName = Get-CliNormalizedName $operation_nomalized_name
 		$operationCliName = Get-SingularNoun (Get-CliOptionName $operation_nomalized_name);
 		$cliOperationDescription = (Get-CliOptionName $operation_nomalized_name).Replace('-', ' ');
-		$cliOperationDescription = Get-SingularNoun $cliOperationDescription;
 		$cliCommandCodeMainBody += "  var network = cli.category(`'network-autogen`')
     .description(`$('Commands to manage network resources'));
 " + $NEW_LINE;

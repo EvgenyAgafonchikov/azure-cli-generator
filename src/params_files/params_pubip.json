@@ -1,0 +1,9 @@
+{
+  "location":"westus",
+  "publicIPAllocationMethod":"Dynamic",
+  "publicIPAddressVersion":"IPv4",
+  "dnsSettings":{
+    "domainNameLabel":"contoso5"
+  },
+  "idleTimeoutInMinutes":4
+}

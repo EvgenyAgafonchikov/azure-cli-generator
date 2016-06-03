@@ -1,0 +1,11 @@
+{
+  "name" : "LGWTest",
+  "type" : "Microsoft.Network/localNetworkGateways",
+  "location" : "westus",
+  "provisioningState" : "Updating",
+  "resourceGuid" : "522e74c5-87dd-452f-a2ee-9ae78e58af92",
+  "localNetworkAddressSpace" : {
+      "addressPrefixes" : []
+  },
+  "gatewayIpAddress" : "10.0.0.13"
+}

@@ -1,0 +1,14 @@
+{
+  "name" : "LB-Test",
+  "type" : "Microsoft.Network/loadBalancers",
+  "location" : "westus",
+  "provisioningState" : "Succeeded",
+  "resourceGuid" : "a51ce60b-033e-44c9-89ed-68ff08c1ded4",
+  "frontendIPConfigurations" : [],
+  "backendAddressPools" : [],
+  "loadBalancingRules" : [],
+  "probes" : [],
+  "inboundNatRules" : [],
+  "outboundNatRules" : [],
+  "inboundNatPools" : []
+}

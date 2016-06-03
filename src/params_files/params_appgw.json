@@ -1,0 +1,115 @@
+{
+    "name" : "AppGW",
+    "type" : "Microsoft.Network/applicationGateways",
+    "location" : "westus",
+    "tags" : {},
+    "provisioningState" : "Updating",
+    "resourceGuid" : "585df900-b384-4cb0-9f10-273ecfe0c6ed",
+    "sku" : {
+        "name" : "Standard_Medium",
+        "tier" : "Standard",
+        "capacity" : 2
+    },
+    "gatewayIPConfigurations" : [{
+            "name" : "ipConfig01",
+            "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/gatewayIPConfigurations/ipConfig01",
+                "provisioningState" : "Updating",
+                "subnet" : {
+                    "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/virtualNetworks/VNTester/subnets/VNTesterSub"
+                }
+            }],
+    "sslCertificates" : [],
+    "frontendIPConfigurations" : [{
+            "name" : "frontendIp01",
+            "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/frontendIPConfigurations/frontendIp01",
+                "provisioningState" : "Updating",
+                "privateIPAllocationMethod" : "Dynamic",
+                "subnet" : {
+                    "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/virtualNetworks/VNTester/subnets/VNTesterSub"
+                },
+                "httpListeners" : [{
+                        "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/httpListeners/listener01"
+                    }
+                    ]
+        }
+        ],
+    "frontendPorts" : [{
+            "name" : "frontendPort01",
+            "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/frontendPorts/frontendPort01",
+            "provisioningState" : "Updating",
+            "port" : 80,
+            "httpListeners" : [{
+                    "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/httpListeners/listener01"
+                }
+                ]
+        }
+        
+    ],
+    "backendAddressPools" : [{
+            "name" : "pool01",
+            "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/backendAddressPools/pool01",
+            "properties" : {
+                "provisioningState" : "Updating",
+                "backendAddresses" : [{
+                        "ipAddress" : "10.0.0.16"
+                    }
+                    ],
+                "requestRoutingRules" : [{
+                        "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/requestRoutingRules/rule01"
+                    }
+                    ]
+            }
+            
+        }
+        ],
+    "backendHttpSettingsCollection" : [{
+            "name" : "httpSettings01",
+            "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/backendHttpSettingsCollection/httpSettings01",
+                "provisioningState" : "Updating",
+                "port" : 80,
+                "protocol" : "Http",
+                "cookieBasedAffinity" : "Disabled",
+                "requestTimeout" : 30,
+                "requestRoutingRules" : [{
+                        "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/requestRoutingRules/rule01"
+                    }
+                    ]
+            
+        }
+        ],
+    "httpListeners" : [{
+            "name" : "listener01",
+            "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/httpListeners/listener01",
+                "provisioningState" : "Updating",
+                "frontendIPConfiguration" : {
+                    "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/frontendIPConfigurations/frontendIp01"
+                },
+                "frontendPort" : {
+                    "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/frontendPorts/frontendPort01"
+                },
+                "protocol" : "Http",
+                "requireServerNameIndication" : false,
+                "requestRoutingRules" : [{
+                    "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/requestRoutingRules/rule01"
+                }]
+        }],
+
+    "urlPathMaps" : [],
+    "requestRoutingRules" : [{
+            "name" : "rule01",
+            "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/requestRoutingRules/rule01",
+            "provisioningState" : "Updating",
+            "ruleType" : "Basic",
+            "httpListener" : {
+                "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/httpListeners/listener01"
+            },
+            "backendAddressPool" : {
+                "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/backendAddressPools/pool01"
+            },
+            "backendHttpSettings" : {
+                "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/applicationGateways/AppGW/backendHttpSettingsCollection/httpSettings01"
+            }
+        }
+        ],
+    "probes" : []
+}

@@ -1,0 +1,29 @@
+{
+    "name" : "GenNic",
+    "location" : "westus",
+    "provisioningState" : "Succeeded",
+    "resourceGuid" : "453eed3f-9d1d-4149-bd85-02fc65b47b7c",
+    "ipConfigurations" : [{
+        "name" : "default-ip-config",
+        "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/networkInterfaces/GenNic/ipConfigurations/default-ip-config",
+            "provisioningState" : "Succeeded",
+            "privateIPAddress" : "10.0.0.5",
+            "privateIPAllocationMethod" : "Dynamic",
+            "publicIPAddress" : {
+                "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/publicIPAddresses/IPforNICGen"
+            },
+            "subnet" : {
+                "id" : "/subscriptions/2c224e7e-3ef5-431d-a57b-e71f4662e3a6/resourceGroups/test-roman-group/providers/Microsoft.Network/virtualNetworks/VnetForNIC/subnets/SubnetForNIC"
+            },
+            "primary" : true,
+            "privateIPAddressVersion" : "IPv4"
+        }
+    ],
+    "dnsSettings" : {
+        "dnsServers" : [],
+        "appliedDnsServers" : [],
+        "internalDomainNameSuffix" : "ujhaplfpnrpu5f102kesa35omh.d--x.internal.cloudapp.net"
+    },
+    "enableIPForwarding" : false,
+    "type" : "Microsoft.Network/networkInterfaces"
+}

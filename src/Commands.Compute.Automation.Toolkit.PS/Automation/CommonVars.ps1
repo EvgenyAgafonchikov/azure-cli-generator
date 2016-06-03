@@ -40,4 +40,7 @@
 
     # 3.2.4 Compute the CLI Command Description, i.e. VirtualMachineScaleSet => virtual machine scale set
     $cliOperationDescription = (Get-CliOptionName $OperationName).Replace('-', ' ');
-    $cliOperationDescription = Get-SingularNoun $cliOperationDescription;
+    if ($cliMethodOption -notlike "list")
+    {
+        $cliOperationDescription = Get-SingularNoun $cliOperationDescription;
+    }

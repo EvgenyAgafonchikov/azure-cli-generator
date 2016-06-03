@@ -28,7 +28,7 @@
         return;
     }
 
-	$code = "";
+    $code = "";
 
     if ($ModelNameSpace -like "*.WindowsAzure.*")
     {
@@ -49,34 +49,28 @@
     # Set Required Parameters
     $requireParams = @();
     $requireParamNormalizedNames = @();
-	$require = Update-RequiredParameters $methodParamNameList $methodParamTypeDict $allStringFieldCheck;
-	$requireParams = $require.requireParams;
-	$requireParamNormalizedNames = $require.requireParamNormalizedNames;
+    $require = Update-RequiredParameters $methodParamNameList $methodParamTypeDict $allStringFieldCheck;
+    $requireParams = $require.requireParams;
+    $requireParamNormalizedNames = $require.requireParamNormalizedNames;
 
     $requireParamsString = $null;
     $usageParamsString = $null;
     $optionParamString = $null;
-    if ($requireParams.Count -gt 0)
-    {
-        $requireParamsJoinStr = "] [";
-        $requireParamsString = " [" + ([string]::Join($requireParamsJoinStr, $requireParams)) + "]";
+    $requireParamsString = Get-RequireParamsString $requireParams;
+    $usageParamsString = Get-UsageParamsString $requireParams;
+    $optionParamString = ([string]::Join(", ", $requireParamNormalizedNames)) + ", ";
 
-        $usageParamsJoinStr = "> <";
-        $usageParamsString = " <" + ([string]::Join($usageParamsJoinStr, $requireParams)) + ">";
-        $optionParamString = ([string]::Join(", ", $requireParamNormalizedNames)) + ", ";
-    }
-
-	#
-	# Command declaration
-	#
+    #
+    # Command declaration
+    #
     $code += 
-	"  ${cliOperationName}.command('${cliMethodOption}${requireParamsString}')
+    "  ${cliOperationName}.command('${cliMethodOption}${requireParamsString}')
     .description(`$('Get a ${cliOperationDescription}'))
     .usage('[options]${usageParamsString}')" + $NEW_LINE;
 
-	#
-	# Options declaration
-	#
+    #
+    # Options declaration
+    #
     $option_str_items = @();
     $use_input_parameter_file = $false;
 
@@ -96,53 +90,38 @@
         $option_str_items += "--${cli_option_name} `$p${index}";
     }
 
-    $code += "    .option('-s, --subscription <subscription>', `$('the subscription identifier'))" + $NEW_LINE;
+    $code += Get-CommonOptions $cliMethodOption;
     $code += "    .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
 
-	# Prompting options
-	$code += Get-PromptingOptionsCode $methodParamNameList 6;
+    # Prompting options
+    $code += Get-PromptingOptionsCode $methodParamNameList 6;
 
     #
-	# API call using SDK
-	#
-	$cliMethodFuncName = $cliMethodName;
+    # API call using SDK
+    #
+    $cliMethodFuncName = $cliMethodName;
+    $resultVarName = "result";
     $code += "
       var subscription = profile.current.getSubscription(options.subscription);
       var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
 
-      var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), name));
-      var result;"
+      var ${resultVarName};"
 
-$code +=
-	"
-      try {
-        result = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}("
-	$code += Get-ParametersString $methodParamNameList;
-    $code += ", null, _);";
-
-	$code+= "
-      } catch (e) {
-        if (e.statusCode === 404) {
-          progress.end();
-          cli.output.warn(util.format(`$('A public ip address with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
-          cli.interaction.formatOutput(result, traverse);
-          return;
-        }
-        throw e;
-      } finally {
-        progress.end();
-      }";
-
-	#
-	# Print publicIp to CLI
-	#
-	$code += "
-      cli.interaction.formatOutput(result, traverse);
-";
+    $code += Get-SafeGetFunction $componentNameInLowerCase $cliOperationName $methodParamNameList $resultVarName $cliOperationDescription;
+    $code += "
+      if (!result) {
+        cli.output.warn(util.format(`$('A public ip address with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
+      }" + $NEW_LINE;
 
     #
-	# End of command declaration
-	#
+    # Print publicIp to CLI
+    #
+    $code += "
+      cli.interaction.formatOutput(${resultVarName}, traverse);" + $NEW_LINE;
+
+    #
+    # End of command declaration
+    #
     $code += "    });";
 
     return $code;

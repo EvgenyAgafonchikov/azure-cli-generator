@@ -1131,9 +1131,12 @@ function Write-CLICommandFile
 @"
 
 var __ = require('underscore');
+var fs = require('fs');
 var profile = require('../../../util/profile');
 var utils = require('../../../util/utils');
+var resourceUtils = require('../resource/resourceUtils');
 var util = require('util');
+var constants = require('./constants');
 var $ = utils.getLocaleString;
 
 "@;
@@ -1231,6 +1234,22 @@ function getHumanReadableFromCamelCase(inName) {
         traverse(obj[i], showKeyValue);
       }
     }
+  }
+
+  function getFlatObject(obj) {
+    var result = {};
+    function recurse(obj) {
+      for (var i in obj) {
+        if (typeof(obj[i]) != "object") {
+          result[i] = obj[i];
+        }
+        if (obj[i] !== null && typeof(obj[i])=="object") {
+          recurse(obj[i], showKeyValue);
+        }
+      }
+    }
+    recurse(obj);
+    return result
   }
 
 exports.init = function (cli) {

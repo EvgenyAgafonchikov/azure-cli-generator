@@ -63,6 +63,11 @@ function Update-RequiredParameters($methodParamNameList, $methodParamTypeDict, $
     {
         # Parameter Declaration - For Each Method Parameter
         [string]$optionParamName = $methodParamNameList[$index];
+        if ($optionParamName -eq "Parameters") {
+            #$paramFileReplacer = "Parameters-file";
+            #$optionParamName = $paramFileReplacer;
+            #$methodParamNameList[$index] = $paramFileReplacer;
+        }
         if ($allStringFieldCheck[$optionParamName])
         {
             [System.Type]$optionParamType = $methodParamTypeDict[$optionParamName];
@@ -94,6 +99,7 @@ function Get-PromptingOptionsCode($methodParamNameList, $spaceLength)
     {
         [string]$optionParamName = $methodParamNameList[$index];
         [string]$cli_option_name = Get-CliOptionName $optionParamName;
+        $cli_option_name  = $cli_option_name -replace "parameters", "parameters-file"
 
         $cli_param_name = Get-CliNormalizedName $optionParamName;
         $result += (" " * $spaceLength) + "${cli_param_name} = cli.interaction.promptIfNotGiven(`$('${cli_option_name} : '), ${cli_param_name}, _);" + $NEW_LINE;
@@ -115,4 +121,73 @@ function Get-ParametersString($methodParamNameList)
 		}
 	}
 	return $str;
+}
+
+function Get-SafeGetFunction($componentNameInLowerCase, $cliOperationName, $methodParamNameList, $resultVarName, $cliOperationDescription)
+{
+	$tempCode = "
+      var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), name));
+      try {
+        ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.get("
+	$tempCode += (Get-ParametersString $methodParamNameList) -replace ", parameters", "";
+    $tempCode += ", null, _);";
+
+	$tempCode += "
+      } catch (e) {
+        if (e.statusCode === 404) {
+          ${resultVarName} = null;
+        } else {
+          throw e;
+        }
+      } finally {
+        progress.end();
+      }";
+	return $tempCode
+}
+
+function Get-CommonOptions($cliMethodOption) {
+	$tempCode = "";
+	if ($cliMethodOption.ToLower() -like "delete") {
+		$tempCode += "    .option('-q, --quiet', `$('quiet mode, do not ask for delete confirmation'))" + $NEW_LINE;
+	}
+    $tempCode += "    .option('-s, --subscription <subscription>', `$('the subscription identifier'))" + $NEW_LINE;
+	return $tempCode;
+}
+
+function Get-CreatePublucIPOptions() {
+return "    .option('-l, --location <location>', `$('the location'))
+    .option('-d, --domain-name-label <domain-name-label>', `$('the domain name label.' +
+      '\n     This set DNS to <domain-name-label>.<location>.cloudapp.azure.com'))
+    .option('-a, --allocation-method <allocation-method>', util.format(`$('the allocation method, valid values are' +
+      '\n     [%s], default is %s'), constants.publicIp.allocation, constants.publicIp.allocation[0]))
+    .option('-i, --idle-timeout <idle-timeout>', `$('the idle timeout specified in minutes'))
+    .option('-f, --reverse-fqdn <reverse-fqdn>', `$('the reverse fqdn'))
+    .option('-e, --ip-version <ip-version>', util.format(`$('the ip version, valid values are' +
+      '\n     [%s], default is %s'), constants.publicIp.version, constants.publicIp.version[0]))
+    .option('-t, --tags <tags>', `$(constants.help.tags.create))
+"
+}
+
+function Get-RequireParamsString($requireParams)
+{
+    if ($requireParams.Count -gt 0)
+    {
+        $requireParamsJoinStr = "] [";
+        $requireParamsString = " [" + ([string]::Join($requireParamsJoinStr, $requireParams)) + "]";
+        $requireParamsString = $requireParamsString -replace "parameters", "parameters-file";
+        return $requireParamsString;
+    }
+    return "";
+}
+
+function Get-UsageParamsString($requireParams)
+{
+    if ($requireParams.Count -gt 0)
+    {
+        $usageParamsJoinStr = "> <";
+        $usageParamsString = " <" + ([string]::Join($usageParamsJoinStr, $requireParams)) + ">";
+        $usageParamsString = $usageParamsString -replace "parameters", "parameters-file";
+        return $usageParamsString;
+    }
+    return "";
 }

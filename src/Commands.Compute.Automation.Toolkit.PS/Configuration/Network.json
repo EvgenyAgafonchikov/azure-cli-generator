@@ -11,6 +11,14 @@
     }
   ],
   "operations": [
-    { "name": "PublicIPAddresses" }
+    { "name": "PublicIPAddresses" },
+    { "name": "ApplicationGateways" },
+    { "name": "VirtualNetworks" },
+    { "name": "LoadBalancers" },
+    { "name": "LocalNetworkGateways" },
+    { "name": "NetworkInterfaces" },
+    { "name": "NetworkSecurityGroups" },
+    { "name": "Usages" },
+    { "name": "VirtualNetworkGateways" }
   ]
 }
