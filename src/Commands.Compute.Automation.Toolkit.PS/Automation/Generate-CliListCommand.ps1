@@ -1,5 +1,3 @@
-
-
  param
     (
         # VirtualMachine, VirtualMachineScaleSet, etc.
@@ -61,19 +59,11 @@
     $optionParamString = ([string]::Join(", ", $requireParamNormalizedNames)) + ", ";
 
     #
-    # Command declaration
-    #
-    $code += 
-    "  ${cliOperationName}.command('${cliMethodOption}${requireParamsString}')
-    .description(`$('List a ${cliOperationDescription}'))
-    .usage('[options]${usageParamsString}')" + $NEW_LINE;
-
-    #
     # Options declaration
     #
     $option_str_items = @();
     $use_input_parameter_file = $false;
-
+    $cmdOptions = "";
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
     {
         [string]$optionParamName = $methodParamNameList[$index];
@@ -86,16 +76,12 @@
             $cli_shorthand_str = "-" + $cli_shorthand_str + ", ";
         }
         $cli_option_help_text = "the ${cli_option_name} of ${cliOperationDescription}";
-        $code += "    .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
+
+        $cmdOptions += "    .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
         $option_str_items += "--${cli_option_name} `$p${index}";
     }
 
-    $code += Get-CommonOptions $cliMethodOption;
-    $code += "    .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
-
-    # Prompting options
-    #$code += Get-PromptingOptionsCode $methodParamNameList 6;
-    $code += "      options.resourceGroup = resourceGroup;" + $NEW_LINE;
+    $commonOptions = Get-CommonOptions $cliMethodOption
 
     #
     # API call using SDK
@@ -103,50 +89,10 @@
     $cliMethodFuncName = $cliMethodName;
     $resultVarName = "result";
 
-    $code += "
-      var subscription = profile.current.getSubscription(options.subscription);
-      var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
-
-      var ${resultVarName} = null;"
-
     $promptingCode = Get-PromptingOptionsCode $methodParamNameList $methodParamNameList 12;
     $methodParamNameListNoRes = $methodParamNameList -ne "resourceGroup";
     $promptingCodeNoResource = Get-PromptingOptionsCode $methodParamNameListNoRes $methodParamNameListNoRes 12;
-    $code += "
-      var progress;
-      try {
-        if(typeof ${componentNameInLowerCase}ManagementClient.${cliOperationName}.listAll != 'function') {
-${promptingCode}
-          progress = cli.interaction.progress(`$('Getting the $cliOperationDescription'));
-          ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.list(${optionParamString} _);
-        } else {
-          if(options.resourceGroup) {
-${promptingCode}
-            progress = cli.interaction.progress(`$('Getting the $cliOperationDescription'));
-            ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.list(${optionParamString} _);
-          } else {
-${promptingCodeNoResource}
-            progress = cli.interaction.progress(`$('Getting the $cliOperationDescription'));
-            ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.listAll(${optionParamString} _);
-          }
-        }
-      } finally {
-        progress.end();
-      }" + $NEW_LINE;
 
-    $code += "
-      if (${resultVarName}.length === 0) {
-        cli.output.warn(`$('No $cliOperationDescription found'));
-      } else {
-        cli.output.table(result, function (row, item) {
-          row.cell(`$('Name'), item.name);
-          row.cell(`$('Location'), item.location);
-          var resInfo = resourceUtils.getResourceInformation(item.id);
-          row.cell(`$('Resource group'), resInfo.resourceGroup);
-          row.cell(`$('Provisioning state'), item.provisioningState);
-        });
-      }" + $NEW_LINE;
-
-    $code += "    });";
-
+    $template = Get-Content "$PSScriptRoot\templates\list.ps1" -raw;
+    $code += Invoke-Expression $template;
     return $code;

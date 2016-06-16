@@ -1,5 +1,3 @@
-
-
  param
     (
         # VirtualMachine, VirtualMachineScaleSet, etc.
@@ -61,18 +59,11 @@
     $optionParamString = ([string]::Join(", ", $requireParamNormalizedNames)) + ", ";
 
     #
-    # Command declaration
-    #
-    $code +=
-    "  ${cliOperationName}.command('${cliMethodOption}${requireParamsString}')
-    .description(`$('Delete a ${cliOperationDescription}'))
-    .usage('[options]${usageParamsString}')" + $NEW_LINE;
-
-    #
     # Options declaration
     #
     $option_str_items = @();
     $use_input_parameter_file = $false;
+    $cmdOptions = "";
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
     {
         [string]$optionParamName = $methodParamNameList[$index];
@@ -85,14 +76,13 @@
             $cli_shorthand_str = "-" + $cli_shorthand_str + ", ";
         }
         $cli_option_help_text = "the ${cli_option_name} of ${cliOperationDescription}";
-        $code += "    .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
+        $cmdOptions += "    .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
         $option_str_items += "--${cli_option_name} `$p${index}";
     }
 
-    $code += Get-CommonOptions $cliMethodOption;
-    $code += "    .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
+    $commonOptions = Get-CommonOptions $cliMethodOption
     # Prompting options
-    $code += Get-PromptingOptionsCode $methodParamNameList $methodParamNameList 6;
+    $promptingOptions = Get-PromptingOptionsCode $methodParamNameList $methodParamNameList 6;
 
     #
     # API call using SDK
@@ -103,37 +93,9 @@
         $cliMethodFuncName += "Method";
     }
     $resultVarName = "result";
-    $code += "
-      var subscription = profile.current.getSubscription(options.subscription);
-      var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
-      var ${resultVarName};"
+    $safeGet = Get-SafeGetFunction $componentNameInLowerCase $cliOperationName $methodParamNameList $resultVarName $cliOperationDescription;
+    $parametersString = Get-ParametersString $methodParamNameList;
 
-    $code += Get-SafeGetFunction $componentNameInLowerCase $cliOperationName $methodParamNameList $resultVarName $cliOperationDescription;
-
-    $code += "
-      if (!result) {
-        throw new Error(util.format(`$('A ${cliOperationDescription} with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
-      }" + $NEW_LINE;
-
-    $code += "
-      if (!options.quiet && !cli.interaction.confirm(util.format(`$('Delete $cliOperationDescription `"%s`"? [y/n] '), name), _)) {
-        return;
-      }
-
-      var progress = cli.interaction.progress(util.format(`$('Deleting $cliOperationDescription `"%s`"'), name));
-      try {
-        ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(";
-    $code += Get-ParametersString $methodParamNameList;
-    $code += ", _);";
-
-    $code += "
-      } finally {
-        progress.end();
-      }" + $NEW_LINE;
-
-    #
-    # End of command declaration
-    #
-    $code += "    });" + $NEW_LINE;
-
+    $template = Get-Content "$PSScriptRoot\templates\delete.ps1" -raw;
+    $code += Invoke-Expression $template;
     return $code;

@@ -72,14 +72,6 @@
     $optionParamString = ([string]::Join(", ", $requireParamNormalizedNames)) + ", ";
 
     #
-    # Command declaration
-    #
-    $code +=
-    "  ${cliOperationName}.command('${cliMethodOption}${requireParamsString}')
-    .description(`$('Create a ${cliOperationDescription}'))
-    .usage('[options]${usageParamsString}')" + $NEW_LINE;
-
-    #
     # Options declaration
     #
     $option_str_items = @();
@@ -88,7 +80,7 @@
     $promptParametersNameList = @();
     $promptParametersNameList += $methodParamNameList;
     $paramDefinitions = Get-ParamsDefinition $cliPromptParams[$OperationName];
-
+    $cmdOptions = "";
     $cliOperationParams[$OperationName] = $cliOperationParams[$OperationName] + $methodParamNameList;
     for ($index = 0; $index -lt $cliOperationParams[$OperationName].Count; $index++)
     {
@@ -104,19 +96,17 @@
         $cli_option_help_text = "the ${cli_option_name} of ${cliOperationDescription}";
         if ($cli_option_name -like "*parameters")
         {
-            $cli_option_name = "parameters-file"; #$cli_option_name -replace "parameters", "parameters-file";
+            $cli_option_name = "parameters-file";
         }
-        $code += "    .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
+        $cmdOptions += "    .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
         $option_str_items += "--${cli_option_name} `$p${index}";
     }
 
-    $code += Get-CommonOptions $cliMethodOption;
-    $code += "    .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
+    $commonOptions = Get-CommonOptions $cliMethodOption;
 
     # Prompting options
-    $code += Get-PromptingOptionsCode $promptParametersNameList $promptParametersNameList 6;
-    $code += "      " + $paramDefinitions + $NEW_LINE;
-    $code += Get-PromptingOptionsCode $cliPromptParams[$OperationName] $promptParametersNameList 6;
+    $promptingOptions = Get-PromptingOptionsCode $promptParametersNameList $promptParametersNameList 6;
+    $promptingOptionsCustom = Get-PromptingOptionsCode $cliPromptParams[$OperationName] $promptParametersNameList 6;
 
     #
     # API call using SDK
@@ -127,25 +117,10 @@
         $cliMethodFuncName += "Method";
     }
     $resultVarName = "result";
-    $code += "
-      var subscription = profile.current.getSubscription(options.subscription);
-      var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
-
-      var ${resultVarName};"
-    $code += Get-SafeGetFunction $componentNameInLowerCase $cliOperationName $methodParamNameList $resultVarName $cliOperationDescription;
-
-    $code += "
-      if (${resultVarName}) {
-        throw new Error(util.format(`$('A ${cliOperationDescription} with name `"%s`" already exists in the resource group `"%s`"'), name, resourceGroup));
-      }
-
-      if (parameters) {
-        var contents = fs.readFileSync(parameters, 'utf8');
-        parameters = JSON.parse(contents);
-      } else {
-        parameters = {};" + $NEW_LINE;
+    $safeGet = Get-SafeGetFunction $componentNameInLowerCase $cliOperationName $methodParamNameList $resultVarName $cliOperationDescription;
 
     $treeProcessedList = @();
+    $treeAnalysisResult = ""
     foreach($param in $cliOperationParams[$OperationName]) {
         if($param -ne "location" -and $param -ne "tags" -and $param -ne "name")
         {
@@ -160,19 +135,19 @@
                 $last = decapitalizeFirstLetter $lastItem;
                 $currentPath = "parameters"
                 for ($i = 0; $i -lt $paramPathSplit.Length - 1; $i += 1) {
-                    $code += "        if(options.${last}) {" + $NEW_LINE;
+                    $treeAnalysisResult += "        if(options.${last}) {" + $NEW_LINE;
                     $current = decapitalizeFirstLetter $paramPathSplit[$i];
-                    $code += "          if(!${currentPath}.${current}) {" + $NEW_LINE;
-                    $code += "            ${currentPath}.${current} = {};" + $NEW_LINE;
+                    $treeAnalysisResult += "          if(!${currentPath}.${current}) {" + $NEW_LINE;
+                    $treeAnalysisResult += "            ${currentPath}.${current} = {};" + $NEW_LINE;
                     ${currentPath} += ".${current}";
-                    $code += "          }" + $NEW_LINE;
-                    $code += "        }" + $NEW_LINE;
+                    $treeAnalysisResult += "          }" + $NEW_LINE;
+                    $treeAnalysisResult += "        }" + $NEW_LINE;
                 }
                 $treeProcessedList += $last;
 
                 $setValue = "null"
                 if ($cliOperationParams[$OperationName] -contains $lastItem) {
-                    $code += "        if(options.${last}) {" + $NEW_LINE;
+                    $treeAnalysisResult += "        if(options.${last}) {" + $NEW_LINE;
                     if($paramType -ne $null -and $paramType -like "*List*") {
                         $setValue = "options." + $last + ".split(',')";
                     }
@@ -180,50 +155,34 @@
                         $setValue = "options." + $last;
                     }
                 }
-                $code += "          ${currentPath}.${last} = ${setValue};" + $NEW_LINE;
-                $code += "        }" + $NEW_LINE;
+                $treeAnalysisResult += "          ${currentPath}.${last} = ${setValue};" + $NEW_LINE;
+                $treeAnalysisResult += "        }" + $NEW_LINE;
             }
         }
     }
 
+    $updateParametersCode = ""
     foreach($item in $cliOperationParams[$OperationName])
     {
         if (-not ($treeProcessedList -contains $item) -and $item -ne "parameters")
         {
-            $code += "        if(options.${item}) {" + $NEW_LINE;
+            $updateParametersCode  += "        if(options.${item}) {" + $NEW_LINE;
             if($item -ne "tags")
             {
-                $code += "          parameters.${item} = options.${item};" + $NEW_LINE;
+                $updateParametersCode  += "          parameters.${item} = options.${item};" + $NEW_LINE;
             }
             else
             {
-                $code += "          if (utils.argHasValue(options.tags)) {
+                $updateParametersCode  += "          if (utils.argHasValue(options.tags)) {
             tagUtils.appendTags(parameters, options);
           }" + $NEW_LINE;
             }
-            $code += "        }" + $NEW_LINE;
+            $updateParametersCode  += "        }" + $NEW_LINE;
         }
     }
 
-    $code +=
-"      }
-      var progress = cli.interaction.progress(util.format(`$('Creating $cliOperationDescription `"%s`"'), name));
-      try {
-        ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(";
-    $code += Get-ParametersString $methodParamNameList;
-    $code += ", _);";
+    $parametersString = Get-ParametersString $methodParamNameList;
 
-    $code += "
-      } finally {
-        progress.end();
-      }" + $NEW_LINE;
-
-    $code += "
-      cli.interaction.formatOutput(${resultVarName}, traverse);"  + $NEW_LINE;
-
-    #
-    # End of command declaration
-    #
-    $code += "  });" + $NEW_LINE;
-
+    $template = Get-Content "$PSScriptRoot\templates\create.ps1" -raw;
+    $code += Invoke-Expression $template;
     return $code;
