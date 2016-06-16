@@ -94,7 +94,7 @@
     $code += "    .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
 
     # Prompting options
-    $code += Get-PromptingOptionsCode $methodParamNameList 6;
+    $code += Get-PromptingOptionsCode $methodParamNameList $methodParamNameList 6;
 
     #
     # API call using SDK
@@ -110,7 +110,7 @@
     $code += Get-SafeGetFunction $componentNameInLowerCase $cliOperationName $methodParamNameList $resultVarName $cliOperationDescription;
     $code += "
       if (!result) {
-        cli.output.warn(util.format(`$('A public ip address with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
+        cli.output.warn(util.format(`$('A ${cliOperationDescription} with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
       }" + $NEW_LINE;
 
     #

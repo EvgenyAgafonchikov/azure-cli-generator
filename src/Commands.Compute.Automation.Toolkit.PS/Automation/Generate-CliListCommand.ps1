@@ -109,21 +109,25 @@
 
       var ${resultVarName} = null;"
 
+    $promptingCode = Get-PromptingOptionsCode $methodParamNameList $methodParamNameList 12;
+    $methodParamNameListNoRes = $methodParamNameList -ne "resourceGroup";
+    $promptingCodeNoResource = Get-PromptingOptionsCode $methodParamNameListNoRes $methodParamNameListNoRes 12;
     $code += "
       var progress;
-
       try {
-        if (options.resourceGroup) {
+        if(typeof ${componentNameInLowerCase}ManagementClient.${cliOperationName}.listAll != 'function') {
+${promptingCode}
           progress = cli.interaction.progress(`$('Getting the $cliOperationDescription'));
-          ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.list(options.resourceGroup, _);
+          ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.list(${optionParamString} _);
         } else {
-          if(typeof ${componentNameInLowerCase}ManagementClient.${cliOperationName}.listAll == 'function') {
+          if(options.resourceGroup) {
+${promptingCode}
             progress = cli.interaction.progress(`$('Getting the $cliOperationDescription'));
-            ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.listAll(_);
+            ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.list(${optionParamString} _);
           } else {
-            resourceGroup = cli.interaction.promptIfNotGiven(`$('resource-group : '), resourceGroup, _);
+${promptingCodeNoResource}
             progress = cli.interaction.progress(`$('Getting the $cliOperationDescription'));
-            ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.list(resourceGroup, _);
+            ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.listAll(${optionParamString} _);
           }
         }
       } finally {

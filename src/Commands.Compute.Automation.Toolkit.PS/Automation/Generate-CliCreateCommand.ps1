@@ -27,8 +27,19 @@
     {
         return;
     }
+    $methodParams = $MethodInfo.GetParameters();
+    $additionalOptions = @();
+    foreach ($param in $methodParams)
+    {
+        if($param.Name -like "*parameters")
+        {
+            $paramType = $param.ParameterType;
+            $param_object = (. $PSScriptRoot\Create-ParameterObject.ps1 -typeInfo $paramType);
+        }
+    }
 
     $code = $NEW_LINE;
+
     if ($ModelNameSpace -like "*.WindowsAzure.*")
     {
         # Use Invoke Category for RDFE APIs
@@ -73,9 +84,15 @@
     #
     $option_str_items = @();
     $use_input_parameter_file = $false;
-    for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
+
+    $promptParametersNameList = @();
+    $promptParametersNameList += $methodParamNameList;
+    $paramDefinitions = Get-ParamsDefinition $cliPromptParams[$OperationName];
+
+    $cliOperationParams[$OperationName] = $cliOperationParams[$OperationName] + $methodParamNameList;
+    for ($index = 0; $index -lt $cliOperationParams[$OperationName].Count; $index++)
     {
-        [string]$optionParamName = $methodParamNameList[$index];
+        [string]$optionParamName = $cliOperationParams[$OperationName][$index];
         $optionShorthandStr = $null;
 
         $cli_option_name = Get-CliOptionName $optionParamName;
@@ -85,21 +102,21 @@
             $cli_shorthand_str = "-" + $cli_shorthand_str + ", ";
         }
         $cli_option_help_text = "the ${cli_option_name} of ${cliOperationDescription}";
-        if ($cli_option_name -eq "parameters")
+        if ($cli_option_name -like "*parameters")
         {
-            $cli_option_name = $cli_option_name -replace "parameters", "parameters-file";
+            $cli_option_name = "parameters-file"; #$cli_option_name -replace "parameters", "parameters-file";
         }
         $code += "    .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
         $option_str_items += "--${cli_option_name} `$p${index}";
     }
 
-    #TODO: Generate list using reflection
-#	$code += Get-CreatePublucIPOptions;
     $code += Get-CommonOptions $cliMethodOption;
     $code += "    .execute(function(${optionParamString}options, _) {" + $NEW_LINE;
 
     # Prompting options
-    $code += Get-PromptingOptionsCode $methodParamNameList 6;
+    $code += Get-PromptingOptionsCode $promptParametersNameList $promptParametersNameList 6;
+    $code += "      " + $paramDefinitions + $NEW_LINE;
+    $code += Get-PromptingOptionsCode $cliPromptParams[$OperationName] $promptParametersNameList 6;
 
     #
     # API call using SDK
@@ -119,11 +136,77 @@
 
     $code += "
       if (${resultVarName}) {
-        throw new Error(util.format(`$('A public ip address with name `"%s`" already exists in the resource group `"%s`"'), name, resourceGroup));
+        throw new Error(util.format(`$('A ${cliOperationDescription} with name `"%s`" already exists in the resource group `"%s`"'), name, resourceGroup));
       }
 
-      var contents = fs.readFileSync(parameters, 'utf8');
-      parameters = JSON.parse(contents);
+      if (parameters) {
+        var contents = fs.readFileSync(parameters, 'utf8');
+        parameters = JSON.parse(contents);
+      } else {
+        parameters = {};" + $NEW_LINE;
+
+    $treeProcessedList = @();
+    foreach($param in $cliOperationParams[$OperationName]) {
+        if($param -ne "location" -and $param -ne "tags" -and $param -ne "name")
+        {
+            $paramPathHash = Search-TreeElement "root" $param_object $param;
+            if ($paramPathHash)
+            {
+                $paramPath = $paramPathHash.path;
+                $paramType = $paramPathHash.type;
+                $paramPath = $paramPath -replace "root.", "";
+                $paramPathSplit = $paramPath.Split(".");
+                $lastItem =  $paramPathSplit[$paramPathSplit.Length - 1];
+                $last = decapitalizeFirstLetter $lastItem;
+                $currentPath = "parameters"
+                for ($i = 0; $i -lt $paramPathSplit.Length - 1; $i += 1) {
+                    $code += "        if(options.${last}) {" + $NEW_LINE;
+                    $current = decapitalizeFirstLetter $paramPathSplit[$i];
+                    $code += "          if(!${currentPath}.${current}) {" + $NEW_LINE;
+                    $code += "            ${currentPath}.${current} = {};" + $NEW_LINE;
+                    ${currentPath} += ".${current}";
+                    $code += "          }" + $NEW_LINE;
+                    $code += "        }" + $NEW_LINE;
+                }
+                $treeProcessedList += $last;
+
+                $setValue = "null"
+                if ($cliOperationParams[$OperationName] -contains $lastItem) {
+                    $code += "        if(options.${last}) {" + $NEW_LINE;
+                    if($paramType -ne $null -and $paramType -like "*List*") {
+                        $setValue = "options." + $last + ".split(',')";
+                    }
+                    else {
+                        $setValue = "options." + $last;
+                    }
+                }
+                $code += "          ${currentPath}.${last} = ${setValue};" + $NEW_LINE;
+                $code += "        }" + $NEW_LINE;
+            }
+        }
+    }
+
+    foreach($item in $cliOperationParams[$OperationName])
+    {
+        if (-not ($treeProcessedList -contains $item) -and $item -ne "parameters")
+        {
+            $code += "        if(options.${item}) {" + $NEW_LINE;
+            if($item -ne "tags")
+            {
+                $code += "          parameters.${item} = options.${item};" + $NEW_LINE;
+            }
+            else
+            {
+                $code += "          if (utils.argHasValue(options.tags)) {
+            tagUtils.appendTags(parameters, options);
+          }" + $NEW_LINE;
+            }
+            $code += "        }" + $NEW_LINE;
+        }
+    }
+
+    $code +=
+"      }
       var progress = cli.interaction.progress(util.format(`$('Creating $cliOperationDescription `"%s`"'), name));
       try {
         ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(";

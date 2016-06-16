@@ -14,10 +14,10 @@ function Get-ParametersNames($methodParameters)
         {
             continue;
         }
-		elseif($paramItem.Name -like "expand")
-		{
-			continue;
-		}
+        elseif($paramItem.Name -like "expand")
+        {
+            continue;
+        }
         else
         {
             # Record the Normalized Parameter Name, i.e. 'vmName' => 'VMName', 'resourceGroup' => 'ResourceGroup', etc.
@@ -48,25 +48,24 @@ function Get-ParametersNames($methodParameters)
         }
         $methodParamIndex += 1;
     }
-	[hashtable]$Return = @{};
-	$Return.methodParamNameList = $methodParamNameList;
-	$Return.methodParamTypeDict = $methodParamTypeDict;
-	$Return.allStringFieldCheck = $allStringFieldCheck;
-	return $Return;
+    [hashtable]$Return = @{};
+    $Return.methodParamNameList = $methodParamNameList;
+    $Return.methodParamTypeDict = $methodParamTypeDict;
+    $Return.allStringFieldCheck = $allStringFieldCheck;
+    return $Return;
 }
 
 function Update-RequiredParameters($methodParamNameList, $methodParamTypeDict, $allStringFieldCheck)
 {
-	$requireParams = @();
-	$requireParamNormalizedNames = @()
+    $requireParams = @();
+    $requireParamNormalizedNames = @()
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
     {
         # Parameter Declaration - For Each Method Parameter
         [string]$optionParamName = $methodParamNameList[$index];
-        if ($optionParamName -eq "Parameters") {
-            #$paramFileReplacer = "Parameters-file";
-            #$optionParamName = $paramFileReplacer;
-            #$methodParamNameList[$index] = $paramFileReplacer;
+        if ($optionParamName -like "*parameters") {
+            $methodParamNameList[$index] = "parameters"
+            $optionParamName = "parameters";
         }
         if ($allStringFieldCheck[$optionParamName])
         {
@@ -80,59 +79,91 @@ function Update-RequiredParameters($methodParamNameList, $methodParamTypeDict, $
             }
         }
         else
-		{
+        {
             $cli_option_name = Get-CliOptionName $optionParamName;
             $requireParams += $cli_option_name;
             $requireParamNormalizedNames += (Get-CliNormalizedName $optionParamName);
-		}
+        }
     }
-	[hashtable]$Return = @{};
-	$Return.requireParams = $requireParams;
-	$Return.requireParamNormalizedNames = $requireParamNormalizedNames;
-	return $Return;
+    [hashtable]$Return = @{};
+    $Return.requireParams = $requireParams;
+    $Return.requireParamNormalizedNames = $requireParamNormalizedNames;
+    return $Return;
 }
 
-function Get-PromptingOptionsCode($methodParamNameList, $spaceLength)
+function Get-PromptingOptionsCode($methodParamNameList, $functionArgsList, $spaceLength)
 {
-	$result = "";
+    $result = "";
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
     {
         [string]$optionParamName = $methodParamNameList[$index];
         [string]$cli_option_name = Get-CliOptionName $optionParamName;
-        $cli_option_name  = $cli_option_name -replace "parameters", "parameters-file"
+        $cli_option_name  = $cli_option_name -replace "parameters", "parameters-file (press enter to skip and use options)"
 
         $cli_param_name = Get-CliNormalizedName $optionParamName;
-        $result += (" " * $spaceLength) + "${cli_param_name} = cli.interaction.promptIfNotGiven(`$('${cli_option_name} : '), ${cli_param_name}, _);" + $NEW_LINE;
+        $conditionStr = "";
+        if($functionArgsList -contains "parameters")
+        {
+            $conditionStr += "!parameters";
+        }
+        if($cli_param_name -ne "parameters")
+        {
+            if($conditionStr -ne "")
+            {
+                $conditionStr += " && ";
+            }
+            $conditionStr += "!options.${cli_param_name}";
+            $result += (" " * $spaceLength) + "if(${conditionStr}) {" + $NEW_LINE;
+        } else
+        {
+            if ($conditionStr -ne "")
+            {
+                $result += (" " * $spaceLength) + "if(${conditionStr}) {" + $NEW_LINE;
+            }
+        }
+        $result += (" " * ($spaceLength + 2));
+        if($functionArgsList -contains $cli_param_name)
+        {
+            $result += "${cli_param_name} = cli.interaction.promptIfNotGiven(`$('${cli_option_name} : '), ${cli_param_name}, _);" + $NEW_LINE;
+        }
+        else
+        {
+            $result += "options.${cli_param_name} = cli.interaction.promptIfNotGiven(`$('${cli_option_name} : '), options.${cli_param_name}, _);" + $NEW_LINE;
+        }
+        if ($conditionStr -ne "")
+        {
+            $result += (" " * $spaceLength) + "}" + $NEW_LINE;
+        }
     }
-	return $result;
+    return $result;
 }
 
 function Get-ParametersString($methodParamNameList)
 {
-	$str ="";
-	for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
-	{
-		# Function Call - For Each Method Parameter
-		$cli_param_name = Get-CliNormalizedName $methodParamNameList[$index];
-		$str += "${cli_param_name}";
-		if ($index -lt $methodParamNameList.Count - 1)
-		{
-			$str+= ", ";
-		}
-	}
-	return $str;
+    $str ="";
+    for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
+    {
+        # Function Call - For Each Method Parameter
+        $cli_param_name = Get-CliNormalizedName $methodParamNameList[$index];
+        $str += "${cli_param_name}";
+        if ($index -lt $methodParamNameList.Count - 1)
+        {
+            $str+= ", ";
+        }
+    }
+    return $str;
 }
 
 function Get-SafeGetFunction($componentNameInLowerCase, $cliOperationName, $methodParamNameList, $resultVarName, $cliOperationDescription)
 {
-	$tempCode = "
+    $tempCode = "
       var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), name));
       try {
         ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.get("
-	$tempCode += (Get-ParametersString $methodParamNameList) -replace ", parameters", "";
+    $tempCode += (Get-ParametersString $methodParamNameList) -replace ", parameters", "";
     $tempCode += ", null, _);";
 
-	$tempCode += "
+    $tempCode += "
       } catch (e) {
         if (e.statusCode === 404) {
           ${resultVarName} = null;
@@ -142,16 +173,16 @@ function Get-SafeGetFunction($componentNameInLowerCase, $cliOperationName, $meth
       } finally {
         progress.end();
       }";
-	return $tempCode
+    return $tempCode
 }
 
 function Get-CommonOptions($cliMethodOption) {
-	$tempCode = "";
-	if ($cliMethodOption.ToLower() -like "delete") {
-		$tempCode += "    .option('-q, --quiet', `$('quiet mode, do not ask for delete confirmation'))" + $NEW_LINE;
-	}
+    $tempCode = "";
+    if ($cliMethodOption.ToLower() -like "delete") {
+        $tempCode += "    .option('-q, --quiet', `$('quiet mode, do not ask for delete confirmation'))" + $NEW_LINE;
+    }
     $tempCode += "    .option('-s, --subscription <subscription>', `$('the subscription identifier'))" + $NEW_LINE;
-	return $tempCode;
+    return $tempCode;
 }
 
 function Get-CreatePublucIPOptions() {
@@ -190,4 +221,58 @@ function Get-UsageParamsString($requireParams)
         return $usageParamsString;
     }
     return "";
+}
+
+function Get-ParamsDefinition($inputParams)
+{
+    if ($inputParams.Count -gt 0)
+    {
+        $out = [string]::Join(",", $inputParams)
+        $out = "var " + $out + ";"
+        return $out
+    }
+    return "";
+}
+
+function IsSimpleType ($type)
+{
+    return ($type.IsPrimitive -or $type.FullName -eq "System.String");
+}
+
+function Search-TreeElement($path, $obj, $target) {
+    $found = $false;
+    foreach ($k in $obj.psobject.properties) {
+        $test = "";
+        if ($k.Value -ne $null)
+        {
+            $test = IsSimpleType $k.Value.GetType();
+        }
+        if ($k.Name -eq $target)
+        {
+            $value = $path + "." + $k.Name
+            $type = $k.TypeNameOfValue; #Value.GetType();
+            return @{path = $value; type = $type};
+        }
+        elseif ($k.Value -ne $null -and -not $test) {
+            $currentPath = $path + "." + $k.Name;
+            $result = Search-TreeElement $currentPath  $k.Value $target;
+            if ($result)
+            {
+                $pathVal = $result;
+                $typeVal = $k.Value.GetType()
+                if($result.GetType().Name -eq "Hashtable")
+                {
+                    $pathVal = $result.path
+                    $typeVal = $result.type
+                }
+                return @{path = $pathVal; type = $typeVal};
+            }
+        }
+    }
+    return $false;
+}
+
+function decapitalizeFirstLetter($inStr)
+{
+    return $inStr.Substring(0,1).ToLower() + $inStr.Substring(1);
 }

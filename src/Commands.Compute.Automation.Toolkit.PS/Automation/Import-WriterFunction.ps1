@@ -1137,6 +1137,7 @@ var utils = require('../../../util/utils');
 var resourceUtils = require('../resource/resourceUtils');
 var util = require('util');
 var constants = require('./constants');
+var tagUtils = require('../tag/tagUtils');
 var $ = utils.getLocaleString;
 
 "@;

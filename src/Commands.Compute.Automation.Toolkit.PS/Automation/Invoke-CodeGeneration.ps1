@@ -57,7 +57,9 @@ param(
     [Parameter(Mandatory = $false, ParameterSetName = "ByConfiguration", Position = 2)]
     $ConfigPath = $null
 )
-
+    $cliOperationParams = @{};
+    $cliPromptParams = @{};
+    $parents = @{};
 # Read Settings from Config Object
 if (-not [string]::IsNullOrEmpty($ConfigPath))
 {
@@ -94,9 +96,21 @@ if (-not [string]::IsNullOrEmpty($ConfigPath))
                     }
                 }
             }
+            if($operationItem.parameters -ne $null)
+            {
+                $cliOperationParams[$operationItem.name] = $operationItem.parameters;
+            }
+            if($operationItem.required -ne $null)
+            {
+                $cliPromptParams[$operationItem.name] = $operationItem.required
+            }
+            if($operationItem.parent -ne $null)
+            {
+                $parents[$operationItem.name] = $operationItem.parent;
+            }
         }
     }
-    
+
     if ($configJsonObject.produces -ne $null)
     {
         $produces = $configJsonObject.produces;
@@ -200,14 +214,25 @@ else
         $cliCommandCodeMainBody = "";
         $global:cli_sample_code_lines = '';
         $cli_code_operation_list += $operation_nomalized_name;
-
-		$operationNormalizedName = Get-CliNormalizedName $operation_nomalized_name
-		$operationCliName = Get-SingularNoun (Get-CliOptionName $operation_nomalized_name);
-		$cliOperationDescription = (Get-CliOptionName $operation_nomalized_name).Replace('-', ' ');
-		$cliCommandCodeMainBody += "  var network = cli.category(`'network-autogen`')
-    .description(`$('Commands to manage network resources'));
+        $typePosition = $clientNameSpace.LastIndexOf(".");
+        $categoryName = $clientNameSpace.Substring($typePosition + 1);
+        $nameSpaceNormalizedName = Get-CliNormalizedName $categoryName;
+        $operationNormalizedName = Get-CliNormalizedName $operation_nomalized_name
+        $operationCliName = Get-SingularNoun (Get-CliOptionName $operation_nomalized_name);
+        $cliOperationDescription = (Get-CliOptionName $operation_nomalized_name).Replace('-', ' ');
+        $cliCommandCodeMainBody += "  var ${nameSpaceNormalizedName} = cli.category(`'${nameSpaceNormalizedName}-autogen`')
+    .description(`$('Commands to manage ${nameSpaceNormalizedName} resources'));
 " + $NEW_LINE;
-		$cliCommandCodeMainBody += "  var $operationNormalizedName = network.category('$operationCliName')
+        if($parents[$operation_nomalized_name])
+        {
+            $subName = $parents[$operation_nomalized_name];
+            $subNameNormalized = Get-CliOptionName $subName;
+            $cliCommandCodeMainBody += "  var $subName = ${nameSpaceNormalizedName}.category('$subNameNormalized')
+    .description(`$('Commands to manage $cliOperationDescription'));
+" + $NEW_LINE;
+            ${nameSpaceNormalizedName} = $subName;
+        }
+        $cliCommandCodeMainBody += "  var $operationNormalizedName = ${nameSpaceNormalizedName}.category('$operationCliName')
     .description(`$('Commands to manage $cliOperationDescription'));
 " + $NEW_LINE;
 
