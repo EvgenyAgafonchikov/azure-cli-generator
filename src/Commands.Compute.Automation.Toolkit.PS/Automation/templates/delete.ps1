@@ -9,13 +9,13 @@ ${promptingOptions}
 
 ${safeGet}
       if (!${resultVarName}) {
-        throw new Error(util.format(`$('A ${cliOperationDescription} with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
+        throw new Error(util.format(`$('A ${cliOperationDescription} with name `"%s`" not found in the resource group `"%s`"'), ${currentOperationNormalizedName}, resourceGroup));
       }
-      if (!options.quiet && !cli.interaction.confirm(util.format(`$('Delete ${cliOperationDescription} `"%s`"? [y/n] '), name), _)) {
+      if (!options.quiet && !cli.interaction.confirm(util.format(`$('Delete ${cliOperationDescription} `"%s`"? [y/n] '), ${currentOperationNormalizedName}), _)) {
         return;
       }
 
-      var progress = cli.interaction.progress(util.format(`$('Deleting ${cliOperationDescription} `"%s`"'), name));
+      var progress = cli.interaction.progress(util.format(`$('Deleting ${cliOperationDescription} `"%s`"'), ${currentOperationNormalizedName}));
       try {
         ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(${parametersString}, _);
       } finally {

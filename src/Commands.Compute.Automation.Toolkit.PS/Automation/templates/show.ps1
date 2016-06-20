@@ -9,7 +9,7 @@ ${promptingOptions}
 
 ${safeGet}
       if (!${resultVarName}) {
-        cli.output.warn(util.format(`$('A ${cliOperationDescription} with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
+        cli.output.warn(util.format(`$('A ${cliOperationDescription} with name `"%s`" not found in the resource group `"%s`"'), ${currentOperationNormalizedName}, resourceGroup));
       }
       cli.interaction.formatOutput(${resultVarName}, traverse);
     });"

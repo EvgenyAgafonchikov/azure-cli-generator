@@ -19,18 +19,19 @@
     # i.e. --virtual-machine-scale-set
     $opCliOptionName = Get-CliOptionName $OperationName;
 
+    # 3.2 Functions
+    # 3.2.1 Compute the CLI Category Name, i.e. VirtualMachineScaleSet => vmss, VirtualMachineScaleSetVM => vmssvm
+    $cliCategoryName = Get-CliCategoryName $OperationName;
+    # 3.2.2 Compute the CLI Operation Name, i.e. VirtualMachineScaleSets => virtualMachineScaleSets, VirtualMachineScaleSetVM => virtualMachineScaleSetVMs
+    $cliOperationName = Get-CliNormalizedName $OperationName;
+    $currentOperationNormalizedName = (Get-CommanderStyleOption (Get-SingularNoun $cliOperationName)) + "Name";
+
     # 3. CLI Code
     # 3.1 Types
     $params = Get-ParametersNames $methodParameters;
     $methodParamNameList = $params.methodParamNameList;
     $methodParamTypeDict = $params.methodParamTypeDict;
     $allStringFieldCheck = $params.allStringFieldCheck;
-
-    # 3.2 Functions
-    # 3.2.1 Compute the CLI Category Name, i.e. VirtualMachineScaleSet => vmss, VirtualMachineScaleSetVM => vmssvm
-    $cliCategoryName = Get-CliCategoryName $OperationName;
-    # 3.2.2 Compute the CLI Operation Name, i.e. VirtualMachineScaleSets => virtualMachineScaleSets, VirtualMachineScaleSetVM => virtualMachineScaleSetVMs
-    $cliOperationName = Get-CliNormalizedName $OperationName;
 
     # 3.2.3 Normalize the CLI Method Name, i.e. CreateOrUpdate => createOrUpdate, ListAll => listAll
     $cliMethodName = Get-CliNormalizedName $methodName;

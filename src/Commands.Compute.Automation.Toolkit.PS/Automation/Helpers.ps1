@@ -22,7 +22,14 @@ function Get-ParametersNames($methodParameters)
         {
             # Record the Normalized Parameter Name, i.e. 'vmName' => 'VMName', 'resourceGroup' => 'ResourceGroup', etc.
             $methodParamName = (Get-CamelCaseName $paramItem.Name);
-            $methodParamName = (Get-CliMethodMappedParameterName $methodParamName $methodParamIndex);
+            if($methodParamName -ne $currentOperationNormalizedName -and $methodParamName -ne ($parents[$cliOperationName] + "Name"))
+            {
+                $methodParamName = (Get-CliMethodMappedParameterName $methodParamName $methodParamIndex);
+            }
+            else
+            {
+                $methodParamName = Get-CommanderStyleOption $methodParamName;
+            }
             $methodParamNameList += $methodParamName;
             $methodParamTypeDict.Add($paramItem.Name, $paramType);
             $allStringFields = Contains-OnlyStringFields $paramType;
@@ -33,7 +40,6 @@ function Get-ParametersNames($methodParameters)
             if ($paramType.Namespace -like $ModelNameSpace)
             {
                 # If the namespace is like 'Microsoft.Azure.Management.*.Models', generate commands for the complex parameter
-                
                 # 3.1.1 Create the Parameter Object, and convert it to JSON code text format
                 $param_object = (. $PSScriptRoot\Create-ParameterObject.ps1 -typeInfo $paramType);
                 $param_object_comment = (. $PSScriptRoot\ConvertTo-Json.ps1 -inputObject $param_object -compress $true);
@@ -156,8 +162,9 @@ function Get-ParametersString($methodParamNameList)
 
 function Get-SafeGetFunction($componentNameInLowerCase, $cliOperationName, $methodParamNameList, $resultVarName, $cliOperationDescription)
 {
+    $cliNormalizedCurrentName = Get-CommanderStyleOption (Get-SingularNoun $cliOperationName);
     $tempCode = "
-      var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), name));
+      var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), ${cliNormalizedCurrentName}Name));
       try {
         ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.get("
     $tempCode += (Get-ParametersString $methodParamNameList) -replace ", parameters", "";

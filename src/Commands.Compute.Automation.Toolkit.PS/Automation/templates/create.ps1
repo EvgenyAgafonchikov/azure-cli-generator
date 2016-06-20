@@ -12,7 +12,7 @@ ${promptingOptionsCustom}
       var ${resultVarName};
 ${safeGet}
       if (${resultVarName}) {
-        throw new Error(util.format(`$('A ${cliOperationDescription} with name `"%s`" already exists in the resource group `"%s`"'), name, resourceGroup));
+        throw new Error(util.format(`$('A ${cliOperationDescription} with name `"%s`" already exists in the resource group `"%s`"'), ${currentOperationNormalizedName}, resourceGroup));
       }
 
       if (parameters) {
@@ -24,7 +24,7 @@ ${safeGet}
 ${treeAnalysisResult}
 ${updateParametersCode}
       }
-      var progress = cli.interaction.progress(util.format(`$('Creating ${cliOperationDescription} `"%s`"'), name));
+      var progress = cli.interaction.progress(util.format(`$('Creating ${cliOperationDescription} `"%s`"'), ${currentOperationNormalizedName}));
       try {
         ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(${parametersString}, _);
       } finally {
