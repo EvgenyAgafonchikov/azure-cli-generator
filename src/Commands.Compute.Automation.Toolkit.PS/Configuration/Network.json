@@ -12,7 +12,7 @@
   ],
   "operations": [
     { "name": "PublicIPAddresses",
-      "parameters": ["location", "domainNameLabel", "publicIPAllocationMethod", "idleTimeoutInMinutes", "reverseFqdn", "ipVersion", "tags"],
+      "parameters": ["location", "domainNameLabel", "publicIPAllocationMethod", "idleTimeoutInMinutes", "reverseFqdn", "publicIPAddressVersion", "tags"],
       "required": ["location"]
     },
     { "name": "VirtualNetworks",

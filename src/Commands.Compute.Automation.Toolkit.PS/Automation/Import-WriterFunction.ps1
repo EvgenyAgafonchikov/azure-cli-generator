@@ -1136,10 +1136,14 @@ var profile = require('../../../util/profile');
 var utils = require('../../../util/utils');
 var resourceUtils = require('../resource/resourceUtils');
 var util = require('util');
+var validation = require('../../../util/validation');
 var constants = require('./constants');
 var tagUtils = require('../tag/tagUtils');
+var Nsg = require('./nsg');
+var RouteTable = require('./routeTable');
 var $ = utils.getLocaleString;
 
+var nsgCrud, routeTableCrud;
 "@;
 
     if ($define_beautify)

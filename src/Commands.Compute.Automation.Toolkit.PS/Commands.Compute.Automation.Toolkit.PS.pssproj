@@ -49,6 +49,7 @@
     <Compile Include="Automation\Import-AssemblyFunction.ps1" />
     <Compile Include="Automation\Import-CommonVariables.ps1" />
     <Compile Include="Automation\Import-OperationFunction.ps1" />
+    <Compile Include="Automation\Import-ParserFunction.ps1" />
     <Compile Include="Automation\Import-StringFunction.ps1" />
     <Compile Include="Automation\Import-TypeFunction.ps1" />
     <Compile Include="Automation\Import-WriterFunction.ps1" />

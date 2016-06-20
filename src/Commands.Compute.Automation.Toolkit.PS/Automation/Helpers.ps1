@@ -118,7 +118,7 @@ function Get-PromptingOptionsCode($methodParamNameList, $functionArgsList, $spac
         {
             if ($conditionStr -ne "")
             {
-                $result += (" " * $spaceLength) + "if(${conditionStr}) {" + $NEW_LINE;
+                $result += (" " * $spaceLength) + "if(${conditionStr} && options.length < 1) {" + $NEW_LINE;
             }
         }
         $result += (" " * ($spaceLength + 2));
@@ -275,4 +275,13 @@ function Search-TreeElement($path, $obj, $target) {
 function decapitalizeFirstLetter($inStr)
 {
     return $inStr.Substring(0,1).ToLower() + $inStr.Substring(1);
+}
+
+function Get-CommanderStyleOption($inStr)
+{
+    if ($inStr.Contains("IP"))
+    {
+        $inStr = $inStr -creplace "IP", "Ip";
+    }
+    return (decapitalizeFirstLetter $inStr);
 }

@@ -7,6 +7,8 @@ ${promptingOptionsCustom}
       var subscription = profile.current.getSubscription(options.subscription);
       var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
 
+      nsgCrud = new Nsg(cli, networkManagementClient);
+      routeTableCrud = new RouteTable(cli, networkManagementClient);
       var ${resultVarName};
 ${safeGet}
       if (${resultVarName}) {
@@ -18,6 +20,7 @@ ${safeGet}
         parameters = JSON.parse(contents);
       } else {
         parameters = {};
+        _parseSubnet(resourceGroup, parameters, options, _);
 ${treeAnalysisResult}
 ${updateParametersCode}
       }
@@ -28,4 +31,6 @@ ${updateParametersCode}
         progress.end();
       }
       cli.interaction.formatOutput(${resultVarName}, traverse);
-    });"
+    });
+
+${parsers}"

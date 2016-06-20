@@ -21,6 +21,7 @@
 . "$PSScriptRoot\Import-WriterFunction.ps1";
 . "$PSScriptRoot\CommonVars.ps1";
 . "$PSScriptRoot\Helpers.ps1";
+. "$PSScriptRoot\Import-ParserFunction.ps1";
 
     # Skip Pagination Function
     if (CheckIf-PaginationMethod $MethodInfo)
@@ -133,6 +134,7 @@
                 $paramPathSplit = $paramPath.Split(".");
                 $lastItem =  $paramPathSplit[$paramPathSplit.Length - 1];
                 $last = decapitalizeFirstLetter $lastItem;
+                $commanderLast = Get-CommanderStyleOption $last;
                 $currentPath = "parameters"
                 for ($i = 0; $i -lt $paramPathSplit.Length - 1; $i += 1) {
                     $treeAnalysisResult += "        if(options.${last}) {" + $NEW_LINE;
@@ -147,12 +149,19 @@
 
                 $setValue = "null"
                 if ($cliOperationParams[$OperationName] -contains $lastItem) {
-                    $treeAnalysisResult += "        if(options.${last}) {" + $NEW_LINE;
+                    $treeAnalysisResult += "        if(options.${commanderLast}) {" + $NEW_LINE;
                     if($paramType -ne $null -and $paramType -like "*List*") {
-                        $setValue = "options." + $last + ".split(',')";
+                        $setValue = "options." + $commanderLast+ ".split(',')";
+                    } elseif($paramType -ne $null -and $paramType -like "*Nullable*")
+                    {
+                        $underlying =  [System.Nullable]::GetUnderlyingType($paramType);
+                        if($underlying -like "*Int*")
+                        {
+                            $setValue = "parseInt(options.${commanderLast}, 10);"
+                        }
                     }
                     else {
-                        $setValue = "options." + $last;
+                        $setValue = "options." + $commanderLast;
                     }
                 }
                 $treeAnalysisResult += "          ${currentPath}.${last} = ${setValue};" + $NEW_LINE;
@@ -182,7 +191,7 @@
     }
 
     $parametersString = Get-ParametersString $methodParamNameList;
-
+    $parsers = Get-SubnetParser;
     $template = Get-Content "$PSScriptRoot\templates\create.ps1" -raw;
     $code += Invoke-Expression $template;
     return $code;
