@@ -295,10 +295,18 @@ function Get-CliShorthandName
     # Sample: 'ResourceGroupName' => '-g', 'Name' => '-n', etc.
     param(
         [Parameter(Mandatory = $True)]
-        [string]$inName
+        [string]$inName,
+
+        [Parameter(Mandatory = $False)]
+        [string]$currentCliItem
     )
 
-    if ($inName -eq 'ResourceGroupName' -or $inName -eq 'ResourceGroup')
+    # First check if this name parameter
+    if($inName -eq $currentCliItem)
+    {
+        return 'n';
+    }
+    elseif ($inName -eq 'ResourceGroupName' -or $inName -eq 'ResourceGroup')
     {
         $outName = 'g';
     }
@@ -318,7 +326,15 @@ function Get-CliShorthandName
     {
         $outName = 'n';
     }
-    elseif ($inName -eq 'instanceId')
+    elseif ($inName -like '*AllocationMethod' -or $inName -like 'AddressPrefix*')
+    {
+        $outName = 'a';
+    }
+    elseif ($inName -eq 'SelectExpression')
+    {
+        $outName = 'c';
+    }
+    elseif ($inName -eq 'instanceId' -or $inName -eq 'DnsServers')
     {
         $outName = 'd';
     }
@@ -326,21 +342,45 @@ function Get-CliShorthandName
     {
         $outName = 'D';
     }
+    elseif ($inName -eq 'DomainNameLabel')
+    {
+        $outName = 'd';
+    }
+    elseif ($inName -eq 'ExpandExpression' -or $inName -eq 'VirtualNetworkName' -or $inName -like '*AddressVersion')
+    {
+        $outName = 'e';
+    }
+    elseif ($inName -eq 'ReverseFqdn')
+    {
+        $outName = 'f';
+    }
+    elseif ($inName -like 'IdleTimeout*' -or $inName -eq 'RouteTableId')
+    {
+        $outName = 'i';
+    }
+    elseif ($inName -eq 'location')
+    {
+        $outName = 'l';
+    }
+    elseif ($inName -eq 'NetworkSecurityGroupName')
+    {
+        $outName = 'o';
+    }
     elseif ($inName -eq 'parameters')
     {
         $outName = 'p';
     }
-    elseif ($inName -eq 'ExpandExpression')
+    elseif ($inName -eq 'RouteTableName')
     {
-        $outName = 'e';
+        $outName = 'r';
     }
-    elseif ($inName -eq 'FilterExpression')
+    elseif ($inName -eq 'FilterExpression' -or $inName -eq 'tags')
     {
         $outName = 't';
     }
-    elseif ($inName -eq 'SelectExpression')
+    elseif ($inName -eq 'NetworkSecurityGroupId')
     {
-        $outName = 'c';
+        $outName = 'w';
     }
     else
     {

@@ -82,14 +82,14 @@
     $promptParametersNameList += $methodParamNameList;
     $paramDefinitions = Get-ParamsDefinition $cliPromptParams[$OperationName];
     $cmdOptions = "";
-    $cliOperationParams[$OperationName] = $cliOperationParams[$OperationName] + $methodParamNameList;
+    $cliOperationParams[$OperationName] = $methodParamNameList + $cliOperationParams[$OperationName];
     for ($index = 0; $index -lt $cliOperationParams[$OperationName].Count; $index++)
     {
         [string]$optionParamName = $cliOperationParams[$OperationName][$index];
         $optionShorthandStr = $null;
 
         $cli_option_name = Get-CliOptionName $optionParamName;
-        $cli_shorthand_str = Get-CliShorthandName $optionParamName;
+        $cli_shorthand_str = Get-CliShorthandName $optionParamName $currentOperationNormalizedName;
         if ($cli_shorthand_str -ne '')
         {
             $cli_shorthand_str = "-" + $cli_shorthand_str + ", ";

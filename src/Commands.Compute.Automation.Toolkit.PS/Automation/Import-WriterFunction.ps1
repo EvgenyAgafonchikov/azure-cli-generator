@@ -1131,7 +1131,6 @@ function Write-CLICommandFile
 @"
 
 var __ = require('underscore');
-var fs = require('fs');
 var profile = require('../../../util/profile');
 var utils = require('../../../util/utils');
 var resourceUtils = require('../resource/resourceUtils');

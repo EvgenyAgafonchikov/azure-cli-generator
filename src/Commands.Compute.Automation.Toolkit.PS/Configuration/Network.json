@@ -21,9 +21,17 @@
     },
     {
         "name": "Subnets",
-        "parameters": ["location", "vnetName", "addressPrefix", "networkSecurityGroupId", "networkSecurityGroupName", "routeTableId", "routeTableName"],
-        "required": ["location"],
+        "parameters": ["addressPrefix", "networkSecurityGroupId", "networkSecurityGroupName", "routeTableId", "routeTableName"],
+        "required": [],
         "parent": "virtualNetwork"
+    },
+    { "name": "LoadBalancers",
+      "parameters": ["location", "tags"],
+      "required": ["location"]
+    },
+    { "name": "NetworkSecurityGroups",
+      "parameters": ["location", "tags"],
+      "required": ["location"]
     }
   ]
 }
