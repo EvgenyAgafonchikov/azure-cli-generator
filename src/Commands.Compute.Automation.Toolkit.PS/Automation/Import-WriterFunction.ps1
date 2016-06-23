@@ -1225,18 +1225,34 @@ function getHumanReadableFromCamelCase(inName) {
   return outName;
 }
 
-  function showKeyValue(key,value) {
-    cli.output.nameValue(utils.capitalizeFirstLetter(getHumanReadableFromCamelCase(key)), value);
+  function showKeyValue(key, value, indent) {
+    cli.output.nameValue(utils.capitalizeFirstLetter(getHumanReadableFromCamelCase(key)), value, indent);
   }
 
-  function traverse(obj) {
-    for (var i in obj) {
-      if (typeof(obj[i]) != `"object`") {
-        showKeyValue.apply(this,[i, obj[i]]);
+  function traverse(obj, indent) {
+   if(typeof(obj) != "string") {
+      for (var i in obj) {
+        if (typeof(obj[i]) != "object") {
+          showKeyValue.apply(this,[i, obj[i], indent]);
+          continue;
+        }
+        if (obj[i] !== null && typeof(obj[i])=="object") {
+          if (i == 'tags') {
+            showKeyValue.apply(this,[i, JSON.stringify(obj[i])]);
+            continue;
+          }
+          if(!(obj[i] instanceof Array)) {
+            traverse(obj[i], 2);
+          } else {
+            cli.output.header(utils.capitalizeFirstLetter(getHumanReadableFromCamelCase(i)));
+            for(var j in obj[i]) {
+              traverse(obj[i][j], 2)
+            }
+          }
+        }
       }
-      if (obj[i] !== null && typeof(obj[i])==`"object`") {
-        traverse(obj[i], showKeyValue);
-      }
+    } else {
+      cli.output.list([utils.capitalizeFirstLetter(getHumanReadableFromCamelCase(obj))], 2, false);
     }
   }
 

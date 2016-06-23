@@ -70,8 +70,7 @@ function Update-RequiredParameters($methodParamNameList, $methodParamTypeDict, $
         # Parameter Declaration - For Each Method Parameter
         [string]$optionParamName = $methodParamNameList[$index];
         if ($optionParamName -like "*parameters") {
-            $methodParamNameList[$index] = "parameters"
-            $optionParamName = "parameters";
+            continue;
         }
         if ($allStringFieldCheck[$optionParamName])
         {

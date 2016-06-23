@@ -6,6 +6,7 @@
 . "$PSScriptRoot\Helpers.ps1";
 
     $methodParameters = $MethodInfo.GetParameters();
+    $methodParameters = $methodParameters | Where-Object {$_.Name -notlike "*parameters"};
     $methodName = ($MethodInfo.Name.Replace('Async', ''));
 
     $methodParamNameList = @();

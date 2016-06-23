@@ -38,6 +38,7 @@
             $param_object = (. $PSScriptRoot\Create-ParameterObject.ps1 -typeInfo $paramType);
         }
     }
+    $methodParams = $methodParams | Where-Object {$_.Name -notlike "*parameters"};;
 
     $code = $NEW_LINE;
 
