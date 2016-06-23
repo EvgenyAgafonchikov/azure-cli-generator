@@ -193,6 +193,14 @@
 
     $parametersString = Get-ParametersString $methodParamNameList;
     $parsers = Get-SubnetParser;
+
     $template = Get-Content "$PSScriptRoot\templates\create.ps1" -raw;
     $code += Invoke-Expression $template;
+    $code += $NEW_LINE
+
+    # Generate set command
+    $cliMethodOption = "set";
+    $template = Get-Content "$PSScriptRoot\templates\set.ps1" -raw;
+    $code += Invoke-Expression $template;
+
     return $code;
