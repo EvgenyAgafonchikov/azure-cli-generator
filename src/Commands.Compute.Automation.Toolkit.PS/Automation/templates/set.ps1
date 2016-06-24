@@ -24,7 +24,7 @@ ${updateParametersCode}
       } finally {
         progress.end();
       }
-      traverse(${resultVarName}, 0);
+      cli.interaction.formatOutput(${resultVarName}, traverse);
     });
 
 ${parsers}"

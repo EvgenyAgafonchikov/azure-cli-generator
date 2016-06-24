@@ -11,5 +11,5 @@ ${safeGet}
       if (!${resultVarName}) {
         cli.output.warn(util.format(`$('A ${cliOperationDescription} with name `"%s`" not found in the resource group `"%s`"'), ${currentOperationNormalizedName}, resourceGroup));
       }
-      traverse(${resultVarName}, 0);
+      cli.interaction.formatOutput(${resultVarName}, traverse);
     });"

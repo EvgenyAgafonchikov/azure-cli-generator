@@ -28,6 +28,49 @@
     {
         return;
     }
+    #TODO: change to usuall array w/o hash;
+    $cliOperationParams[$OperationName] = @();
+    $cliPromptParams[$OperationName] = @();
+
+    $cliCreateParams = @();
+    $cliUpdateParams = @();
+    $testCreateStr = "";
+    $testUpdateStr = "";
+    $inputTestCode = "";
+    $assertCodeCreate = "";
+    $assertCodeUpdate = "";
+
+    foreach($paramItem in $cliOperationParamsRaw[$OperationName])
+    {
+        $name = $paramItem.name
+        if($name )
+        {
+            $cliOperationParams[$OperationName] += $name;
+        }
+        else
+        {
+            Write-Warning "There is no name for one of the parameters inside of $OperationName config!"
+        }
+        if($paramItem.inCreateSet -eq $true)
+        {
+            $value = $paramItem.first;
+            $testCreateStr += ("--" + (Get-CliOptionName $paramItem.name) + " {${name}} ");
+            $inputTestCode += "  ${name}: '$value'," + $NEW_LINE;
+            $cliCreateParams += $name;
+        }
+        if($paramItem.inUpdateSet -eq $true)
+        {
+            $value = $paramItem.second;
+            $testUpdateStr += ("--" + (Get-CliOptionName $paramItem.name) + " {${name}New} ");
+            $inputTestCode += "  ${name}New: '$value'," + $NEW_LINE;
+            $cliUpdateParams += $name;
+        }
+        if($paramItem.required -eq $true)
+        {
+            $cliPromptParams[$OperationName] += $name;
+        }
+    }
+
     $methodParams = $MethodInfo.GetParameters();
     $additionalOptions = @();
     foreach ($param in $methodParams)
@@ -149,23 +192,42 @@
                 $treeProcessedList += $last;
 
                 $setValue = "null"
+                $assertValue = "null";
+                $assertValueUpdate = "null";
+                $assertionType = "equal";
                 if ($cliOperationParams[$OperationName] -contains $lastItem) {
                     $treeAnalysisResult += "        if(options.${commanderLast}) {" + $NEW_LINE;
                     if($paramType -ne $null -and $paramType -like "*List*") {
                         $setValue = "options." + $commanderLast+ ".split(',')";
+                        $assertValue = "${cliOperationName}.${last}"
+                        $assertValueUpdate = "${cliOperationName}.${last}New"
+                        $assertionType = "containEql";
                     } elseif($paramType -ne $null -and $paramType -like "*Nullable*")
                     {
                         $underlying =  [System.Nullable]::GetUnderlyingType($paramType);
                         if($underlying -like "*Int*")
                         {
                             $setValue = "parseInt(options.${commanderLast}, 10);"
+                            $assertValue = "parseInt(${cliOperationName}.${last}, 10)"
+                            $assertValueUpdate = "parseInt(${cliOperationName}.${last}New, 10)"
                         }
                     }
                     else {
                         $setValue = "options." + $commanderLast;
+                        $assertValue = "${cliOperationName}.${last}"
+                        $assertValueUpdate = "${cliOperationName}.${last}New"
                     }
                 }
                 $treeAnalysisResult += "          ${currentPath}.${last} = ${setValue};" + $NEW_LINE;
+                $assertPath = $currentPath -replace "parameters", "output";
+                if($cliCreateParams -contains $last)
+                {
+                    $assertCodeCreate += "            ${assertPath}.${last}.should.${assertionType}(${assertValue});" + $NEW_LINE;
+                }
+                if($cliUpdateParams -contains $last)
+                {
+                    $assertCodeUpdate += "            ${assertPath}.${last}.should.${assertionType}(${assertValueUpdate});" + $NEW_LINE;
+                }
                 $treeAnalysisResult += "        }" + $NEW_LINE;
             }
         }
@@ -179,6 +241,14 @@
             $updateParametersCode  += "        if(options.${item}) {" + $NEW_LINE;
             if($item -ne "tags")
             {
+                if($item -ne $currentOperationNormalizedName -and $item -ne "resourceGroup" -and $cliCreateParams -contains $last)
+                {
+                    $assertCodeCreate += "            output.${item}.should.equal(${cliOperationName}.${item});" + $NEW_LINE;
+                }
+                if($item -ne $currentOperationNormalizedName -and $item -ne "resourceGroup" -and $item -ne "location" -and $cliUpdateParams -contains $last)
+                {
+                    $assertCodeUpdate += "            output.${item}.should.equal(${cliOperationName}.${item}New);" + $NEW_LINE;
+                }
                 $updateParametersCode  += "          parameters.${item} = options.${item};" + $NEW_LINE;
             }
             else
@@ -202,5 +272,13 @@
     $cliMethodOption = "set";
     $template = Get-Content "$PSScriptRoot\templates\set.ps1" -raw;
     $code += Invoke-Expression $template;
+
+#TODO: remove condition after tests generation will be ready for child items
+    if (-not $parents[$OperationName])
+    {
+        $template = Get-Content "$PSScriptRoot\templates\test.ps1" -raw;
+        $outTest = Invoke-Expression $template;
+        Set-Content -Path "$PSScriptRoot\arm.network.${cliOperationNameInLowerCase}-tests.js" -Value $outTest -Encoding "UTF8" -Force;
+    }
 
     return $code;

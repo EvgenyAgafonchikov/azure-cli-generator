@@ -19,12 +19,14 @@
 
     # i.e. --virtual-machine-scale-set
     $opCliOptionName = Get-CliOptionName $OperationName;
+    $opCliOptionNameSingular = Get-SingularNoun $opCliOptionName;
 
     # 3.2 Functions
     # 3.2.1 Compute the CLI Category Name, i.e. VirtualMachineScaleSet => vmss, VirtualMachineScaleSetVM => vmssvm
     $cliCategoryName = Get-CliCategoryName $OperationName;
     # 3.2.2 Compute the CLI Operation Name, i.e. VirtualMachineScaleSets => virtualMachineScaleSets, VirtualMachineScaleSetVM => virtualMachineScaleSetVMs
     $cliOperationName = Get-CliNormalizedName $OperationName;
+    $cliOperationNameInLowerCase = $cliOperationName.ToLower();
     $currentOperationNormalizedName = (Get-CommanderStyleOption (Get-SingularNoun $cliOperationName)) + "Name";
 
     # 3. CLI Code

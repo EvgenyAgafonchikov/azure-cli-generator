@@ -57,8 +57,7 @@ param(
     [Parameter(Mandatory = $false, ParameterSetName = "ByConfiguration", Position = 2)]
     $ConfigPath = $null
 )
-    $cliOperationParams = @{};
-    $cliPromptParams = @{};
+    $cliOperationParamsRaw = @{};
     $parents = @{};
 # Read Settings from Config Object
 if (-not [string]::IsNullOrEmpty($ConfigPath))
@@ -89,7 +88,6 @@ if (-not [string]::IsNullOrEmpty($ConfigPath))
                     {
                         $operationSettings[$operationItem.name] += $methodItem.name;
                     }
-                    
                     if ($methodItem.command -ne $null -and $methodItem.command.skip -eq $true)
                     {
                         $cliOperationSettings[$operationItem.name] += $methodItem.name;
@@ -98,13 +96,9 @@ if (-not [string]::IsNullOrEmpty($ConfigPath))
             }
             if($operationItem.parameters -ne $null)
             {
-                $cliOperationParams[$operationItem.name] = $operationItem.parameters;
+                $cliOperationParamsRaw[$operationItem.name] = $operationItem.parameters;
             }
-            if($operationItem.required -ne $null)
-            {
-                $cliPromptParams[$operationItem.name] = $operationItem.required
-            }
-            if($operationItem.parent -ne $null)
+            if($operationItem.parent)
             {
                 $parents[$operationItem.name] = $operationItem.parent;
             }

@@ -12,26 +12,211 @@
   ],
   "operations": [
     { "name": "PublicIPAddresses",
-      "parameters": ["location", "domainNameLabel", "publicIPAllocationMethod", "idleTimeoutInMinutes", "reverseFqdn", "publicIPAddressVersion", "tags"],
-      "required": ["location"]
+      "parameters": [
+        {
+          "name": "location",
+          "first" : "westus",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "domainNameLabel",
+          "first" : "label",
+          "second" : "newlabel",
+          "inCreateSet": "true",
+          "inUpdateSet": "true",
+          "required": "false"
+        },
+        {
+          "name": "publicIPAllocationMethod",
+          "first" : "Static",
+          "second" : "Dynamic",
+          "inCreateSet": "true",
+          "inUpdateSet": "true",
+          "required": "false"
+        },
+        {
+          "name": "idleTimeoutInMinutes",
+          "first" : "13",
+          "second" : "5",
+          "inCreateSet": "true",
+          "inUpdateSet": "true",
+          "required": "false"
+        },
+        {
+          "name": "reverseFqdn",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        },
+        {
+          "name": "publicIPAddressVersion",
+          "first" : "IPv4",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "false"
+        },
+        {
+          "name": "tags",
+          "first" : "TagA=B",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "false"
+        }
+      ],
+      "parent": ""
     },
     { "name": "VirtualNetworks",
-      "parameters": ["location", "addressPrefixes", "dnsServers", "tags"],
-      "required": ["location"]
+      "parameters": [
+        {
+          "name": "location",
+          "first" : "westus",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "addressPrefixes",
+          "first" : "10.0.0.0/8",
+          "second" : "192.168.0.0/16",
+          "inCreateSet": "true",
+          "inUpdateSet": "true",
+          "required": "true"
+        },
+        {
+          "name": "dnsServers",
+          "first" : "10.0.0.42",
+          "second" : "10.0.0.24",
+          "inCreateSet": "true",
+          "inUpdateSet": "true",
+          "required": "false"
+        },
+        {
+          "name": "tags",
+          "first" : "TagVnet=Test",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "false"
+        }
+      ],
+      "parent": ""
     },
-    {
-        "name": "Subnets",
-        "parameters": ["addressPrefix", "networkSecurityGroupId", "networkSecurityGroupName", "routeTableId", "routeTableName"],
-        "required": [],
-        "parent": "virtualNetwork"
+    { "name": "Subnets",
+      "parameters": [
+        {
+          "name": "addressPrefix",
+          "first" : "10.0.0.0/16",
+          "second" : "192.168.0.0/24",
+          "inCreateSet": "true",
+          "inUpdateSet": "true",
+          "required": "true"
+        },
+        {
+          "name": "networkSecurityGroupId",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        },
+        {
+          "name": "networkSecurityGroupName",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        },
+        {
+          "name": "routeTableId",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        },
+        {
+          "name": "routeTableName",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        }
+      ],
+      "parent": "virtualNetwork",
+      "dependencies": ["VirtualNetworks", "NetworkSecurityGroups", "RouteTables"]
     },
     { "name": "LoadBalancers",
-      "parameters": ["location", "tags"],
-      "required": ["location"]
+      "parameters": [
+        {
+          "name": "location",
+          "first" : "westus",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "tags",
+          "first" : "LBTag=lbTag",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "false"
+        }
+      ],
+      "parent": ""
     },
     { "name": "NetworkSecurityGroups",
-      "parameters": ["location", "tags"],
-      "required": ["location"]
+      "parameters": [
+        {
+          "name": "location",
+          "first" : "westus",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "tags",
+          "first" : "NSGTag=NSG",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "false"
+        }
+      ],
+      "parent": ""
+    },
+    { "name": "RouteTables",
+      "parameters": [
+        {
+          "name": "location",
+          "first" : "westus",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "tags",
+          "first" : "RTTag=tag",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "false"
+        }
+      ],
+      "parent": ""
     }
   ]
 }
