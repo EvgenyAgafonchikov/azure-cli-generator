@@ -114,7 +114,7 @@
         {
           "name": "addressPrefix",
           "first" : "10.0.0.0/16",
-          "second" : "192.168.0.0/24",
+          "second" : "10.0.0.0/24",
           "inCreateSet": "true",
           "inUpdateSet": "true",
           "required": "true"
@@ -129,9 +129,9 @@
         },
         {
           "name": "networkSecurityGroupName",
-          "first" : "",
+          "first" : "nsgName",
           "second" : "",
-          "inCreateSet": "false",
+          "inCreateSet": "true",
           "inUpdateSet": "false",
           "required": "false"
         },
@@ -145,9 +145,9 @@
         },
         {
           "name": "routeTableName",
-          "first" : "",
+          "first" : "routeTableName",
           "second" : "",
-          "inCreateSet": "false",
+          "inCreateSet": "true",
           "inUpdateSet": "false",
           "required": "false"
         }

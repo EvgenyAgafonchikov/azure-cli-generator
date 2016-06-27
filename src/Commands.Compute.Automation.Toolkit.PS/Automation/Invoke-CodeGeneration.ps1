@@ -59,6 +59,7 @@ param(
 )
     $cliOperationParamsRaw = @{};
     $parents = @{};
+    $dependencies = @{};
 # Read Settings from Config Object
 if (-not [string]::IsNullOrEmpty($ConfigPath))
 {
@@ -101,6 +102,10 @@ if (-not [string]::IsNullOrEmpty($ConfigPath))
             if($operationItem.parent)
             {
                 $parents[$operationItem.name] = $operationItem.parent;
+            }
+            if($operationItem.dependencies)
+            {
+                $dependencies[$operationItem.name] = $operationItem.dependencies;
             }
         }
     }

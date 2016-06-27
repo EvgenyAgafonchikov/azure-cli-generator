@@ -28,9 +28,9 @@
     {
         return;
     }
-    #TODO: change to usuall array w/o hash;
-    $cliOperationParams[$OperationName] = @();
-    $cliPromptParams[$OperationName] = @();
+
+    $cliOperationParams = @();
+    $cliPromptParams = @();
 
     $cliCreateParams = @();
     $cliUpdateParams = @();
@@ -38,6 +38,7 @@
     $testUpdateStr = "";
     $inputTestCode = "";
     $assertCodeCreate = "";
+    $assertIdCodeCreate = "";
     $assertCodeUpdate = "";
 
     foreach($paramItem in $cliOperationParamsRaw[$OperationName])
@@ -45,7 +46,7 @@
         $name = $paramItem.name
         if($name )
         {
-            $cliOperationParams[$OperationName] += $name;
+            $cliOperationParams += $name;
         }
         else
         {
@@ -67,7 +68,7 @@
         }
         if($paramItem.required -eq $true)
         {
-            $cliPromptParams[$OperationName] += $name;
+            $cliPromptParams += $name;
         }
     }
 
@@ -124,12 +125,12 @@
 
     $promptParametersNameList = @();
     $promptParametersNameList += $methodParamNameList;
-    $paramDefinitions = Get-ParamsDefinition $cliPromptParams[$OperationName];
+    $paramDefinitions = Get-ParamsDefinition $cliPromptParams;
     $cmdOptions = "";
-    $cliOperationParams[$OperationName] = $methodParamNameList + $cliOperationParams[$OperationName];
-    for ($index = 0; $index -lt $cliOperationParams[$OperationName].Count; $index++)
+    $cliOperationParams = $methodParamNameList + $cliOperationParams;
+    for ($index = 0; $index -lt $cliOperationParams.Count; $index++)
     {
-        [string]$optionParamName = $cliOperationParams[$OperationName][$index];
+        [string]$optionParamName = $cliOperationParams[$index];
         $optionShorthandStr = $null;
 
         $cli_option_name = Get-CliOptionName $optionParamName;
@@ -151,7 +152,7 @@
 
     # Prompting options
     $promptingOptions = Get-PromptingOptionsCode $promptParametersNameList $promptParametersNameList 6;
-    $promptingOptionsCustom = Get-PromptingOptionsCode $cliPromptParams[$OperationName] $promptParametersNameList 6;
+    $promptingOptionsCustom = Get-PromptingOptionsCode $cliPromptParams $promptParametersNameList 6;
 
     #
     # API call using SDK
@@ -166,7 +167,7 @@
 
     $treeProcessedList = @();
     $treeAnalysisResult = ""
-    foreach($param in $cliOperationParams[$OperationName]) {
+    foreach($param in $cliOperationParams) {
         if($param -ne "location" -and $param -ne "tags" -and $param -ne "name")
         {
             $paramPathHash = Search-TreeElement "root" $param_object $param;
@@ -195,7 +196,7 @@
                 $assertValue = "null";
                 $assertValueUpdate = "null";
                 $assertionType = "equal";
-                if ($cliOperationParams[$OperationName] -contains $lastItem) {
+                if ($cliOperationParams -contains $lastItem) {
                     $treeAnalysisResult += "        if(options.${commanderLast}) {" + $NEW_LINE;
                     if($paramType -ne $null -and $paramType -like "*List*") {
                         $setValue = "options." + $commanderLast+ ".split(',')";
@@ -220,11 +221,11 @@
                 }
                 $treeAnalysisResult += "          ${currentPath}.${last} = ${setValue};" + $NEW_LINE;
                 $assertPath = $currentPath -replace "parameters", "output";
-                if($cliCreateParams -contains $last)
+                if($cliCreateParams -contains $last -and $last -notlike "*Id" -and $item -notmatch ".+name")
                 {
                     $assertCodeCreate += "            ${assertPath}.${last}.should.${assertionType}(${assertValue});" + $NEW_LINE;
                 }
-                if($cliUpdateParams -contains $last)
+                if($cliUpdateParams -contains $last-and $last -notlike "*Id" -and $item -notmatch ".+name")
                 {
                     $assertCodeUpdate += "            ${assertPath}.${last}.should.${assertionType}(${assertValueUpdate});" + $NEW_LINE;
                 }
@@ -234,18 +235,34 @@
     }
 
     $updateParametersCode = ""
-    foreach($item in $cliOperationParams[$OperationName])
+    foreach($item in $cliOperationParams)
     {
         if (-not ($treeProcessedList -contains $item) -and $item -ne "parameters")
         {
             $updateParametersCode  += "        if(options.${item}) {" + $NEW_LINE;
             if($item -ne "tags")
             {
-                if($item -ne $currentOperationNormalizedName -and $item -ne "resourceGroup" -and $cliCreateParams -contains $last)
+                if($item -ne $currentOperationNormalizedName -and
+                    $item -ne "resourceGroup" -and
+                    $cliCreateParams -contains $last -and
+                   $item -notmatch ".+name")
                 {
-                    $assertCodeCreate += "            output.${item}.should.equal(${cliOperationName}.${item});" + $NEW_LINE;
+                    if($item -notlike "*Id")
+                    {
+                        $assertCodeCreate += "            output.${item}.should.equal(${cliOperationName}.${item});" + $NEW_LINE;
+                    }
+                    else
+                    {
+                        $itemStrippedId = ${item} -creplace "Id","";
+                        $assertIdCodeCreate += "            output.${itemStrippedId}.id.should.equal(${itemStrippedId}.id);" + $NEW_LINE;
+                    }
                 }
-                if($item -ne $currentOperationNormalizedName -and $item -ne "resourceGroup" -and $item -ne "location" -and $cliUpdateParams -contains $last)
+                if($item -ne $currentOperationNormalizedName -and
+                    $item -ne "resourceGroup" -and
+                    $item -ne "location" -and
+                    $cliUpdateParams -contains $last -and
+                    $item -notlike "*Id" -and
+                    $item -notmatch ".+name")
                 {
                     $assertCodeUpdate += "            output.${item}.should.equal(${cliOperationName}.${item}New);" + $NEW_LINE;
                 }
@@ -261,6 +278,41 @@
         }
     }
 
+    $depsCode = "";
+    $additionalOptions = "";
+    $closingBraces = "";
+    if($dependencies[$OperationName])
+    {
+        foreach($dependency in $dependencies[$OperationName])
+        {
+            $outResult = "";
+            $depCliOption = Get-SingularNoun (Get-CliOptionName $dependency);
+            $depResultVarName = (decapitalizeFirstLetter (Get-SingularNoun $dependency));
+            $depCliName = $depResultVarName + "Name";
+            if($inputTestCode -like "*${depCliName}*")
+            {
+                $depCliName = "{${depCliName}}";
+            }
+            $outResult += "          var cmd = '${componentNameInLowerCase}-autogen ${depCliOption} create -g {group} -l {location} -n ${depCliName} ";
+            foreach($param in $cliOperationParamsRaw[$dependency])
+            {
+                if($param.required -eq $true -and $param.name -ne "location")
+                {
+                    $outResult += "--" + (Get-CliOptionName $param.name) + " " + $param.first;
+                }
+            }
+            $outResult += " --json'.formatArgs(${cliOperationName})" + $NEW_LINE;
+            $outResult += "testUtils.executeCommand(suite, retry, cmd, function (${depResultVarName}) {"
+            $depsCode += $outResult + $NEW_LINE
+            $depsCode  += "${depResultVarName}.exitStatus.should.equal(0);" + $NEW_LINE;
+            $depsCode += "${depResultVarName} = JSON.parse(${depResultVarName}.text);" + $NEW_LINE;
+            if($testCreateStr -notlike "*${depCliOption}*") {
+                $additionalOptions += "--${depCliOption}-name ${depCliName} ";
+            }
+            $closingBraces += "});" + $NEW_LINE;
+        }
+    }
+
     $parametersString = Get-ParametersString $methodParamNameList;
     $parsers = Get-SubnetParser;
 
@@ -273,12 +325,16 @@
     $template = Get-Content "$PSScriptRoot\templates\set.ps1" -raw;
     $code += Invoke-Expression $template;
 
-#TODO: remove condition after tests generation will be ready for child items
     if (-not $parents[$OperationName])
     {
-        $template = Get-Content "$PSScriptRoot\templates\test.ps1" -raw;
-        $outTest = Invoke-Expression $template;
-        Set-Content -Path "$PSScriptRoot\arm.network.${cliOperationNameInLowerCase}-tests.js" -Value $outTest -Encoding "UTF8" -Force;
+        $parentOp = "";
     }
+    else
+    {
+        $parentOp = (Get-CliOptionName $parents[$OperationName]) + " ";
+    }
+    $template = Get-Content "$PSScriptRoot\templates\test.ps1" -raw;
+    $outTest = Invoke-Expression $template;
+    Set-Content -Path "$PSScriptRoot\arm.network.${cliOperationNameInLowerCase}-tests.js" -Value $outTest -Encoding "UTF8" -Force;
 
     return $code;

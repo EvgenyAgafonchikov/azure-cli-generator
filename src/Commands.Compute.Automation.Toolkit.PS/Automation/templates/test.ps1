@@ -66,19 +66,22 @@ describe('arm', function () {
 
     describe('${cliOperationNameInLowerCase}', function () {
       it('create should create ${cliOperationNameInLowerCase}', function (done) {
-        var cmd = '${componentNameInLowerCase}-autogen ${opCliOptionNameSingular} create -g {group} -n {name} ${testCreateStr}--json'.formatArgs(${cliOperationName});
         networkUtil.createGroup(groupName, location, suite, function () {
+${depsCode}
+          var cmd = '${componentNameInLowerCase}-autogen ${parentOp}${opCliOptionNameSingular} create -g {group} -n {name} ${testCreateStr}${additionalOptions}--json'.formatArgs(${cliOperationName});
           testUtils.executeCommand(suite, retry, cmd, function (result) {
             result.exitStatus.should.equal(0);
             var output = JSON.parse(result.text);
             output.name.should.equal(${cliOperationName}.name);
 ${assertCodeCreate}
+${assertIdCodeCreate}
             done();
           });
+${closingBraces}
         });
       });
       it('show should display ${cliOperationNameInLowerCase} details', function (done) {
-        var cmd = '${componentNameInLowerCase}-autogen ${opCliOptionNameSingular} show -g {group} -n {name} --json'.formatArgs(${cliOperationName});
+        var cmd = '${componentNameInLowerCase}-autogen ${parentOp}${opCliOptionNameSingular} show -g {group} -n {name} ${additionalOptions}--json'.formatArgs(${cliOperationName});
         testUtils.executeCommand(suite, retry, cmd, function (result) {
           result.exitStatus.should.equal(0);
           var output = JSON.parse(result.text);
@@ -87,7 +90,7 @@ ${assertCodeCreate}
         });
       });
       it('set should update ${cliOperationNameInLowerCase}', function (done) {
-        var cmd = '${componentNameInLowerCase}-autogen ${opCliOptionNameSingular} set -g {group} -n {name} ${testUpdateStr}--json'.formatArgs(${cliOperationName});
+        var cmd = '${componentNameInLowerCase}-autogen ${parentOp}${opCliOptionNameSingular} set -g {group} -n {name} ${testUpdateStr}${additionalOptions}--json'.formatArgs(${cliOperationName});
         networkUtil.createGroup(groupName, location, suite, function () {
           testUtils.executeCommand(suite, retry, cmd, function (result) {
             result.exitStatus.should.equal(0);
@@ -98,7 +101,7 @@ ${assertCodeUpdate}
         });
       });
       it('list should display all ${cliOperationNameInLowerCase} in resource group', function (done) {
-        var cmd = '${componentNameInLowerCase}-autogen ${opCliOptionNameSingular} list -g {group} --json'.formatArgs(${cliOperationName});
+        var cmd = '${componentNameInLowerCase}-autogen ${parentOp}${opCliOptionNameSingular} list -g {group} ${additionalOptions}--json'.formatArgs(${cliOperationName});
         testUtils.executeCommand(suite, retry, cmd, function (result) {
           result.exitStatus.should.equal(0);
           var outputs = JSON.parse(result.text);
@@ -109,11 +112,11 @@ ${assertCodeUpdate}
         });
       });
       it('delete should delete ${cliOperationNameInLowerCase}', function (done) {
-        var cmd = '${componentNameInLowerCase}-autogen ${opCliOptionNameSingular} delete -g {group} -n {name} --quiet --json'.formatArgs(${cliOperationName});
+        var cmd = '${componentNameInLowerCase}-autogen ${parentOp}${opCliOptionNameSingular} delete -g {group} -n {name} --quiet ${additionalOptions}--json'.formatArgs(${cliOperationName});
         testUtils.executeCommand(suite, retry, cmd, function (result) {
           result.exitStatus.should.equal(0);
 
-          cmd = '${componentNameInLowerCase}-autogen ${opCliOptionNameSingular} show -g {group} -n {name} --json'.formatArgs(${cliOperationName});
+          cmd = '${componentNameInLowerCase}-autogen ${parentOp}${opCliOptionNameSingular} show -g {group} -n {name} ${additionalOptions}--json'.formatArgs(${cliOperationName});
           testUtils.executeCommand(suite, retry, cmd, function (result) {
             result.exitStatus.should.equal(0);
             var output = JSON.parse(result.text);
