@@ -148,6 +148,20 @@
         $option_str_items += "--${cli_option_name} `$p${index}";
     }
 
+    # Collect data about 'param-name' and 'param-id' alternatives
+    $alternativesArray = @();
+    foreach ($item in $cliOperationParams)
+    {
+        if ($item -clike "*Id")
+        {
+            $cutItem = $item -creplace "Id", "";
+            if($cliOperationParams -contains ($cutItem + "Name"))
+            {
+                $alternativesArray += $cutItem;
+            }
+        }
+    }
+
     $commonOptions = Get-CommonOptions $cliMethodOption;
 
     # Prompting options
@@ -239,7 +253,14 @@
     {
         if (-not ($treeProcessedList -contains $item) -and $item -ne "parameters")
         {
-            $updateParametersCode  += "        if(options.${item}) {" + $NEW_LINE;
+            if($item -cnotlike "*Id" -and $item -cnotlike "*Name")
+            {
+                $updateParametersCode  += "        if(options.${item}) {" + $NEW_LINE;
+            }
+            elseif($alternativesArray -notcontains ($item -creplace "Id","") -and $alternativesArray -notcontains ($item -creplace "Name",""))
+            {
+                $updateParametersCode  += "        if(options.${item}) {" + $NEW_LINE;
+            }
             if($item -ne "tags")
             {
                 if($item -ne $currentOperationNormalizedName -and
@@ -247,14 +268,36 @@
                     $cliCreateParams -contains $last -and
                    $item -notmatch ".+name")
                 {
-                    if($item -notlike "*Id")
+                    if($item -clike "*Id")
                     {
-                        $assertCodeCreate += "            output.${item}.should.equal(${cliOperationName}.${item});" + $NEW_LINE;
+                        $itemStrippedId = $item -creplace "Id","";
+                        if ($alternativesArray -contains $itemStrippedId)
+                        {
+                            $updateParametersCode += "        if (options.${item}) {" + $NEW_LINE;
+                            $updateParametersCode += "          parameters.${itemStrippedId} = {};" + $NEW_LINE;
+                            $updateParametersCode += "          parameters.${itemStrippedId}.id = options.${item};" + $NEW_LINE;
+                            $updateParametersCode += "        } else if (options.${itemStrippedId}Name) {" + $NEW_LINE;
+                            $updateParametersCode += "          parameters.${itemStrippedId} = {};" + $NEW_LINE;
+                            $cliOptionToGetIdByName = Get-CliNormalizedName $itemStrippedId;
+                            if ($cliOptionToGetIdByName.toLower().EndsWith("address"))
+                            {
+                                $cliOptionToGetIdByName += "es";
+                            }
+                            else
+                            {
+                                $cliOptionToGetIdByName += "s";
+                            }
+                            $updateParametersCode +=
+"          var idContainer = ${componentNameInLowerCase}ManagementClient.${cliOptionToGetIdByName}.get(resourceGroup, options.${itemStrippedId}Name, _);
+          parameters.${itemStrippedId}.id = idContainer.id;
+"
+                            $updateParametersCode += "        }" + $NEW_LINE;
+                        }
+                        $assertIdCodeCreate += "            output.${itemStrippedId}.id.should.equal(${itemStrippedId}.id);" + $NEW_LINE;
                     }
                     else
                     {
-                        $itemStrippedId = ${item} -creplace "Id","";
-                        $assertIdCodeCreate += "            output.${itemStrippedId}.id.should.equal(${itemStrippedId}.id);" + $NEW_LINE;
+                        $assertCodeCreate += "            output.${item}.should.equal(${cliOperationName}.${item});" + $NEW_LINE;
                     }
                 }
                 if($item -ne $currentOperationNormalizedName -and
@@ -266,7 +309,14 @@
                 {
                     $assertCodeUpdate += "            output.${item}.should.equal(${cliOperationName}.${item}New);" + $NEW_LINE;
                 }
-                $updateParametersCode  += "          parameters.${item} = options.${item};" + $NEW_LINE;
+                if($item -cnotlike "*Id" -and $item -cnotlike "*Name")
+                {
+                    $updateParametersCode  += "          parameters.${item} = options.${item};" + $NEW_LINE;
+                }
+                elseif($alternativesArray -notcontains ($item -creplace "Id","") -and $alternativesArray -notcontains ($item -creplace "Name",""))
+                {
+                    $updateParametersCode  += "          parameters.${item} = options.${item};" + $NEW_LINE;
+                }
             }
             else
             {
@@ -274,7 +324,14 @@
             tagUtils.appendTags(parameters, options);
           }" + $NEW_LINE;
             }
-            $updateParametersCode  += "        }" + $NEW_LINE;
+            if($item -cnotlike "*Id" -and $item -cnotlike "*Name")
+            {
+                $updateParametersCode  += "        }" + $NEW_LINE;
+            }
+            elseif($alternativesArray -notcontains ($item -creplace "Id","") -and $alternativesArray -notcontains ($item -creplace "Name",""))
+            {
+                $updateParametersCode  += "        }" + $NEW_LINE;
+            }
         }
     }
 

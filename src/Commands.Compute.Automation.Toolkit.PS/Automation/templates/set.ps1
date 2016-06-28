@@ -15,7 +15,6 @@ ${safeGet}
       }
 
         var parameters = ${resultVarName};
-        _parseSubnet(resourceGroup, parameters, options, _);
 ${treeAnalysisResult}
 ${updateParametersCode}
       var progress = cli.interaction.progress(util.format(`$('Updating ${cliOperationDescription} `"%s`"'), ${currentOperationNormalizedName}));
@@ -26,5 +25,4 @@ ${updateParametersCode}
       }
       cli.interaction.formatOutput(${resultVarName}, traverse);
     });
-
-${parsers}"
+"

@@ -191,20 +191,6 @@ function Get-CommonOptions($cliMethodOption) {
     return $tempCode;
 }
 
-function Get-CreatePublucIPOptions() {
-return "    .option('-l, --location <location>', `$('the location'))
-    .option('-d, --domain-name-label <domain-name-label>', `$('the domain name label.' +
-      '\n     This set DNS to <domain-name-label>.<location>.cloudapp.azure.com'))
-    .option('-a, --allocation-method <allocation-method>', util.format(`$('the allocation method, valid values are' +
-      '\n     [%s], default is %s'), constants.publicIp.allocation, constants.publicIp.allocation[0]))
-    .option('-i, --idle-timeout <idle-timeout>', `$('the idle timeout specified in minutes'))
-    .option('-f, --reverse-fqdn <reverse-fqdn>', `$('the reverse fqdn'))
-    .option('-e, --ip-version <ip-version>', util.format(`$('the ip version, valid values are' +
-      '\n     [%s], default is %s'), constants.publicIp.version, constants.publicIp.version[0]))
-    .option('-t, --tags <tags>', `$(constants.help.tags.create))
-"
-}
-
 function Get-RequireParamsString($requireParams)
 {
     if ($requireParams.Count -gt 0)
