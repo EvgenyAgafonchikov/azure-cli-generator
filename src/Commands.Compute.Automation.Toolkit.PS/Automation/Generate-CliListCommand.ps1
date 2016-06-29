@@ -43,7 +43,11 @@
             $cliCategoryName = 'vnet';
         }
     }
-
+    $resourceGroupInit = "";
+    if($OperationName -ne "usages")
+    {
+        $resourceGroupInit = "      options.resourceGroup = resourceGroup;" + $NEW_LINE;
+    }
     # Set Required Parameters
     $requireParams = @();
     $requireParamNormalizedNames = @();

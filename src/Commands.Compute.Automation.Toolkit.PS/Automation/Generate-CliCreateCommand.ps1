@@ -182,6 +182,7 @@
     $treeProcessedList = @();
     $treeAnalysisResult = ""
     foreach($param in $cliOperationParams) {
+		$conversion = "";
         if($param -ne "location" -and $param -ne "tags" -and $param -ne "name")
         {
             $paramPathHash = Search-TreeElement "root" $param_object $param;
@@ -217,7 +218,8 @@
                         $assertValue = "${cliOperationName}.${last}"
                         $assertValueUpdate = "${cliOperationName}.${last}New"
                         $assertionType = "containEql";
-                    } elseif($paramType -ne $null -and $paramType -like "*Nullable*")
+                    }
+                    elseif($paramType -ne $null -and $paramType -like "*Nullable*")
                     {
                         $underlying =  [System.Nullable]::GetUnderlyingType($paramType);
                         if($underlying -like "*Int*")
@@ -226,6 +228,12 @@
                             $assertValue = "parseInt(${cliOperationName}.${last}, 10)"
                             $assertValueUpdate = "parseInt(${cliOperationName}.${last}New, 10)"
                         }
+                    }
+                    elseif($paramType -ne $null -and $paramType -like "*String*") {
+                        $setValue = "options." + $commanderLast;
+                        $conversion = ".toLowerCase()"
+                        $assertValue = "${cliOperationName}.${last}"
+                        $assertValueUpdate = "${cliOperationName}.${last}New"
                     }
                     else {
                         $setValue = "options." + $commanderLast;
@@ -237,11 +245,11 @@
                 $assertPath = $currentPath -replace "parameters", "output";
                 if($cliCreateParams -contains $last -and $last -notlike "*Id" -and $item -notmatch ".+name")
                 {
-                    $assertCodeCreate += "            ${assertPath}.${last}.should.${assertionType}(${assertValue});" + $NEW_LINE;
+                    $assertCodeCreate += "            ${assertPath}.${last}${conversion}.should.${assertionType}(${assertValue}${conversion});" + $NEW_LINE;
                 }
                 if($cliUpdateParams -contains $last-and $last -notlike "*Id" -and $item -notmatch ".+name")
                 {
-                    $assertCodeUpdate += "            ${assertPath}.${last}.should.${assertionType}(${assertValueUpdate});" + $NEW_LINE;
+                    $assertCodeUpdate += "            ${assertPath}.${last}${conversion}.should.${assertionType}(${assertValueUpdate}${conversion});" + $NEW_LINE;
                 }
                 $treeAnalysisResult += "        }" + $NEW_LINE;
             }

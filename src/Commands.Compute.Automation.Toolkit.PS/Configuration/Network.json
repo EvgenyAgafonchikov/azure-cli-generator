@@ -217,6 +217,135 @@
         }
       ],
       "parent": ""
+    },
+    { "name": "SecurityRules",
+      "parameters": [
+        {
+          "name": "description",
+          "first" : "testdesc",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        },
+        {
+          "name": "protocol",
+          "first" : "tcp",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "sourceAddressPrefix",
+          "first" : "10.0.0.0",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "sourcePortRange",
+          "first" : "*",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "destinationAddressPrefix",
+          "first" : "10.0.0.0",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "destinationPortRange",
+          "first" : "*",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "access",
+          "first" : "allow",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "priority",
+          "first" : "150",
+          "second" : "256",
+          "inCreateSet": "true",
+          "inUpdateSet": "true",
+          "required": "true"
+        },
+        {
+          "name": "direction",
+          "first" : "inbound",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "tags",
+          "first" : "SRuleTag=tagNSGSR",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        }
+      ],
+      "parent": "networkSecurityGroup",
+      "dependencies": ["NetworkSecurityGroups"]
+    },
+    { "name": "Routes",
+      "parameters": [
+        {
+          "name": "addressPrefix",
+          "first" : "10.0.0.0/8",
+          "second" : "10.0.0.0/16",
+          "inCreateSet": "true",
+          "inUpdateSet": "true",
+          "required": "true"
+        },
+        {
+          "name": "nextHopType",
+          "first" : "VNETLocal",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "nextHopIpAddress",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        }
+      ],
+      "parent": "routeTable",
+      "dependencies": ["RouteTables"]
+    },
+    { "name": "Usages",
+      "parameters": [
+        {
+          "name": "location",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "true"
+        }
+      ],
+      "parent": ""
     }
   ]
 }
