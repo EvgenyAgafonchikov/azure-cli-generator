@@ -32,7 +32,29 @@ ${promptingCodeNoResource}
         cli.output.warn(`$('No ${cliOperationDescription} found'));
       } else {
 "
-if ($cliOperationName -ne "usages")
+if ($cliOperationName -eq "usages")
+{
+"       cli.output.table(result, function (row, item) {
+          row.cell(`$('Name'), item.name.localizedValue);
+          row.cell(`$('Unit'), item.unit);
+          row.cell(`$('Current Value'), item.currentValue);
+          row.cell(`$('Limit'), item.limit);
+        });
+"
+}
+elseif($cliOperationName -eq "ExpressRouteServiceProviders")
+{
+"       cli.output.table(result, function (row, provider) {
+          row.cell(`$('Name'), provider.name);
+          var bandwidths = provider.bandwidthsOffered.map(function (b) {
+            return b.offerName;
+          });
+          row.cell(`$('Bandwidths offered'), bandwidths);
+          row.cell(`$('Peering locations'), provider.peeringLocations.join());
+        });
+"
+}
+else
 {
 "       cli.output.table(${resultVarName}, function (row, item) {
           row.cell(`$('Name'), item.name);
@@ -40,16 +62,6 @@ if ($cliOperationName -ne "usages")
           var resInfo = resourceUtils.getResourceInformation(item.id);
           row.cell(`$('Resource group'), resInfo.resourceGroup);
           row.cell(`$('Provisioning state'), item.provisioningState);
-        });
-"
-}
-else
-{
-"       cli.output.table(result, function (row, item) {
-          row.cell(`$('Name'), item.name.localizedValue);
-          row.cell(`$('Unit'), item.unit);
-          row.cell(`$('Current Value'), item.currentValue);
-          row.cell(`$('Limit'), item.limit);
         });
 "
 }

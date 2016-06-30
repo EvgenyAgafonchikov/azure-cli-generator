@@ -346,6 +346,195 @@
         }
       ],
       "parent": ""
+    },
+    { "name": "ExpressRouteServiceProviders",
+      "parameters": [],
+      "parent": ""
+    },
+    { "name": "ExpressRouteCircuitAuthorizations",
+      "parameters": [
+        {
+          "name": "authorizationKey",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        }
+      ],
+      "parent": "",
+      "dependencies": "ExpressRouteCircuits"
+    },
+    { "name": "ExpressRouteCircuitPeerings",
+      "parameters": [
+        {
+          "name": "peeringType",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        },
+        {
+          "name": "azureAsn",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        },
+        {
+          "name": "peerAsn",
+          "first" : "1",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "false"
+        },
+        {
+          "name": "primaryPeerAddressPrefix",
+          "first" : "10.0.0.0/30",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "secondaryPeerAddressPrefix",
+          "first" : "10.0.0.0/30",
+          "second" : "11.0.0.0/30",
+          "inCreateSet": "true",
+          "inUpdateSet": "true",
+          "required": "true"
+        },
+        {
+          "name": "primaryAzurePort",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        },
+        {
+          "name": "secondaryAzurePort",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        },
+        {
+          "name": "sharedKey",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        },
+        {
+          "name": "vlanId",
+          "first" : "1",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "false"
+        },
+        {
+          "name": "advertisedPublicPrefixes",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        },
+        {
+          "name": "advertisedPublicPrefixesState",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        },
+        {
+          "name": "customerAsn",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        },
+        {
+          "name": "routingRegistryName",
+          "first" : "",
+          "second" : "",
+          "inCreateSet": "false",
+          "inUpdateSet": "false",
+          "required": "false"
+        }
+      ],
+      "parent": "",
+      "dependencies": "ExpressRouteCircuits"
+    },
+    { "name": "ExpressRouteCircuits",
+      "parameters": [
+        {
+          "name": "location",
+          "first" : "eastasia",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "serviceProviderName",
+          "first" : "Equinix",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "peeringLocation",
+          "first" : "Seattle",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "bandwidthInMbps",
+          "first" : "100",
+          "second" : "200",
+          "inCreateSet": "true",
+          "inUpdateSet": "true",
+          "required": "true"
+        },
+        {
+          "name": "tier",
+          "first" : "Standard",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "family",
+          "first" : "MeteredData",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "true"
+        },
+        {
+          "name": "tags",
+          "first" : "ERC=erctag",
+          "second" : "",
+          "inCreateSet": "true",
+          "inUpdateSet": "false",
+          "required": "false"
+        }
+      ],
+      "parent": ""
     }
   ]
 }

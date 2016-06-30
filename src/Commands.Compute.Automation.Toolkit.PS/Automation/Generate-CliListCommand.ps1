@@ -44,7 +44,7 @@
         }
     }
     $resourceGroupInit = "";
-    if($OperationName -ne "usages")
+    if($OperationName -ne "usages" -and $OperationName -ne "ExpressRouteServiceProviders")
     {
         $resourceGroupInit = "      options.resourceGroup = resourceGroup;" + $NEW_LINE;
     }
@@ -60,7 +60,14 @@
     $optionParamString = $null;
     $requireParamsString = Get-RequireParamsString $requireParams;
     $usageParamsString = Get-UsageParamsString $requireParams;
-    $optionParamString = ([string]::Join(", ", $requireParamNormalizedNames)) + ", ";
+    if ($requireParamNormalizedNames.Length)
+    {
+        $optionParamString = ([string]::Join(", ", $requireParamNormalizedNames)) + ", ";
+    }
+    else
+    {
+        $optionParamString  = "";
+    }
 
     #
     # Options declaration

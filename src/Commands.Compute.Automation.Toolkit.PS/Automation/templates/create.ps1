@@ -18,6 +18,7 @@ ${safeGet}
         var parameters = {};
 ${treeAnalysisResult}
 ${updateParametersCode}
+${skuNameCode}
       var progress = cli.interaction.progress(util.format(`$('Creating ${cliOperationDescription} `"%s`"'), ${currentOperationNormalizedName}));
       try {
         ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(${parametersString}, parameters, _);

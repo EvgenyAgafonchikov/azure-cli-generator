@@ -28,6 +28,10 @@
     $cliOperationName = Get-CliNormalizedName $OperationName;
     $cliOperationNameInLowerCase = $cliOperationName.ToLower();
     $currentOperationNormalizedName = (Get-CommanderStyleOption (Get-SingularNoun $cliOperationName)) + "Name";
+    if($currentOperationNormalizedName -eq "Name")
+    {
+        $currentOperationNormalizedName = decapitalizeFirstLetter $currentOperationNormalizedName ;
+    }
 
     # 3. CLI Code
     # 3.1 Types

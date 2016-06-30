@@ -29,8 +29,18 @@ var testPrefix = 'arm-${componentNameInLowerCase}-autogen-${cliOperationNameInLo
   location;
 
 var ${cliOperationName} = {
-${inputTestCode}  name: '${cliOperationName}Name'
-};
+${inputTestCode}"
+if($cliOperationName -ne "expressRouteCircuitPeerings")
+{
+  "  name: '${cliOperationName}Name'
+"
+}
+else
+{
+  "  name: 'AzurePrivatePeering'
+"
+}
+"};
 
 var requiredEnvironment = [{
   name: 'AZURE_VM_TEST_LOCATION',
@@ -44,7 +54,7 @@ describe('arm', function () {
     before(function (done) {
       suite = new CLITest(this, testPrefix, requiredEnvironment);
       suite.setupSuite(function () {
-        location = process.env.AZURE_VM_TEST_LOCATION;
+        location = ${cliOperationName}.location || process.env.AZURE_VM_TEST_LOCATION;
         groupName = suite.isMocked ? groupName : suite.generateId(groupName, null);
         ${cliOperationName}.location = location;
         ${cliOperationName}.group = groupName;
@@ -85,6 +95,7 @@ ${closingBraces}
         testUtils.executeCommand(suite, retry, cmd, function (result) {
           result.exitStatus.should.equal(0);
           var output = JSON.parse(result.text);
+          output.name.should.equal(${cliOperationName}.name);
 ${assertCodeCreate}
           done();
         });
@@ -95,6 +106,7 @@ ${assertCodeCreate}
           testUtils.executeCommand(suite, retry, cmd, function (result) {
             result.exitStatus.should.equal(0);
             var output = JSON.parse(result.text);
+            output.name.should.equal(${cliOperationName}.name);
 ${assertCodeUpdate}
             done();
           });

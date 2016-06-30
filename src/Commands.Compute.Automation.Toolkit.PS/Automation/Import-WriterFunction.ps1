@@ -1189,7 +1189,7 @@ function getHumanReadableFromCamelCase(inName) {
         outName += ' ';
       }
 
-      var abbrWords =['VM', 'IP', 'RM', 'OS', 'NAT', 'IDs', 'DNS', 'VNet', 'SubNet'];
+      var abbrWords =['VM', 'IP', 'RM', 'OS', 'NAT', 'IDs', 'DNS', 'VNet', 'ASN', 'SubNet'];
       var matched = false;
       var matchedAbbr = "";
       abbrWords.every(function(item, index, arr) {

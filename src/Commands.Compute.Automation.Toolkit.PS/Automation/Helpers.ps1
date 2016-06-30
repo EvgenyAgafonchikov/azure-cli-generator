@@ -22,7 +22,9 @@ function Get-ParametersNames($methodParameters)
         {
             # Record the Normalized Parameter Name, i.e. 'vmName' => 'VMName', 'resourceGroup' => 'ResourceGroup', etc.
             $methodParamName = (Get-CamelCaseName $paramItem.Name);
-            if($methodParamName -ne $currentOperationNormalizedName -and $methodParamName -ne ($parents[$cliOperationName] + "Name"))
+            if($methodParamName -ne $currentOperationNormalizedName -and
+               $methodParamName -ne ($parents[$cliOperationName] + "Name") -and
+               $methodParamName  -notlike "circuit*")
             {
                 $methodParamName = (Get-CliMethodMappedParameterName $methodParamName $methodParamIndex);
             }
@@ -162,8 +164,13 @@ function Get-ParametersString($methodParamNameList)
 function Get-SafeGetFunction($componentNameInLowerCase, $cliOperationName, $methodParamNameList, $resultVarName, $cliOperationDescription)
 {
     $cliNormalizedCurrentName = Get-CommanderStyleOption (Get-SingularNoun $cliOperationName);
+    $cliNormalizedCurrentNameArg = "${cliNormalizedCurrentName}Name";
+    if($cliNormalizedCurrentNameArg -eq "Name")
+    {
+        $cliNormalizedCurrentNameArg = decapitalizeFirstLetter $cliNormalizedCurrentNameArg;
+    }
     $tempCode = "
-      var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), ${cliNormalizedCurrentName}Name));
+      var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), ${cliNormalizedCurrentNameArg}));
       try {
         ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.get("
     $tempCode += (Get-ParametersString $methodParamNameList) -replace ", parameters", "";
@@ -266,7 +273,14 @@ function Search-TreeElement($path, $obj, $target) {
 
 function decapitalizeFirstLetter($inStr)
 {
-    return $inStr.Substring(0,1).ToLower() + $inStr.Substring(1);
+    if ($inStr -ne "")
+    {
+        return $inStr.Substring(0,1).ToLower() + $inStr.Substring(1);
+    }
+    else
+    {
+        return $inStr;
+    }
 }
 
 function Get-CommanderStyleOption($inStr)
@@ -275,5 +289,18 @@ function Get-CommanderStyleOption($inStr)
     {
         $inStr = $inStr -creplace "IP", "Ip";
     }
+    elseif ($inStr.Contains("ASN"))
+    {
+        $inStr = $inStr -creplace "ASN", "Asn";
+    }
+    if($inStr -eq "expressRouteCircuit")
+    {
+        $inStr = $inStr -replace "expressRoute", "";
+    }
+    elseif($inStr -ne "circuitName")
+    {
+        $inStr = $inStr -replace "expressRouteCircuit", "";
+    }
+
     return (decapitalizeFirstLetter $inStr);
 }

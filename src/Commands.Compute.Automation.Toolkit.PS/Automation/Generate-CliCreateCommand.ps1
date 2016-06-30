@@ -180,15 +180,21 @@
     $safeGet = Get-SafeGetFunction $componentNameInLowerCase $cliOperationName $methodParamNameList $resultVarName $cliOperationDescription;
 
     $treeProcessedList = @();
-    $treeAnalysisResult = ""
+    $treeAnalysisResult = "";
+    $skuNameMergeRequired = $false;
+    $skuNameCode = "";
     foreach($param in $cliOperationParams) {
-		$conversion = "";
+        $conversion = "";
         if($param -ne "location" -and $param -ne "tags" -and $param -ne "name")
         {
             $paramPathHash = Search-TreeElement "root" $param_object $param;
             if ($paramPathHash)
             {
                 $paramPath = $paramPathHash.path;
+                if($paramPath -like "*.sku.*")
+                {
+                    $skuNameMergeRequired = $true;
+                }
                 $paramType = $paramPathHash.type;
                 $paramPath = $paramPath -replace "root.", "";
                 $paramPathSplit = $paramPath.Split(".");
@@ -254,6 +260,14 @@
                 $treeAnalysisResult += "        }" + $NEW_LINE;
             }
         }
+    }
+
+    if($skuNameMergeRequired)
+    {
+        $skuNameCode = "      if (parameters.sku.tier && parameters.sku.family) {
+        parameters.sku.name = parameters.sku.tier + '_' + parameters.sku.family;
+      }
+"
     }
 
     $updateParametersCode = ""
@@ -331,6 +345,7 @@
                 $updateParametersCode  += "          if (utils.argHasValue(options.tags)) {
             tagUtils.appendTags(parameters, options);
           }" + $NEW_LINE;
+            $assertCodeCreate += "            networkUtil.shouldHaveTags(output);";
             }
             if($item -cnotlike "*Id" -and $item -cnotlike "*Name")
             {
@@ -363,7 +378,11 @@
             {
                 if($param.required -eq $true -and $param.name -ne "location")
                 {
-                    $outResult += "--" + (Get-CliOptionName $param.name) + " " + $param.first;
+                    $outResult += " --" + ((Get-CliOptionName $param.name) -replace "express-route-","") + " " + $param.first;
+                }
+                elseif($param.name -eq "location" -and $inputTestCode -notlike "*location*")
+                {
+                    $inputTestCode += "  location: '" +  $param.first + "'," + $NEW_LINE;
                 }
             }
             $outResult += " --json'.formatArgs(${cliOperationName})" + $NEW_LINE;
@@ -372,7 +391,8 @@
             $depsCode  += "${depResultVarName}.exitStatus.should.equal(0);" + $NEW_LINE;
             $depsCode += "${depResultVarName} = JSON.parse(${depResultVarName}.text);" + $NEW_LINE;
             if($testCreateStr -notlike "*${depCliOption}*") {
-                $additionalOptions += "--${depCliOption}-name ${depCliName} ";
+                $depCliOption = $depCliOption -replace "express-route-",""
+                $additionalOptions += " --${depCliOption}-name ${depCliName} ";
             }
             $closingBraces += "});" + $NEW_LINE;
         }
