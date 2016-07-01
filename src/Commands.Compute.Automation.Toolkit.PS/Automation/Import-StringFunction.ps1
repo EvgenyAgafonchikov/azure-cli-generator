@@ -326,15 +326,19 @@ function Get-CliShorthandName
     {
         $outName = 'n';
     }
-    elseif ($inName -like '*AllocationMethod' -or $inName -like 'AddressPrefix*')
+    elseif ($inName -eq "AzureAsn" -or $inName -like '*AllocationMethod' -or $inName -like 'AddressPrefix*')
     {
         $outName = 'a';
     }
-    elseif ($inName -eq 'SelectExpression' -or $inName -eq 'Access')
+    elseif($inName -eq "BandwidthInMbps" -or $inName -eq "SecondaryAzurePort")
+    {
+        $outName = 'b';
+    }
+    elseif ($inName -eq 'SelectExpression' -or $inName -eq 'Access' -or $inName -eq 'CircuitName')
     {
         $outName = 'c';
     }
-    elseif ($inName -eq 'instanceId' -or $inName -eq 'DnsServers' -or $inName -eq 'Description')
+    elseif ($inName -eq 'instanceId' -or $inName -eq 'DnsServers' -or $inName -eq 'Description' -or $inName -eq "PrimaryAzurePort")
     {
         $outName = 'd';
     }
@@ -346,31 +350,39 @@ function Get-CliShorthandName
     {
         $outName = 'd';
     }
-    elseif ($inName -eq 'ExpandExpression' -or $inName -eq 'VirtualNetworkName' -or $inName -eq 'DestinationAddressPrefix' -or $inName -like '*AddressVersion')
+    elseif ($inName -eq 'ExpandExpression' -or $inName -eq 'VirtualNetworkName' -or $inName -eq 'tier' -or $inName -eq 'DestinationAddressPrefix' -or $inName -like '*AddressVersion')
     {
         $outName = 'e';
     }
-    elseif ($inName -eq 'ReverseFqdn' -or $inName -eq 'SourceAddressPrefix')
+    elseif ($inName -eq 'ReverseFqdn' -or $inName -eq 'SourceAddressPrefix' -or $inName -eq 'family' -or $inName -eq "AdvertisedPublicPrefixes")
     {
         $outName = 'f';
     }
-    elseif ($inName -like 'IdleTimeout*' -or $inName -eq 'RouteTableId')
+    elseif ($inName -like 'IdleTimeout*' -or $inName -eq 'RouteTableId' -or $inName -eq "PeeringLocation" -or $inName -eq "VlanId")
     {
         $outName = 'i';
     }
-    elseif ($inName -eq 'location')
+    elseif ($inName -eq 'AuthorizationKey' -or $inName -eq 'SharedKey')
+    {
+        $outName = 'k';
+    }
+    elseif ($inName -eq 'location' -or $inName -eq "customerAsn")
     {
         $outName = 'l';
     }
-    elseif ($inName -eq 'NetworkSecurityGroupName')
+    elseif ($inName -eq 'AdvertisedPublicPrefixesState')
+    {
+        $outName = 'm';
+    }
+    elseif ($inName -eq 'NetworkSecurityGroupName' -or $inName -eq "SecondaryPeerAddressPrefix")
     {
         $outName = 'o';
     }
-    elseif ($inName -eq 'parameters' -or $inName -eq 'Protocol' -or $inName -eq 'NextHopIpAddress')
+    elseif ($inName -eq 'parameters' -or $inName -eq 'Protocol' -or $inName -eq 'NextHopIpAddress' -or $inName -eq "ServiceProviderName" -or $inName -eq "PeerAsn")
     {
         $outName = 'p';
     }
-    elseif ($inName -eq 'RouteTableName' -or $inName -eq 'Direction')
+    elseif ($inName -eq 'RouteTableName' -or $inName -eq 'Direction' -or $inName -eq "PrimaryPeerAddressPrefix")
     {
         $outName = 'r';
     }
@@ -378,7 +390,7 @@ function Get-CliShorthandName
     {
         $outName = 't';
     }
-    elseif ($inName -eq 'DestinationPortRange')
+    elseif ($inName -eq 'DestinationPortRange' -or $inName -eq "RoutingRegistryName")
     {
         $outName = 'u';
     }
@@ -386,7 +398,7 @@ function Get-CliShorthandName
     {
         $outName = 'w';
     }
-    elseif ($inName -eq 'Priority' -or $inName -eq 'NextHopType')
+    elseif ($inName -eq 'Priority' -or $inName -eq 'NextHopType' -or $inName -eq "PeeringType")
     {
         $outName = 'y';
     }

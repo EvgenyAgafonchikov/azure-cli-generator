@@ -52,16 +52,16 @@
         {
             Write-Warning "There is no name for one of the parameters inside of $OperationName config!"
         }
-        if($paramItem.inCreateSet -eq $true)
+        if($paramItem.createValue)
         {
-            $value = $paramItem.first;
+            $value = $paramItem.createValue;
             $testCreateStr += ("--" + (Get-CliOptionName $paramItem.name) + " {${name}} ");
             $inputTestCode += "  ${name}: '$value'," + $NEW_LINE;
             $cliCreateParams += $name;
         }
-        if($paramItem.inUpdateSet -eq $true)
+        if($paramItem.setValue)
         {
-            $value = $paramItem.second;
+            $value = $paramItem.setValue;
             $testUpdateStr += ("--" + (Get-CliOptionName $paramItem.name) + " {${name}New} ");
             $inputTestCode += "  ${name}New: '$value'," + $NEW_LINE;
             $cliUpdateParams += $name;
@@ -345,7 +345,10 @@
                 $updateParametersCode  += "          if (utils.argHasValue(options.tags)) {
             tagUtils.appendTags(parameters, options);
           }" + $NEW_LINE;
-            $assertCodeCreate += "            networkUtil.shouldHaveTags(output);";
+            $assertCodeCreate += "            tagUtils.getTagsInfo(output.${item}).should.equal(${cliOperationName}.${item});";
+            $assertCodeUpdate += "            if (${cliOperationName}.${item}New) {
+              tagUtils.getTagsInfo(output.${item}).should.equal(${cliOperationName}.${item} + ';' + ${cliOperationName}.${item}New);
+            }" + $NEW_LINE;
             }
             if($item -cnotlike "*Id" -and $item -cnotlike "*Name")
             {
@@ -378,11 +381,11 @@
             {
                 if($param.required -eq $true -and $param.name -ne "location")
                 {
-                    $outResult += " --" + ((Get-CliOptionName $param.name) -replace "express-route-","") + " " + $param.first;
+                    $outResult += " --" + ((Get-CliOptionName $param.name) -replace "express-route-","") + " " + $param.createValue;
                 }
                 elseif($param.name -eq "location" -and $inputTestCode -notlike "*location*")
                 {
-                    $inputTestCode += "  location: '" +  $param.first + "'," + $NEW_LINE;
+                    $inputTestCode += "  location: '" +  $param.createValue + "'," + $NEW_LINE;
                 }
             }
             $outResult += " --json'.formatArgs(${cliOperationName})" + $NEW_LINE;

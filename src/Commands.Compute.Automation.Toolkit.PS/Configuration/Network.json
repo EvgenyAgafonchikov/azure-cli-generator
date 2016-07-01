@@ -15,58 +15,43 @@
       "parameters": [
         {
           "name": "location",
-          "first" : "westus",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "westus",
           "required": "true"
         },
         {
           "name": "domainNameLabel",
-          "first" : "label",
-          "second" : "newlabel",
-          "inCreateSet": "true",
-          "inUpdateSet": "true",
+          "createValue" : "label",
+          "setValue" : "newlabel",
           "required": "false"
         },
         {
           "name": "publicIPAllocationMethod",
-          "first" : "Static",
-          "second" : "Dynamic",
-          "inCreateSet": "true",
-          "inUpdateSet": "true",
+          "default": "Dynamic",
+          "createValue" : "Static",
+          "setValue" : "Dynamic",
           "required": "false"
         },
         {
           "name": "idleTimeoutInMinutes",
-          "first" : "13",
-          "second" : "5",
-          "inCreateSet": "true",
-          "inUpdateSet": "true",
+          "default": "4",
+          "createValue" : "13",
+          "setValue" : "5",
           "required": "false"
         },
         {
           "name": "reverseFqdn",
-          "first" : "",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
           "required": "false"
         },
         {
           "name": "publicIPAddressVersion",
-          "first" : "IPv4",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "default": "IPv4",
+          "createValue" : "IPv4",
           "required": "false"
         },
         {
           "name": "tags",
-          "first" : "TagA=B",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "TagA=B",
+          "setValue" : "tagb=a",
           "required": "false"
         }
       ],
@@ -76,34 +61,26 @@
       "parameters": [
         {
           "name": "location",
-          "first" : "westus",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "westus",
           "required": "true"
         },
         {
           "name": "addressPrefixes",
-          "first" : "10.0.0.0/8",
-          "second" : "192.168.0.0/16",
-          "inCreateSet": "true",
-          "inUpdateSet": "true",
+          "default": "10.0.0.0/8",
+          "createValue" : "10.0.0.0/8",
+          "setValue" : "192.168.0.0/16",
           "required": "true"
         },
         {
           "name": "dnsServers",
-          "first" : "10.0.0.42",
-          "second" : "10.0.0.24",
-          "inCreateSet": "true",
-          "inUpdateSet": "true",
+          "createValue" : "10.0.0.42",
+          "setValue" : "10.0.0.24",
           "required": "false"
         },
         {
           "name": "tags",
-          "first" : "TagVnet=Test",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "TagVnet=Test",
+          "setValue" : "tagNew=new",
           "required": "false"
         }
       ],
@@ -113,42 +90,26 @@
       "parameters": [
         {
           "name": "addressPrefix",
-          "first" : "10.0.0.0/16",
-          "second" : "10.0.0.0/24",
-          "inCreateSet": "true",
-          "inUpdateSet": "true",
+          "createValue" : "10.0.0.0/16",
+          "setValue" : "10.0.0.0/24",
           "required": "true"
         },
         {
           "name": "networkSecurityGroupId",
-          "first" : "",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
           "required": "false"
         },
         {
           "name": "networkSecurityGroupName",
-          "first" : "nsgName",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "nsgName",
           "required": "false"
         },
         {
           "name": "routeTableId",
-          "first" : "",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
           "required": "false"
         },
         {
           "name": "routeTableName",
-          "first" : "routeTableName",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "routeTableName",
           "required": "false"
         }
       ],
@@ -159,18 +120,13 @@
       "parameters": [
         {
           "name": "location",
-          "first" : "westus",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "westus",
           "required": "true"
         },
         {
           "name": "tags",
-          "first" : "LBTag=lbTag",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "LBTag=lbTag",
+          "setValue" : "lb=tag",
           "required": "false"
         }
       ],
@@ -180,18 +136,13 @@
       "parameters": [
         {
           "name": "location",
-          "first" : "westus",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "westus",
           "required": "true"
         },
         {
           "name": "tags",
-          "first" : "NSGTag=NSG",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "NSGTag=NSG",
+          "setValue" : "tag=nsg",
           "required": "false"
         }
       ],
@@ -201,18 +152,13 @@
       "parameters": [
         {
           "name": "location",
-          "first" : "westus",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "westus",
           "required": "true"
         },
         {
           "name": "tags",
-          "first" : "RTTag=tag",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "RTTag=tag",
+          "setValue" : "rt=rt",
           "required": "false"
         }
       ],
@@ -222,82 +168,56 @@
       "parameters": [
         {
           "name": "description",
-          "first" : "testdesc",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
+          "createValue" : "testdesc",
           "required": "false"
         },
         {
           "name": "protocol",
-          "first" : "tcp",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
-          "required": "true"
+          "default": "*",
+          "createValue" : "tcp",
+          "required": "false"
         },
         {
           "name": "sourceAddressPrefix",
-          "first" : "10.0.0.0",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
-          "required": "true"
+          "createValue" : "10.0.0.0",
+          "default": "*",
+          "required": "false"
         },
         {
           "name": "sourcePortRange",
-          "first" : "*",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
-          "required": "true"
+          "default": "*",
+          "createValue" : "*",
+          "required": "false"
         },
         {
           "name": "destinationAddressPrefix",
-          "first" : "10.0.0.0",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
-          "required": "true"
+          "default": "*",
+          "createValue" : "10.0.0.0",
+          "required": "false"
         },
         {
           "name": "destinationPortRange",
-          "first" : "*",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
-          "required": "true"
+          "default": "80",
+          "createValue" : "*",
+          "required": "false"
         },
         {
           "name": "access",
-          "first" : "allow",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
-          "required": "true"
+          "default": "Allow",
+          "createValue" : "allow",
+          "required": "false"
         },
         {
           "name": "priority",
-          "first" : "150",
-          "second" : "256",
-          "inCreateSet": "true",
-          "inUpdateSet": "true",
-          "required": "true"
+          "default": "100",
+          "createValue" : "150",
+          "setValue" : "256",
+          "required": "false"
         },
         {
           "name": "direction",
-          "first" : "inbound",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
-          "required": "true"
-        },
-        {
-          "name": "tags",
-          "first" : "SRuleTag=tagNSGSR",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
+          "default": "Inbound",
+          "createValue" : "inbound",
           "required": "false"
         }
       ],
@@ -308,26 +228,17 @@
       "parameters": [
         {
           "name": "addressPrefix",
-          "first" : "10.0.0.0/8",
-          "second" : "10.0.0.0/16",
-          "inCreateSet": "true",
-          "inUpdateSet": "true",
+          "createValue" : "10.0.0.0/8",
+          "setValue" : "10.0.0.0/16",
           "required": "true"
         },
         {
           "name": "nextHopType",
-          "first" : "VNETLocal",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "VNETLocal",
           "required": "true"
         },
         {
           "name": "nextHopIpAddress",
-          "first" : "",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
           "required": "false"
         }
       ],
@@ -338,10 +249,6 @@
       "parameters": [
         {
           "name": "location",
-          "first" : "",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
           "required": "true"
         }
       ],
@@ -355,10 +262,6 @@
       "parameters": [
         {
           "name": "authorizationKey",
-          "first" : "",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
           "required": "false"
         }
       ],
@@ -369,106 +272,62 @@
       "parameters": [
         {
           "name": "peeringType",
-          "first" : "",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
+          "default": "AzurePrivatePeering",
           "required": "false"
         },
         {
           "name": "azureAsn",
-          "first" : "",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
           "required": "false"
         },
         {
           "name": "peerAsn",
-          "first" : "1",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "1",
           "required": "false"
         },
         {
           "name": "primaryPeerAddressPrefix",
-          "first" : "10.0.0.0/30",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "10.0.0.0/30",
           "required": "true"
         },
         {
           "name": "secondaryPeerAddressPrefix",
-          "first" : "10.0.0.0/30",
-          "second" : "11.0.0.0/30",
-          "inCreateSet": "true",
-          "inUpdateSet": "true",
+          "createValue" : "10.0.0.0/30",
+          "setValue" : "11.0.0.0/30",
           "required": "true"
         },
         {
           "name": "primaryAzurePort",
-          "first" : "",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
           "required": "false"
         },
         {
           "name": "secondaryAzurePort",
-          "first" : "",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
           "required": "false"
         },
         {
           "name": "sharedKey",
-          "first" : "",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
           "required": "false"
         },
         {
           "name": "vlanId",
-          "first" : "1",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "1",
           "required": "false"
         },
         {
           "name": "advertisedPublicPrefixes",
-          "first" : "",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
           "required": "false"
         },
         {
           "name": "advertisedPublicPrefixesState",
-          "first" : "",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
+          "default": "NotConfigured",
           "required": "false"
         },
         {
           "name": "customerAsn",
-          "first" : "",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
           "required": "false"
         },
         {
           "name": "routingRegistryName",
-          "first" : "",
-          "second" : "",
-          "inCreateSet": "false",
-          "inUpdateSet": "false",
+          "default": "ARIN",
           "required": "false"
         }
       ],
@@ -479,58 +338,42 @@
       "parameters": [
         {
           "name": "location",
-          "first" : "eastasia",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "eastasia",
           "required": "true"
         },
         {
           "name": "serviceProviderName",
-          "first" : "Equinix",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "Equinix",
           "required": "true"
         },
         {
           "name": "peeringLocation",
-          "first" : "Seattle",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "Seattle",
           "required": "true"
         },
         {
           "name": "bandwidthInMbps",
-          "first" : "100",
-          "second" : "200",
-          "inCreateSet": "true",
-          "inUpdateSet": "true",
+          "default": "100",
+          "createValue" : "100",
+          "setValue" : "200",
           "required": "true"
         },
         {
           "name": "tier",
-          "first" : "Standard",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "default": "Standard",
+          "createValue" : "Standard",
           "required": "true"
         },
         {
           "name": "family",
-          "first" : "MeteredData",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "default": "MeteredData",
+          "createValue" : "MeteredData",
           "required": "true"
         },
         {
           "name": "tags",
-          "first" : "ERC=erctag",
-          "second" : "",
-          "inCreateSet": "true",
-          "inUpdateSet": "false",
+          "createValue" : "ERC=erctag",
+          "setValue" : "tag=erc",
           "required": "false"
         }
       ],
