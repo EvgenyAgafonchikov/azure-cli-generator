@@ -44,7 +44,7 @@
     foreach($paramItem in $cliOperationParamsRaw[$OperationName])
     {
         $name = $paramItem.name
-        if($name )
+        if($name)
         {
             $cliOperationParams += $name;
         }
@@ -127,6 +127,7 @@
     $promptParametersNameList += $methodParamNameList;
     $paramDefinitions = Get-ParamsDefinition $cliPromptParams;
     $cmdOptions = "";
+    $cmdOptionsSet = "";
     $cliOperationParams = $methodParamNameList + $cliOperationParams;
     for ($index = 0; $index -lt $cliOperationParams.Count; $index++)
     {
@@ -145,6 +146,10 @@
             $cli_option_name = "parameters-file";
         }
         $cmdOptions += "    .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
+        if($cli_option_name -ne "location")
+        {
+            $cmdOptionsSet += "    .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
+        }
         $option_str_items += "--${cli_option_name} `$p${index}";
     }
 

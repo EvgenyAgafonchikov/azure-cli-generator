@@ -1,7 +1,7 @@
 "  ${cliOperationName}.command(`'${cliMethodOption}${requireParamsString}`')
     .description(`$('Update a ${cliOperationDescription}'))
     .usage('[options]${usageParamsString}')
-${cmdOptions}${commonOptions}    .execute(function(${optionParamString}options, _) {
+${cmdOptionsSet}${commonOptions}    .execute(function(${optionParamString}options, _) {
 ${promptingOptions}
       var subscription = profile.current.getSubscription(options.subscription);
       var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
