@@ -318,7 +318,6 @@
         },
         {
           "name": "advertisedPublicPrefixesState",
-          "default": "NotConfigured",
           "required": "false"
         },
         {
@@ -327,7 +326,6 @@
         },
         {
           "name": "routingRegistryName",
-          "default": "ARIN",
           "required": "false"
         }
       ],
@@ -356,19 +354,19 @@
           "default": "100",
           "createValue" : "100",
           "setValue" : "200",
-          "required": "true"
+          "required": "false"
         },
         {
           "name": "tier",
           "default": "Standard",
           "createValue" : "Standard",
-          "required": "true"
+          "required": "false"
         },
         {
           "name": "family",
           "default": "MeteredData",
           "createValue" : "MeteredData",
-          "required": "true"
+          "required": "false"
         },
         {
           "name": "tags",

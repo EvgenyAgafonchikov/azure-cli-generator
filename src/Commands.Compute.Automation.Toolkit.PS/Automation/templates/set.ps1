@@ -2,6 +2,7 @@
     .description(`$('Update a ${cliOperationDescription}'))
     .usage('[options]${usageParamsString}')
 ${cmdOptionsSet}${commonOptions}    .execute(function(${optionParamString}options, _) {
+      var useDefaults = false;
 ${promptingOptions}
       var subscription = profile.current.getSubscription(options.subscription);
       var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
@@ -18,6 +19,7 @@ ${safeGet}
 ${treeAnalysisResult}
 ${updateParametersCode}
 ${skuNameCode}
+      removeEmptyObjects(parameters);
       var progress = cli.interaction.progress(util.format(`$('Updating ${cliOperationDescription} `"%s`"'), ${currentOperationNormalizedName}));
       try {
         ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(${parametersString}, parameters, _);

@@ -1272,6 +1272,16 @@ function getHumanReadableFromCamelCase(inName) {
     return result
   }
 
+  function removeEmptyObjects(test) {
+    for (var i in test) {
+      if (typeof test[i] === 'object' && Object.getOwnPropertyNames(test[i]).length == 0) {
+        delete test[i];
+      } else if (typeof test[i] === 'object') {
+        removeEmptyObjects(test[i]);
+      }
+    }
+  }
+
 exports.init = function (cli) {
 $commandCodeLines
 };

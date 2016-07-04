@@ -304,3 +304,20 @@ function Get-CommanderStyleOption($inStr)
 
     return (decapitalizeFirstLetter $inStr);
 }
+
+function Get-WrappedAs($type, $inputString)
+{
+    if($type -eq "list")
+    {
+        return "('${inputString}').split(',')";
+    }
+    elseif($type -eq "string")
+    {
+        return "'${inputString}'";
+    }
+    elseif($type -eq "int")
+    {
+        return "parseInt('${inputString}', 10)";
+    }
+    return "${inputString}"
+}

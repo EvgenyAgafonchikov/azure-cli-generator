@@ -31,6 +31,7 @@
 
     $cliOperationParams = @();
     $cliPromptParams = @();
+    $cliDefaults = @();
 
     $cliCreateParams = @();
     $cliUpdateParams = @();
@@ -69,6 +70,10 @@
         if($paramItem.required -eq $true)
         {
             $cliPromptParams += $name;
+        }
+        if($paramItem.default)
+        {
+            $cliDefaults += $name;
         }
     }
 
@@ -190,6 +195,7 @@
     $skuNameCode = "";
     foreach($param in $cliOperationParams) {
         $conversion = "";
+        $wrapType = "";
         if($param -ne "location" -and $param -ne "tags" -and $param -ne "name")
         {
             $paramPathHash = Search-TreeElement "root" $param_object $param;
@@ -208,12 +214,10 @@
                 $commanderLast = Get-CommanderStyleOption $last;
                 $currentPath = "parameters"
                 for ($i = 0; $i -lt $paramPathSplit.Length - 1; $i += 1) {
-                    $treeAnalysisResult += "        if(options.${last}) {" + $NEW_LINE;
                     $current = decapitalizeFirstLetter $paramPathSplit[$i];
-                    $treeAnalysisResult += "          if(!${currentPath}.${current}) {" + $NEW_LINE;
-                    $treeAnalysisResult += "            ${currentPath}.${current} = {};" + $NEW_LINE;
+                    $treeAnalysisResult += "        if(!${currentPath}.${current}) {" + $NEW_LINE;
+                    $treeAnalysisResult += "          ${currentPath}.${current} = {};" + $NEW_LINE;
                     ${currentPath} += ".${current}";
-                    $treeAnalysisResult += "          }" + $NEW_LINE;
                     $treeAnalysisResult += "        }" + $NEW_LINE;
                 }
                 $treeProcessedList += $last;
@@ -229,6 +233,7 @@
                         $assertValue = "${cliOperationName}.${last}"
                         $assertValueUpdate = "${cliOperationName}.${last}New"
                         $assertionType = "containEql";
+                        $wrapType = "list";
                     }
                     elseif($paramType -ne $null -and $paramType -like "*Nullable*")
                     {
@@ -238,6 +243,7 @@
                             $setValue = "parseInt(options.${commanderLast}, 10);"
                             $assertValue = "parseInt(${cliOperationName}.${last}, 10)"
                             $assertValueUpdate = "parseInt(${cliOperationName}.${last}New, 10)"
+                            $wrapType = "int";
                         }
                     }
                     elseif($paramType -ne $null -and $paramType -like "*String*") {
@@ -245,6 +251,7 @@
                         $conversion = ".toLowerCase()"
                         $assertValue = "${cliOperationName}.${last}"
                         $assertValueUpdate = "${cliOperationName}.${last}New"
+                        $wrapType = "string";
                     }
                     else {
                         $setValue = "options." + $commanderLast;
@@ -252,7 +259,15 @@
                         $assertValueUpdate = "${cliOperationName}.${last}New"
                     }
                 }
-                $treeAnalysisResult += "          ${currentPath}.${last} = ${setValue};" + $NEW_LINE;
+                $treeAnalysisResult += "          ${currentPath}.${last} = ${setValue};"; # + $NEW_LINE;
+                if($cliDefaults -contains $last)
+                {
+                    $def = $cliOperationParamsRaw[$OperationName] | Where-Object -Property name -eq $last;
+                    $defValue = (Get-WrappedAs $wrapType $def.default);
+                    $treeAnalysisResult += $NEW_LINE + "        } else if (useDefaults) {" + $NEW_LINE;
+                    $treeAnalysisResult += "          ${currentPath}.${last} = ${defValue};";
+                }
+                $treeAnalysisResult += $NEW_LINE;
                 $assertPath = $currentPath -replace "parameters", "output";
                 if($cliCreateParams -contains $last -and $last -notlike "*Id" -and $item -notmatch ".+name")
                 {
