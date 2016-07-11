@@ -36,9 +36,12 @@
     $cliCreateParams = @();
     $cliUpdateParams = @();
     $testCreateStr = "";
+    $testCreateDefaultStr = "";
     $testUpdateStr = "";
+
     $inputTestCode = "";
     $assertCodeCreate = "";
+    $assertCodeCreateDefault = "";
     $assertIdCodeCreate = "";
     $assertCodeUpdate = "";
 
@@ -70,6 +73,10 @@
         if($paramItem.required -eq $true)
         {
             $cliPromptParams += $name;
+            if(-not $paramItem.default)
+            {
+                $testCreateDefaultStr += ("--" + (Get-CliOptionName $paramItem.name) + " {${name}} ");
+            }
         }
         if($paramItem.default)
         {
@@ -275,8 +282,8 @@
                         else
                         {
                             $setValue = "options." + $commanderLast + ".split(',')";
-                            $assertValue = "${cliOperationName}.${last}"
-                            $assertValueUpdate = "${cliOperationName}.${last}New"
+                            $assertValue = "${cliOperationName}.${last}";
+                            $assertValueUpdate = "${cliOperationName}.${last}New";
                             $assertionType = "containEql";
                         }
                             $wrapType = "list";
@@ -286,14 +293,14 @@
                         $underlying =  [System.Nullable]::GetUnderlyingType($paramType);
                         if($underlying -like "*Int*")
                         {
-                            $setValue = "parseInt(options.${commanderLast}, 10);"
-                            $assertValue = "parseInt(${cliOperationName}.${last}, 10)"
-                            $assertValueUpdate = "parseInt(${cliOperationName}.${last}New, 10)"
+                            $setValue = "parseInt(options.${commanderLast}, 10);";
+                            $assertValue = "parseInt(${cliOperationName}.${last}, 10)";
+                            $assertValueUpdate = "parseInt(${cliOperationName}.${last}New, 10)";
                             $wrapType = "int";
                         }
                         elseif($underlying.Name -like "*Boolean*")
                         {
-                            $setValue = "utils.parseBool(options.${commanderLast});"
+                            $setValue = "utils.parseBool(options.${commanderLast});";
                             $assertValue = "utils.parseBool(${cliOperationName}.${last})";
                             $assertValueUpdate = "utils.parseBool(${cliOperationName}.${last}New)";
                             $wrapType = "bool";
@@ -301,15 +308,15 @@
                     }
                     elseif($paramType -ne $null -and $paramType -like "*String*") {
                         $setValue = "options." + $commanderLast;
-                        $conversion = ".toLowerCase()"
-                        $assertValue = "${cliOperationName}.${last}"
-                        $assertValueUpdate = "${cliOperationName}.${last}New"
+                        $conversion = ".toLowerCase()";
+                        $assertValue = "${cliOperationName}.${last}";
+                        $assertValueUpdate = "${cliOperationName}.${last}New";
                         $wrapType = "string";
                     }
                     else {
                         $setValue = "options." + $commanderLast;
                         $assertValue = "${cliOperationName}.${last}"
-                        $assertValueUpdate = "${cliOperationName}.${last}New"
+                        $assertValueUpdate = "${cliOperationName}.${last}New";
                     }
                 }
 
@@ -358,15 +365,21 @@ $treeAnalysisResult +=
                         }
                     }
 
+                    $assertPath = $currentPath -replace "parameters", "output";
                     if($cliDefaults -contains $last)
                     {
                         $def = $cliOperationParamsRaw[$OperationName] | Where-Object -Property name -eq $last;
                         $defValue = (Get-WrappedAs $wrapType $def.default);
+                        $defAssertValue = "'{0}'" -f $def.default;
+                        if($wrapType -ne "list")
+                        {
+                            $defAssertValue = $defValue;
+                        }
                         $treeAnalysisResult += $NEW_LINE + "        } else if (useDefaults) {" + $NEW_LINE;
                         $treeAnalysisResult += "          ${currentPath}.${last} = ${defValue};";
+                        $assertCodeCreateDefault += "            ${assertPath}.${last}${conversion}.should.${assertionType}(${defAssertValue}${conversion});" + $NEW_LINE;
                     }
                     $treeAnalysisResult += $NEW_LINE;
-                    $assertPath = $currentPath -replace "parameters", "output";
                     if($cliCreateParams -contains $last -and $last -notlike "*Id" -and $item -notmatch ".+name")
                     {
                         $assertCodeCreate += "            ${assertPath}.${last}${conversion}.should.${assertionType}(${assertValue}${conversion});" + $NEW_LINE;

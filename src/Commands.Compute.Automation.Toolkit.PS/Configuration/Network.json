@@ -282,7 +282,7 @@
         {
           "name": "peerAsn",
           "createValue" : "1",
-          "required": "false"
+          "required": "true"
         },
         {
           "name": "primaryPeerAddressPrefix",
@@ -310,7 +310,7 @@
         {
           "name": "vlanId",
           "createValue" : "1",
-          "required": "false"
+          "required": "true"
         },
         {
           "name": "advertisedPublicPrefixes",

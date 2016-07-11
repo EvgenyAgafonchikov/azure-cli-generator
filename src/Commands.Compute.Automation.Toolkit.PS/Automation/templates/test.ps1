@@ -138,7 +138,28 @@ ${assertCodeUpdate}
             done();
           });
         });
-      });
+      });"
+if ($cliDefaults.Length -gt 0)
+{
+"
+      it('create with defaults should create ${cliOperationNameInLowerCase} with default values', function (done) {
+        networkUtil.deleteGroup(groupName, suite, function () {
+        networkUtil.createGroup(groupName, location, suite, function () {
+${depsCode}
+          var cmd = '${componentNameInLowerCase}-autogen ${parentOp}${opCliOptionNameSingular} create -g {group} -n {name} ${testCreateDefaultStr}${additionalOptionsCreate}--json'.formatArgs(${cliOperationName});
+          testUtils.executeCommand(suite, retry, cmd, function (result) {
+            result.exitStatus.should.equal(0);
+            var output = JSON.parse(result.text);
+            output.name.should.equal(${cliOperationName}.name);
+${assertCodeCreateDefault}
+            done();
+          });
+${closingBraces}
+        });
+        });
+      });"
+}
+"
     });
   });
 });"
