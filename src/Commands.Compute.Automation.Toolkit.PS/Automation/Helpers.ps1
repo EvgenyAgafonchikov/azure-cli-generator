@@ -241,20 +241,32 @@ function IsSimpleType ($type)
 function Search-TreeElement($path, $obj, $target) {
     $found = $false;
     foreach ($k in $obj.psobject.properties) {
-        $test = "";
+        $simpleType = "";
         if ($k.Value -ne $null)
         {
-            $test = IsSimpleType $k.Value.GetType();
+            $simpleType = IsSimpleType $k.Value.GetType();
         }
         if ($k.Name -eq $target)
         {
             $value = $path + "." + $k.Name
             $type = $k.TypeNameOfValue; #Value.GetType();
-            return @{path = $value; type = $type};
+            if ($value -notlike "*subnet*" -or ($value -notlike "*subnets*" -and $target -eq "subnet"))
+            {
+                return @{path = $value; type = $type};
+            }
         }
-        elseif ($k.Value -ne $null -and -not $test) {
-            $currentPath = $path + "." + $k.Name;
-            $result = Search-TreeElement $currentPath  $k.Value $target;
+        elseif ($k.Value -ne $null -and -not $simpleType) {
+            $result = $null;
+            if($k.Value.GetType() -like "*List*")
+            {
+                $currentPath = $path + "." + $k.Name + "[0]";
+                $result = Search-TreeElement $currentPath $k.Value[0] $target;
+            }
+            else
+            {
+                $currentPath = $path + "." + $k.Name;
+                $result = Search-TreeElement $currentPath $k.Value $target;
+            }
             if ($result)
             {
                 $pathVal = $result;
@@ -264,7 +276,10 @@ function Search-TreeElement($path, $obj, $target) {
                     $pathVal = $result.path
                     $typeVal = $result.type
                 }
+                if ($pathVal -notlike "*subnet*" -or ($pathVal -notlike "*subnets*" -and $target -eq "subnet"))
+                {
                 return @{path = $pathVal; type = $typeVal};
+                }
             }
         }
     }
@@ -318,6 +333,10 @@ function Get-WrappedAs($type, $inputString)
     elseif($type -eq "int")
     {
         return "parseInt('${inputString}', 10)";
+    }
+    elseif($type -eq "bool")
+    {
+        return "utils.parseBool('${inputString}')";
     }
     return "${inputString}"
 }

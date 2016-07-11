@@ -198,7 +198,24 @@
         $wrapType = "";
         if($param -ne "location" -and $param -ne "tags" -and $param -ne "name")
         {
-            $paramPathHash = Search-TreeElement "root" $param_object $param;
+            $searchParam = $param;
+            if($param -like "*Name")
+            {
+                $tmp = $param -replace "Name", "";
+                if($alternativesArray -contains $tmp)
+                {
+                    $searchParam = $tmp;
+                }
+            }
+            elseif($param -like "*Id")
+            {
+                $tmp = $param -replace "Id", "";
+                if($alternativesArray -contains $tmp)
+                {
+                    $searchParam = $tmp;
+                }
+            }
+            $paramPathHash = Search-TreeElement "root" $param_object $searchParam;
             if ($paramPathHash)
             {
                 $paramPath = $paramPathHash.path;
@@ -209,17 +226,40 @@
                 $paramType = $paramPathHash.type;
                 $paramPath = $paramPath -replace "root.", "";
                 $paramPathSplit = $paramPath.Split(".");
+
+                if($param -like "*Name" -and $alternativesArray -contains ($param -replace "Name", ""))
+                {
+                    continue;
+                }
+                elseif($param -like "*Id" -and $alternativesArray -contains ($param -replace "Id", ""))
+                {
+                    $paramPathSplit[$paramPathSplit.Length - 1] += "Id";
+                }
                 $lastItem =  $paramPathSplit[$paramPathSplit.Length - 1];
                 $last = decapitalizeFirstLetter $lastItem;
                 $commanderLast = Get-CommanderStyleOption $last;
                 $currentPath = "parameters"
                 for ($i = 0; $i -lt $paramPathSplit.Length - 1; $i += 1) {
                     $current = decapitalizeFirstLetter $paramPathSplit[$i];
+
+                    if($current -like "*[0]*")
+                    {
+                        $currentArray = "${currentPath}.${current}" -replace "\[0\]","";
+                        $treeAnalysisResult += "        if(!$currentArray) {" + $NEW_LINE;
+                        $treeAnalysisResult += "          ${currentArray} = [];" + $NEW_LINE;
+                        $treeAnalysisResult += "        }" + $NEW_LINE;
+                    }
+
                     $treeAnalysisResult += "        if(!${currentPath}.${current}) {" + $NEW_LINE;
                     $treeAnalysisResult += "          ${currentPath}.${current} = {};" + $NEW_LINE;
+                    if ($current -eq "ipConfigurations[0]")
+                    {
+                        $treeAnalysisResult += "          ${currentPath}.${current}.name = 'default';" + $NEW_LINE;
+                    }
                     ${currentPath} += ".${current}";
                     $treeAnalysisResult += "        }" + $NEW_LINE;
                 }
+
                 $treeProcessedList += $last;
 
                 $setValue = "null"
@@ -229,11 +269,18 @@
                 if ($cliOperationParams -contains $lastItem) {
                     $treeAnalysisResult += "        if(options.${commanderLast}) {" + $NEW_LINE;
                     if($paramType -ne $null -and $paramType -like "*List*") {
-                        $setValue = "options." + $commanderLast+ ".split(',')";
-                        $assertValue = "${cliOperationName}.${last}"
-                        $assertValueUpdate = "${cliOperationName}.${last}New"
-                        $assertionType = "containEql";
-                        $wrapType = "list";
+                        if($last -eq "loadBalancerBackendAddressPools" -or $last -eq "loadBalancerInboundNatRules")
+                        {
+                            $setValue = "options." + $commanderLast + ".split(',').map(function(item) { return { id: item } })";
+                        }
+                        else
+                        {
+                            $setValue = "options." + $commanderLast + ".split(',')";
+                            $assertValue = "${cliOperationName}.${last}"
+                            $assertValueUpdate = "${cliOperationName}.${last}New"
+                            $assertionType = "containEql";
+                        }
+                            $wrapType = "list";
                     }
                     elseif($paramType -ne $null -and $paramType -like "*Nullable*")
                     {
@@ -244,6 +291,13 @@
                             $assertValue = "parseInt(${cliOperationName}.${last}, 10)"
                             $assertValueUpdate = "parseInt(${cliOperationName}.${last}New, 10)"
                             $wrapType = "int";
+                        }
+                        elseif($underlying.Name -like "*Boolean*")
+                        {
+                            $setValue = "utils.parseBool(options.${commanderLast});"
+                            $assertValue = "${cliOperationName}.${last}"
+                            $assertValueUpdate = "${cliOperationName}.${last}New"
+                            $wrapType = "bool";
                         }
                     }
                     elseif($paramType -ne $null -and $paramType -like "*String*") {
@@ -259,25 +313,66 @@
                         $assertValueUpdate = "${cliOperationName}.${last}New"
                     }
                 }
-                $treeAnalysisResult += "          ${currentPath}.${last} = ${setValue};"; # + $NEW_LINE;
-                if($cliDefaults -contains $last)
-                {
-                    $def = $cliOperationParamsRaw[$OperationName] | Where-Object -Property name -eq $last;
-                    $defValue = (Get-WrappedAs $wrapType $def.default);
-                    $treeAnalysisResult += $NEW_LINE + "        } else if (useDefaults) {" + $NEW_LINE;
-                    $treeAnalysisResult += "          ${currentPath}.${last} = ${defValue};";
-                }
-                $treeAnalysisResult += $NEW_LINE;
-                $assertPath = $currentPath -replace "parameters", "output";
-                if($cliCreateParams -contains $last -and $last -notlike "*Id" -and $item -notmatch ".+name")
-                {
-                    $assertCodeCreate += "            ${assertPath}.${last}${conversion}.should.${assertionType}(${assertValue}${conversion});" + $NEW_LINE;
-                }
-                if($cliUpdateParams -contains $last-and $last -notlike "*Id" -and $item -notmatch ".+name")
-                {
-                    $assertCodeUpdate += "            ${assertPath}.${last}${conversion}.should.${assertionType}(${assertValueUpdate}${conversion});" + $NEW_LINE;
-                }
-                $treeAnalysisResult += "        }" + $NEW_LINE;
+
+                    if($last -clike "*Id" -and $alternativesArray -contains ($param -replace "Id", ""))
+                    {
+                        $itemStrippedId = $last -creplace "Id","";
+                        $itemStrippedComander = Get-CommanderStyleOption $itemStrippedId;
+                        if ($alternativesArray -contains $itemStrippedId)
+                        {
+                            $treeAnalysisResult += "          ${currentPath}.${itemStrippedId} = {};" + $NEW_LINE;
+                            $treeAnalysisResult += "          ${currentPath}.${itemStrippedId}.id = options.${last};" + $NEW_LINE;
+                            $treeAnalysisResult += "        } else if (options.${itemStrippedComander}Name) {" + $NEW_LINE;
+                            $treeAnalysisResult += "          ${currentPath}.${itemStrippedId} = {};" + $NEW_LINE;
+                            $cliOptionToGetIdByName = Get-CliNormalizedName $itemStrippedId;
+                            if ($cliOptionToGetIdByName.toLower().EndsWith("address"))
+                            {
+                                $cliOptionToGetIdByName += "es";
+                            }
+                            else
+                            {
+                                $cliOptionToGetIdByName += "s";
+                            }
+
+                            if($itemStrippedId -ne "subnet")
+                            {
+                                $treeAnalysisResult +=
+"          var idContainer = ${componentNameInLowerCase}ManagementClient.${cliOptionToGetIdByName}.get(resourceGroup, options.${itemStrippedComander}Name, _);"
+                            }
+                            else
+                            {
+                                $treeAnalysisResult +=
+"          var idContainer = ${componentNameInLowerCase}ManagementClient.${cliOptionToGetIdByName}.get(resourceGroup, options.subnetVirtualNetworkName, options.${itemStrippedComander}Name, _);"
+                            }
+$treeAnalysisResult +=
+"
+          ${currentPath}.${itemStrippedId}.id = idContainer.id;
+"
+                        }
+                    }
+                    else
+                    {
+                        $treeAnalysisResult += "          ${currentPath}.${last} = ${setValue};"; # + $NEW_LINE;
+                    }
+
+                    if($cliDefaults -contains $last)
+                    {
+                        $def = $cliOperationParamsRaw[$OperationName] | Where-Object -Property name -eq $last;
+                        $defValue = (Get-WrappedAs $wrapType $def.default);
+                        $treeAnalysisResult += $NEW_LINE + "        } else if (useDefaults) {" + $NEW_LINE;
+                        $treeAnalysisResult += "          ${currentPath}.${last} = ${defValue};";
+                    }
+                    $treeAnalysisResult += $NEW_LINE;
+                    $assertPath = $currentPath -replace "parameters", "output";
+                    if($cliCreateParams -contains $last -and $last -notlike "*Id" -and $item -notmatch ".+name")
+                    {
+                        $assertCodeCreate += "            ${assertPath}.${last}${conversion}.should.${assertionType}(${assertValue}${conversion});" + $NEW_LINE;
+                    }
+                    if($cliUpdateParams -contains $last -and $last -notlike "*Id" -and $item -notmatch ".+name")
+                    {
+                        $assertCodeUpdate += "            ${assertPath}.${last}${conversion}.should.${assertionType}(${assertValueUpdate}${conversion});" + $NEW_LINE;
+                    }
+                    $treeAnalysisResult += "        }" + $NEW_LINE;
             }
         }
     }
@@ -307,7 +402,6 @@
             {
                 if($item -ne $currentOperationNormalizedName -and
                     $item -ne "resourceGroup" -and
-                    $cliCreateParams -contains $last -and
                    $item -notmatch ".+name")
                 {
                     if($item -clike "*Id")
@@ -334,8 +428,11 @@
           parameters.${itemStrippedId}.id = idContainer.id;
 "
                             $updateParametersCode += "        }" + $NEW_LINE;
+                            if($cliCreateParams -contains $item -or $cliCreateParams -contains ($itemStrippedId + "Name"))
+                            {
+                                $assertIdCodeCreate += "            output.${itemStrippedId}.id.should.equal(${itemStrippedId}.id);" + $NEW_LINE;
+                            }
                         }
-                        $assertIdCodeCreate += "            output.${itemStrippedId}.id.should.equal(${itemStrippedId}.id);" + $NEW_LINE;
                     }
                     else
                     {
@@ -345,7 +442,7 @@
                 if($item -ne $currentOperationNormalizedName -and
                     $item -ne "resourceGroup" -and
                     $item -ne "location" -and
-                    $cliUpdateParams -contains $last -and
+                    $cliUpdateParams -contains $item -and
                     $item -notlike "*Id" -and
                     $item -notmatch ".+name")
                 {
