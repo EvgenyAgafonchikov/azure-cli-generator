@@ -78,7 +78,6 @@
     }
 
     $methodParams = $MethodInfo.GetParameters();
-    $additionalOptions = @();
     foreach ($param in $methodParams)
     {
         if($param.Name -like "*parameters")
@@ -295,8 +294,8 @@
                         elseif($underlying.Name -like "*Boolean*")
                         {
                             $setValue = "utils.parseBool(options.${commanderLast});"
-                            $assertValue = "${cliOperationName}.${last}"
-                            $assertValueUpdate = "${cliOperationName}.${last}New"
+                            $assertValue = "utils.parseBool(${cliOperationName}.${last})";
+                            $assertValueUpdate = "utils.parseBool(${cliOperationName}.${last}New)";
                             $wrapType = "bool";
                         }
                     }
@@ -352,7 +351,11 @@ $treeAnalysisResult +=
                     }
                     else
                     {
-                        $treeAnalysisResult += "          ${currentPath}.${last} = ${setValue};"; # + $NEW_LINE;
+                        $treeAnalysisResult += "          ${currentPath}.${last} = ${setValue};";
+                        if($last -eq "privateIPAddress")
+                        {
+                            $treeAnalysisResult += $NEW_LINE + "          ${currentPath}.privateIPAllocationMethod = 'Static';";
+                        }
                     }
 
                     if($cliDefaults -contains $last)
@@ -479,12 +482,22 @@ $treeAnalysisResult +=
     }
 
     $depsCode = "";
-    $additionalOptions = "";
+    $additionalOptionsCommon = "";
+    $additionalOptionsCreate = "";
     $closingBraces = "";
     if($dependencies[$OperationName])
     {
         foreach($dependency in $dependencies[$OperationName])
         {
+            $parentCmd = "";
+            $parentRef = "";
+            if($parents[$dependency])
+            {
+                $depParent = $parents[$dependency];
+                $parentCmd = Get-CliOptionName $parents[$dependency];
+                $parentRef = "--${parentCmd}-name ${depParent}Name";
+                $parentCmd = " ${parentCmd}";
+            }
             $outResult = "";
             $depCliOption = Get-SingularNoun (Get-CliOptionName $dependency);
             $depResultVarName = (decapitalizeFirstLetter (Get-SingularNoun $dependency));
@@ -493,14 +506,14 @@ $treeAnalysisResult +=
             {
                 $depCliName = "{${depCliName}}";
             }
-            $outResult += "          var cmd = '${componentNameInLowerCase}-autogen ${depCliOption} create -g {group} -l {location} -n ${depCliName} ";
+            $outResult += "          var cmd = '${componentNameInLowerCase}-autogen${parentCmd} ${depCliOption} create -g {group} -n ${depCliName} ${parentRef} ";
             foreach($param in $cliOperationParamsRaw[$dependency])
             {
-                if($param.required -eq $true -and $param.name -ne "location")
+                if($param.required -eq $true)
                 {
                     $outResult += " --" + ((Get-CliOptionName $param.name) -replace "express-route-","") + " " + $param.createValue;
                 }
-                elseif($param.name -eq "location" -and $inputTestCode -notlike "*location*")
+                if($param.name -eq "location" -and $inputTestCode -notlike "*location*")
                 {
                     $inputTestCode += "  location: '" +  $param.createValue + "'," + $NEW_LINE;
                 }
@@ -508,11 +521,21 @@ $treeAnalysisResult +=
             $outResult += " --json'.formatArgs(${cliOperationName})" + $NEW_LINE;
             $outResult += "testUtils.executeCommand(suite, retry, cmd, function (${depResultVarName}) {"
             $depsCode += $outResult + $NEW_LINE
-            $depsCode  += "${depResultVarName}.exitStatus.should.equal(0);" + $NEW_LINE;
+            $depsCode += "${depResultVarName}.exitStatus.should.equal(0);" + $NEW_LINE;
             $depsCode += "${depResultVarName} = JSON.parse(${depResultVarName}.text);" + $NEW_LINE;
-            if($testCreateStr -notlike "*${depCliOption}*") {
-                $depCliOption = $depCliOption -replace "express-route-",""
-                $additionalOptions += " --${depCliOption}-name ${depCliName} ";
+            if($testCreateStr -notlike "*${depCliOption}*")
+            {
+                $depCliOption = $depCliOption -replace "express-route-","";
+                $additionalOptionsValue = " --${depCliOption}-name ${depCliName} ";
+                if($OperationName -eq "NetworkInterfaces")
+                {
+                    $additionalOptionsValue = $additionalOptionsValue -creplace "virtual-network-name","subnet-virtual-network-name";
+                }
+                if($parents[$OperationName] -eq (Get-SingularNoun $dependency) -or $dependency -eq "ExpressRouteCircuits")
+                {
+                    $additionalOptionsCommon += $additionalOptionsValue;
+                }
+                $additionalOptionsCreate +=  $additionalOptionsValue;
             }
             $closingBraces += "});" + $NEW_LINE;
         }

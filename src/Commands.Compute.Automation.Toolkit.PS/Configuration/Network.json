@@ -69,7 +69,7 @@
           "default": "10.0.0.0/8",
           "createValue" : "10.0.0.0/8",
           "setValue" : "192.168.0.0/16",
-          "required": "true"
+          "required": "false"
         },
         {
           "name": "dnsServers",
@@ -376,6 +376,80 @@
         }
       ],
       "parent": ""
+    },
+    { "name": "NetworkInterfaces",
+      "parameters": [
+        {
+          "name": "location",
+          "createValue" : "westus",
+          "required": "true"
+        },
+        {
+          "name": "subnetId",
+          "required": "false"
+        },
+        {
+          "name": "subnetName",
+          "required": "false"
+        },
+        {
+          "name": "subnetVirtualNetworkName",
+          "required": "false"
+        },
+        {
+          "name": "networkSecurityGroupId",
+          "required": "false"
+        },
+        {
+          "name": "networkSecurityGroupName",
+          "required": "false"
+        },
+        {
+          "name": "publicIpAddressId",
+          "required": "false"
+        },
+        {
+          "name": "publicIpAddressName",
+          "required": "false"
+        },
+        {
+          "name": "loadBalancerBackendAddressPools",
+          "required": "false"
+        },
+        {
+          "name": "loadBalancerInboundNatRules",
+          "required": "false"
+        },
+        {
+          "name": "privateIPAddress",
+          "createValue" : "10.0.0.13",
+          "setValue" : "10.0.0.42",
+          "required": "false"
+        },
+        {
+          "name": "privateIPAddressVersion",
+          "required": "false"
+        },
+        {
+          "name": "internalDnsNameLabel",
+          "createValue" : "testlabel",
+          "required": "false"
+        },
+        {
+          "name": "enableIPForwarding",
+          "createValue" : "true",
+          "setValue" : "false",
+          "required": "false"
+        },
+        {
+          "name": "tags",
+          "createValue" : "first=one",
+          "setValue" : "second=two",
+          "required": "false"
+        }
+      ],
+      "parent": "",
+      "dependencies": ["VirtualNetworks", "Subnets", "PublicIPAddresses"]
     }
   ]
 }

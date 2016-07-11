@@ -326,7 +326,7 @@ function Get-CliShorthandName
     {
         $outName = 'n';
     }
-    elseif ($inName -eq "AzureAsn" -or $inName -like '*AllocationMethod' -or $inName -like 'AddressPrefix*')
+    elseif ($inName -eq "AzureAsn" -or $inName -like '*AllocationMethod' -or $inName -like 'AddressPrefix*' -or $inName -eq "PrivateIpAddress")
     {
         $outName = 'a';
     }
@@ -338,7 +338,7 @@ function Get-CliShorthandName
     {
         $outName = 'c';
     }
-    elseif ($inName -eq 'instanceId' -or $inName -eq 'DnsServers' -or $inName -eq 'Description' -or $inName -eq "PrimaryAzurePort")
+    elseif ($inName -eq 'instanceId' -or $inName -eq 'DnsServers' -or $inName -eq 'Description' -or $inName -eq "PrimaryAzurePort" -or $inName -eq "LoadBalancerBackendAddressPools")
     {
         $outName = 'd';
     }
@@ -354,15 +354,15 @@ function Get-CliShorthandName
     {
         $outName = 'e';
     }
-    elseif ($inName -eq 'ReverseFqdn' -or $inName -eq 'SourceAddressPrefix' -or $inName -eq 'family' -or $inName -eq "AdvertisedPublicPrefixes")
+    elseif ($inName -eq 'ReverseFqdn' -or $inName -eq 'SourceAddressPrefix' -or $inName -eq 'family' -or $inName -eq "AdvertisedPublicPrefixes" -or $inName -eq "EnableIpForwarding")
     {
         $outName = 'f';
     }
-    elseif ($inName -like 'IdleTimeout*' -or $inName -eq 'RouteTableId' -or $inName -eq "PeeringLocation" -or $inName -eq "VlanId")
+    elseif ($inName -like 'IdleTimeout*' -or $inName -eq 'RouteTableId' -or $inName -eq "PeeringLocation" -or $inName -eq "VlanId" -or $inName -eq "PublicIpAddressId")
     {
         $outName = 'i';
     }
-    elseif ($inName -eq 'AuthorizationKey' -or $inName -eq 'SharedKey')
+    elseif ($inName -eq 'AuthorizationKey' -or $inName -eq 'SharedKey' -or $inName -eq "SubnetName")
     {
         $outName = 'k';
     }
@@ -370,7 +370,7 @@ function Get-CliShorthandName
     {
         $outName = 'l';
     }
-    elseif ($inName -eq 'AdvertisedPublicPrefixesState')
+    elseif ($inName -eq 'AdvertisedPublicPrefixesState' -or $inName -eq "SubnetVirtualNetworkName")
     {
         $outName = 'm';
     }
@@ -378,11 +378,11 @@ function Get-CliShorthandName
     {
         $outName = 'o';
     }
-    elseif ($inName -eq 'parameters' -or $inName -eq 'Protocol' -or $inName -eq 'NextHopIpAddress' -or $inName -eq "ServiceProviderName" -or $inName -eq "PeerAsn")
+    elseif ($inName -eq 'parameters' -or $inName -eq 'Protocol' -or $inName -eq 'NextHopIpAddress' -or $inName -eq "ServiceProviderName" -or $inName -eq "PeerAsn" -or $inName -eq "PublicIpAddressName")
     {
         $outName = 'p';
     }
-    elseif ($inName -eq 'RouteTableName' -or $inName -eq 'Direction' -or $inName -eq "PrimaryPeerAddressPrefix")
+    elseif ($inName -eq 'RouteTableName' -or $inName -eq 'Direction' -or $inName -eq "PrimaryPeerAddressPrefix" -or $inName -eq "InternalDnsNameLabel")
     {
         $outName = 'r';
     }
@@ -390,7 +390,7 @@ function Get-CliShorthandName
     {
         $outName = 't';
     }
-    elseif ($inName -eq 'DestinationPortRange' -or $inName -eq "RoutingRegistryName")
+    elseif ($inName -eq 'DestinationPortRange' -or $inName -eq "RoutingRegistryName" -or $inName -eq "SubnetId")
     {
         $outName = 'u';
     }
