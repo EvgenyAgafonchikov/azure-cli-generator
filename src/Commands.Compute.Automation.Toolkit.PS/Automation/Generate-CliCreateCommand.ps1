@@ -44,6 +44,7 @@
     $assertCodeCreateDefault = "";
     $assertIdCodeCreate = "";
     $assertCodeUpdate = "";
+    $alternativesArray = @();
 
     foreach($paramItem in $cliOperationParamsRaw[$OperationName])
     {
@@ -56,31 +57,39 @@
         {
             Write-Warning "There is no name for one of the parameters inside of $OperationName config!"
         }
+		$commanderStyleName = Get-CommanderStyleOption $name;
         if($paramItem.createValue)
         {
             $value = $paramItem.createValue;
-            $testCreateStr += ("--" + (Get-CliOptionName $paramItem.name) + " {${name}} ");
-            $inputTestCode += "  ${name}: '$value'," + $NEW_LINE;
-            $cliCreateParams += $name;
+            $testCreateStr += ("--" + (Get-CliOptionName $paramItem.name) + " {${commanderStyleName}} ");
+            $inputTestCode += "  ${commanderStyleName}: '$value'," + $NEW_LINE;
+            $cliCreateParams += $commanderStyleName;
         }
         if($paramItem.setValue)
         {
             $value = $paramItem.setValue;
-            $testUpdateStr += ("--" + (Get-CliOptionName $paramItem.name) + " {${name}New} ");
-            $inputTestCode += "  ${name}New: '$value'," + $NEW_LINE;
-            $cliUpdateParams += $name;
+            $testUpdateStr += ("--" + (Get-CliOptionName $paramItem.name) + " {${commanderStyleName}New} ");
+            $inputTestCode += "  ${commanderStyleName}New: '$value'," + $NEW_LINE;
+            $cliUpdateParams += $commanderStyleName;
         }
         if($paramItem.required -eq $true)
         {
-            $cliPromptParams += $name;
+            $cliPromptParams += $commanderStyleName;
             if(-not $paramItem.default)
             {
-                $testCreateDefaultStr += ("--" + (Get-CliOptionName $paramItem.name) + " {${name}} ");
+                $testCreateDefaultStr += ("--" + (Get-CliOptionName $paramItem.name) + " {${commanderStyleName}} ");
             }
         }
         if($paramItem.default)
         {
-            $cliDefaults += $name;
+            $cliDefaults += $commanderStyleName;
+        }
+        if($name -clike "*Id")
+        {
+            if($paramItem.alternative)
+            {
+                $alternativesArray += ($commanderStyleName -creplace "Id","");
+            }
         }
     }
 
@@ -162,20 +171,6 @@
             $cmdOptionsSet += "    .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
         }
         $option_str_items += "--${cli_option_name} `$p${index}";
-    }
-
-    # Collect data about 'param-name' and 'param-id' alternatives
-    $alternativesArray = @();
-    foreach ($item in $cliOperationParams)
-    {
-        if ($item -clike "*Id")
-        {
-            $cutItem = $item -creplace "Id", "";
-            if($cliOperationParams -contains ($cutItem + "Name"))
-            {
-                $alternativesArray += $cutItem;
-            }
-        }
     }
 
     $commonOptions = Get-CommonOptions $cliMethodOption;
@@ -294,29 +289,29 @@
                         if($underlying -like "*Int*")
                         {
                             $setValue = "parseInt(options.${commanderLast}, 10);";
-                            $assertValue = "parseInt(${cliOperationName}.${last}, 10)";
-                            $assertValueUpdate = "parseInt(${cliOperationName}.${last}New, 10)";
+                            $assertValue = "parseInt(${cliOperationName}.${commanderLast}, 10)";
+                            $assertValueUpdate = "parseInt(${cliOperationName}.${commanderLast}New, 10)";
                             $wrapType = "int";
                         }
                         elseif($underlying.Name -like "*Boolean*")
                         {
                             $setValue = "utils.parseBool(options.${commanderLast});";
-                            $assertValue = "utils.parseBool(${cliOperationName}.${last})";
-                            $assertValueUpdate = "utils.parseBool(${cliOperationName}.${last}New)";
+                            $assertValue = "utils.parseBool(${cliOperationName}.${commanderLast})";
+                            $assertValueUpdate = "utils.parseBool(${cliOperationName}.${commanderLast}New)";
                             $wrapType = "bool";
                         }
                     }
                     elseif($paramType -ne $null -and $paramType -like "*String*") {
                         $setValue = "options." + $commanderLast;
                         $conversion = ".toLowerCase()";
-                        $assertValue = "${cliOperationName}.${last}";
-                        $assertValueUpdate = "${cliOperationName}.${last}New";
+                        $assertValue = "${cliOperationName}.${commanderLast}";
+                        $assertValueUpdate = "${cliOperationName}.${commanderLast}New";
                         $wrapType = "string";
                     }
                     else {
                         $setValue = "options." + $commanderLast;
-                        $assertValue = "${cliOperationName}.${last}"
-                        $assertValueUpdate = "${cliOperationName}.${last}New";
+                        $assertValue = "${cliOperationName}.${commanderLast}"
+                        $assertValueUpdate = "${cliOperationName}.${commanderLast}New";
                     }
                 }
 

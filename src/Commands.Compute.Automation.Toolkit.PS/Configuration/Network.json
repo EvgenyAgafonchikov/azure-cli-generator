@@ -96,19 +96,23 @@
         },
         {
           "name": "networkSecurityGroupId",
+          "alternative": "networkSecurityGroupName",
           "required": "false"
         },
         {
           "name": "networkSecurityGroupName",
+          "alternative": "networkSecurityGroupId",
           "createValue" : "nsgName",
           "required": "false"
         },
         {
           "name": "routeTableId",
+          "alternative": "routeTableName",
           "required": "false"
         },
         {
           "name": "routeTableName",
+          "alternative": "routeTableId",
           "createValue" : "routeTableName",
           "required": "false"
         }
@@ -386,10 +390,12 @@
         },
         {
           "name": "subnetId",
+          "alternative": "subnetName",
           "required": "false"
         },
         {
           "name": "subnetName",
+          "alternative": "subnetId",
           "required": "false"
         },
         {
@@ -398,18 +404,22 @@
         },
         {
           "name": "networkSecurityGroupId",
+          "alternative": "networkSecurityGroupName",
           "required": "false"
         },
         {
           "name": "networkSecurityGroupName",
+          "alternative": "networkSecurityGroupId",
           "required": "false"
         },
         {
           "name": "publicIpAddressId",
+          "alternative": "publicIpAddressName",
           "required": "false"
         },
         {
           "name": "publicIpAddressName",
+          "alternative": "publicIpAddressId",
           "required": "false"
         },
         {
