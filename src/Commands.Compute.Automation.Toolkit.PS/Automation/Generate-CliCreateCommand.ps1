@@ -192,7 +192,6 @@
 
     $treeProcessedList = @();
     $treeAnalysisResult = "";
-    $skuNameMergeRequired = $false;
     $skuNameCode = "";
     foreach($param in $cliOperationParams) {
         $conversion = "";
@@ -200,7 +199,15 @@
         if($param -ne "location" -and $param -ne "tags" -and $param -ne "name")
         {
             $searchParam = $param;
-            if($param -like "*Name")
+            $searchTree = $param_object;
+            $searchRoot = "root";
+            if($param -like "sku*")
+            {
+                $searchParam = $searchParam -replace "sku","";
+                $searchTree = $param_object.Sku;
+                $searchRoot += ".sku";
+            }
+            elseif($param -like "*Name")
             {
                 $tmp = $param -replace "Name", "";
                 if($alternativesArray -contains $tmp)
@@ -216,14 +223,10 @@
                     $searchParam = $tmp;
                 }
             }
-            $paramPathHash = Search-TreeElement "root" $param_object $searchParam;
+            $paramPathHash = Search-TreeElement $searchRoot $searchTree $searchParam;
             if ($paramPathHash)
             {
                 $paramPath = $paramPathHash.path;
-                if($paramPath -like "*.sku.*")
-                {
-                    $skuNameMergeRequired = $true;
-                }
                 $paramType = $paramPathHash.type;
                 $paramPath = $paramPath -replace "root.", "";
                 $paramPathSplit = $paramPath.Split(".");
@@ -267,8 +270,21 @@
                 $assertValue = "null";
                 $assertValueUpdate = "null";
                 $assertionType = "equal";
-                if ($cliOperationParams -contains $lastItem) {
-                    $treeAnalysisResult += "        if(options.${commanderLast}) {" + $NEW_LINE;
+                if ($cliOperationParams -contains $lastItem -or $cliOperationParams -contains "sku${lastItem}") {
+                    if($paramPathSplit -contains "sku")
+                    {
+                        $treeAnalysisResult += "        if(options.sku${lastItem}) {" + $NEW_LINE;
+                        if("sku${lastItem}" -eq "skuName")
+                        {
+                            $treeAnalysisResult += "          if(!options.skuTier) {" + $NEW_LINE;
+                            $treeAnalysisResult += "            ${currentPath}.tier = options.sku${lastItem}" + $NEW_LINE;
+                            $treeAnalysisResult += "          }" + $NEW_LINE;
+                        }
+                    }
+                    else
+                    {
+                        $treeAnalysisResult += "        if(options.${commanderLast}) {" + $NEW_LINE;
+                    }
                     if($paramType -ne $null -and $paramType -like "*List*") {
                         if($last -eq "loadBalancerBackendAddressPools" -or $last -eq "loadBalancerInboundNatRules")
                         {
@@ -302,7 +318,14 @@
                         }
                     }
                     elseif($paramType -ne $null -and $paramType -like "*String*") {
-                        $setValue = "options." + $commanderLast;
+                        if($paramPathSplit -contains "sku")
+                        {
+                            $setValue = "options.sku" + $lastItem;
+                        }
+                        else
+                        {
+                            $setValue = "options." + $commanderLast;
+                        }
                         $conversion = ".toLowerCase()";
                         $assertValue = "${cliOperationName}.${commanderLast}";
                         $assertValueUpdate = "${cliOperationName}.${commanderLast}New";
@@ -335,6 +358,11 @@
                                 $cliOptionToGetIdByName += "s";
                             }
 
+                            if($cliOptionToGetIdByName -eq "gatewayDefaultSites")
+                            {
+                                $cliOptionToGetIdByName = "localNetworkGateways";
+                            }
+
                             if($itemStrippedId -ne "subnet")
                             {
                                 $treeAnalysisResult +=
@@ -361,9 +389,13 @@ $treeAnalysisResult +=
                     }
 
                     $assertPath = $currentPath -replace "parameters", "output";
-                    if($cliDefaults -contains $last)
+                    if($cliDefaults -contains $last -or $cliDefaults -contains "sku${lastItem}")
                     {
                         $def = $cliOperationParamsRaw[$OperationName] | Where-Object -Property name -eq $last;
+                        if($cliDefaults -contains "sku${lastItem}")
+                        {
+                            $def = $cliOperationParamsRaw[$OperationName] | Where-Object -Property name -eq "sku${lastItem}";
+                        }
                         $defValue = (Get-WrappedAs $wrapType $def.default);
                         $defAssertValue = "'{0}'" -f $def.default;
                         if($wrapType -ne "list")
@@ -388,7 +420,7 @@ $treeAnalysisResult +=
         }
     }
 
-    if($skuNameMergeRequired)
+    if ($OperationName -eq "ExpressRouteCircuits")
     {
         $skuNameCode = "      if (parameters.sku.tier && parameters.sku.family) {
         parameters.sku.name = parameters.sku.tier + '_' + parameters.sku.family;
@@ -447,7 +479,15 @@ $treeAnalysisResult +=
                     }
                     else
                     {
-                        $assertCodeCreate += "            output.${item}.should.equal(${cliOperationName}.${item});" + $NEW_LINE;
+                        if($item -like "sku*")
+                        {
+                            $assertSku =  $item.Insert(3, ".").ToLower();
+                            $assertCodeCreate += "            output.${assertSku}.should.equal(${cliOperationName}.${item});" + $NEW_LINE;
+                        }
+                        else
+                        {
+                            $assertCodeCreate += "            output.${item}.should.equal(${cliOperationName}.${item});" + $NEW_LINE;
+                        }
                     }
                 }
                 if($item -ne $currentOperationNormalizedName -and
@@ -510,6 +550,10 @@ $treeAnalysisResult +=
             $depCliOption = Get-SingularNoun (Get-CliOptionName $dependency);
             $depResultVarName = (decapitalizeFirstLetter (Get-SingularNoun $dependency));
             $depCliName = $depResultVarName + "Name";
+            if($depCliName -eq "subnetName" -and $OperationName -eq "VirtualNetworkGateways")
+            {
+                $depCliName = "GatewaySubnet";
+            }
             if($inputTestCode -like "*${depCliName}*")
             {
                 $depCliName = "{${depCliName}}";
@@ -535,7 +579,7 @@ $treeAnalysisResult +=
             {
                 $depCliOption = $depCliOption -replace "express-route-","";
                 $additionalOptionsValue = " --${depCliOption}-name ${depCliName} ";
-                if($OperationName -eq "NetworkInterfaces")
+                if($OperationName -eq "NetworkInterfaces" -or $OperationName -eq "VirtualNetworkGateways")
                 {
                     $additionalOptionsValue = $additionalOptionsValue -creplace "virtual-network-name","subnet-virtual-network-name";
                 }

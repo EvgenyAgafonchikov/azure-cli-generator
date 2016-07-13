@@ -52,6 +52,7 @@ var requiredEnvironment = [{
 describe('arm', function () {
   describe('${componentNameInLowerCase}-autogen', function () {
     var suite, retry = 5;
+    var hour = 60 * 60000;
 
     before(function (done) {
       suite = new CLITest(this, testPrefix, requiredEnvironment);
@@ -65,6 +66,7 @@ describe('arm', function () {
       });
     });
     after(function (done) {
+      this.timeout(hour);
       networkUtil.deleteGroup(groupName, suite, function () {
         suite.teardownSuite(done);
       });
@@ -77,6 +79,7 @@ describe('arm', function () {
     });
 
     describe('${cliOperationNameInLowerCase}', function () {
+      this.timeout(hour);
       it('create should create ${cliOperationNameInLowerCase}', function (done) {
         networkUtil.createGroup(groupName, location, suite, function () {
 ${depsCode}
@@ -143,6 +146,7 @@ if ($cliDefaults.Length -gt 0)
 {
 "
       it('create with defaults should create ${cliOperationNameInLowerCase} with default values', function (done) {
+        this.timeout(hour);
         networkUtil.deleteGroup(groupName, suite, function () {
         networkUtil.createGroup(groupName, location, suite, function () {
 ${depsCode}

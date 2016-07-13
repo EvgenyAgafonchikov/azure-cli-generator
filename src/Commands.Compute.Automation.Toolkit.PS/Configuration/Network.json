@@ -361,13 +361,13 @@
           "required": "false"
         },
         {
-          "name": "tier",
+          "name": "skuTier",
           "default": "Standard",
           "createValue" : "Standard",
           "required": "false"
         },
         {
-          "name": "family",
+          "name": "skuFamily",
           "default": "MeteredData",
           "createValue" : "MeteredData",
           "required": "false"
@@ -455,6 +455,120 @@
           "name": "tags",
           "createValue" : "first=one",
           "setValue" : "second=two",
+          "required": "false"
+        }
+      ],
+      "parent": "",
+      "dependencies": ["VirtualNetworks", "Subnets", "PublicIPAddresses"]
+    },
+    { "name": "LocalNetworkGateways",
+      "parameters": [
+        {
+          "name": "location",
+          "createValue" : "westus",
+          "required": "true"
+        },
+        {
+          "name": "addressPrefixes",
+          "createValue" : "10.0.0.0/8",
+          "setValue" : "192.168.0.0/16",
+          "required": "false"
+        },
+        {
+          "name": "gatewayIpAddress",
+          "createValue" : "10.0.0.42",
+          "setValue" : "10.0.0.24",
+          "required": "true"
+        },
+        {
+          "name": "tags",
+          "createValue" : "first=one",
+          "setValue" : "second=two",
+          "required": "false"
+        }
+      ],
+      "parent": ""
+    },
+    { "name": "VirtualNetworkGateways",
+      "parameters": [
+        {
+          "name": "location",
+          "createValue" : "westus",
+          "required": "true"
+        },
+        {
+          "name": "gatewayType",
+          "default": "VPN",
+          "createValue": "ExpressRoute",
+          "required": "false"
+        },
+        {
+          "name": "vpnType",
+          "default": "RouteBased",
+          "createValue": "PolicyBased",
+          "required": "false"
+        },
+        {
+          "name": "skuName",
+          "default": "Basic",
+          "createValue": "Standard",
+          "setValue": "Basic",
+          "required": "false"
+        },
+        {
+          "name": "publicIpAddressId",
+          "alternative": "publicIpAddressName",
+          "required": "false"
+        },
+        {
+          "name": "publicIpAddressName",
+          "alternative": "publicIpAddressId",
+          "required": "false"
+        },
+        {
+          "name": "subnetId",
+          "alternative": "subnetName",
+          "required": "false"
+        },
+        {
+          "name": "subnetVirtualNetworkName",
+          "required": "false"
+        },
+        {
+          "name": "subnetName",
+          "alternative": "subnetId",
+          "required": "false"
+        },
+        {
+          "name": "gatewayDefaultSiteName",
+          "alternative": "gatewayDefaultSiteId",
+          "required": "false"
+        },
+        {
+          "name": "gatewayDefaultSiteId",
+          "alternative": "gatewayDefaultSiteName",
+          "required": "false"
+        },
+        {
+          "name": "addressPrefixes",
+          "createValue": "192.0.0.0/8",
+          "required": "false"
+        },
+        {
+          "name": "privateIPAddress",
+          "createValue": "10.0.0.42",
+          "required": "false"
+        },
+        {
+          "name": "enableBgp",
+          "default": "false",
+          "createValue": "true",
+          "required": "false"
+        },
+        {
+          "name": "tags",
+          "createValue" : "first=old",
+          "setValue" : "second=new",
           "required": "false"
         }
       ],
