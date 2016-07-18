@@ -259,7 +259,7 @@ function Search-TreeElement($path, $obj, $target) {
             $result = $null;
             if($k.Value.GetType() -like "*List*")
             {
-                $currentPath = $path + "." + $k.Name + "[0]";
+                $currentPath = $path + "." + $k.Name + "[index]";
                 $result = Search-TreeElement $currentPath $k.Value[0] $target;
             }
             else
@@ -339,4 +339,16 @@ function Get-WrappedAs($type, $inputString)
         return "utils.parseBool('${inputString}')";
     }
     return "${inputString}"
+}
+
+function GetPlural($inStr)
+{
+    if ($inStr.toLower().EndsWith("address"))
+    {
+        return $inStr + "es";
+    }
+    else
+    {
+        return $inStr + "s";
+    }
 }

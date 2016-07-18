@@ -60,6 +60,11 @@ param(
     $cliOperationParamsRaw = @{};
     $parents = @{};
     $dependencies = @{};
+
+    # TODO: merge into one
+    $artificalOperations = @();
+    $artificallyExtracted = @();
+
 # Read Settings from Config Object
 if (-not [string]::IsNullOrEmpty($ConfigPath))
 {
@@ -77,6 +82,11 @@ if (-not [string]::IsNullOrEmpty($ConfigPath))
         $operationNameFilter = @();
         foreach ($operationItem in $configJsonObject.operations)
         {
+            if($operationItem.path)
+            {
+                $artificalOperations += $operationItem;
+                $artificallyExtracted += $operationItem.name;
+            }
             $operationNameFilter += $operationItem.name;
             $operationSettings.Add($operationItem.name, @());
             $cliOperationSettings.Add($operationItem.name, @());
@@ -263,6 +273,11 @@ $code +=
         }
         $st = mkdir -Force $opOutFolder;
 
+        $artificalOperationsFilter = $artificalOperations | Where-Object { $_.name -eq $operation_type.Name };
+        if($artificalOperationsFilter)
+        {
+            $operation_type = $filtered_types | Where-Object {$_.Name -eq $artificalOperationsFilter.parenttype}
+        }
         $methods = Get-OperationMethods $operation_type;
         if ($methods -eq $null -or $methods.Count -eq 0)
         {

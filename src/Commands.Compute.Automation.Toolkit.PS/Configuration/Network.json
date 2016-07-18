@@ -574,6 +574,102 @@
       ],
       "parent": "",
       "dependencies": ["VirtualNetworks", "Subnets", "PublicIPAddresses"]
+    },
+    { "name": "NetworkInterfaceIPConfiguration",
+      "parameters": [
+        {
+          "name": "networkInterfaceIPConfigurationName",
+          "required": "true",
+          "useforall": "true"
+        },
+        {
+          "name": "subnetId",
+          "alternative": "subnetName",
+          "required": "false"
+        },
+        {
+          "name": "subnetName",
+          "alternative": "subnetId",
+          "required": "false"
+        },
+        {
+          "name": "subnetVirtualNetworkName",
+          "required": "false"
+        },
+        {
+          "name": "publicIpAddressId",
+          "alternative": "publicIpAddressName",
+          "required": "false"
+        },
+        {
+          "name": "publicIpAddressName",
+          "alternative": "publicIpAddressId",
+          "required": "false"
+        },
+        {
+          "name": "loadBalancerBackendAddressPools",
+          "required": "false"
+        },
+        {
+          "name": "loadBalancerInboundNatRules",
+          "required": "false"
+        },
+        {
+          "name": "privateIPAddress",
+          "createValue" : "10.0.0.13",
+          "setValue" : "10.0.0.42",
+          "required": "false"
+        },
+        {
+          "name": "privateIPAddressVersion",
+          "required": "false"
+        }
+      ],
+      "parent": "networkInterface",
+      "path": "ipConfigurations",
+      "parenttype": "NetworkInterfacesOperationsExtensions"
+    },
+    { "name": "FrontendIPConfiguration",
+      "parameters": [
+        {
+          "name": "frontendIpConfigurationName",
+          "required": "true",
+          "useforall": "true"
+        },
+        {
+          "name": "privateIPAddress",
+          "createValue" : "10.0.0.13",
+          "setValue" : "10.0.0.42",
+          "required": "false"
+        },
+        {
+          "name": "publicIpAddressId",
+          "alternative": "publicIpAddressName",
+          "required": "false"
+        },
+        {
+          "name": "publicIpAddressName",
+          "alternative": "publicIpAddressId",
+          "required": "false"
+        },
+        {
+          "name": "subnetId",
+          "alternative": "subnetName",
+          "required": "false"
+        },
+        {
+          "name": "subnetName",
+          "alternative": "subnetId",
+          "required": "false"
+        },
+        {
+          "name": "subnetVirtualNetworkName",
+          "required": "false"
+        }
+      ],
+      "parent": "loadBalancer",
+      "path": "frontendIPConfigurations",
+      "parenttype": "LoadBalancersOperationsExtensions"
     }
   ]
 }

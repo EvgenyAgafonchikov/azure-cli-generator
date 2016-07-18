@@ -132,6 +132,8 @@ function Get-FilteredOperationTypes
     )
 
     $op_types = $all_assembly_types | where { $_.Namespace -eq $dll_name -and $_.Name -like '*OperationsExtensions' };
+    $op_types_add = $all_assembly_types | where { $_.Namespace -eq "${dll_name}.Models" -and $operation_name_filter -contains $_.Name };
+    $op_types += $op_types_add;
 
     Write-Verbose $BAR_LINE;
     Write-Verbose 'List All Operation Types:';

@@ -47,7 +47,17 @@
     # Set Required Parameters
     $requireParams = @();
     $requireParamNormalizedNames = @();
-    $require = Update-RequiredParameters $methodParamNameList $methodParamTypeDict $allStringFieldCheck;
+    $methodParamNameListExtended = $methodParamNameList;
+    [array]$requiredAddons = ($cliOperationParamsRaw[$OperationName] | Where-Object { $_.useforall -eq $true}).name
+    if($requiredAddons)
+    {
+        for ($i = 0; $i -lt $requiredAddons.Length; $i++)
+        {
+            $requiredAddons[$i] = Get-CommanderStyleOption $requiredAddons[$i];
+        }
+        $methodParamNameListExtended += $requiredAddons ;
+    }
+    $require = Update-RequiredParameters $methodParamNameListExtended $methodParamTypeDict $allStringFieldCheck;
     $requireParams = $require.requireParams;
     $requireParamNormalizedNames = $require.requireParamNormalizedNames;
 
@@ -64,9 +74,9 @@
     $option_str_items = @();
     $use_input_parameter_file = $false;
     $cmdOptions = "";
-    for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
+    for ($index = 0; $index -lt $methodParamNameListExtended.Count; $index++)
     {
-        [string]$optionParamName = $methodParamNameList[$index];
+        [string]$optionParamName = $methodParamNameListExtended[$index];
         $optionShorthandStr = $null;
 
         $cli_option_name = Get-CliOptionName $optionParamName;
@@ -82,7 +92,7 @@
 
     $commonOptions = Get-CommonOptions $cliMethodOption
     # Prompting options
-    $promptingOptions = Get-PromptingOptionsCode $methodParamNameList $methodParamNameList 6;
+    $promptingOptions = Get-PromptingOptionsCode $methodParamNameListExtended $methodParamNameListExtended 6;
 
     #
     # API call using SDK
@@ -93,9 +103,21 @@
         $cliMethodFuncName += "Method";
     }
     $resultVarName = "result";
-    $safeGet = Get-SafeGetFunction $componentNameInLowerCase $cliOperationName $methodParamNameList $resultVarName $cliOperationDescription;
-    $parametersString = Get-ParametersString $methodParamNameList;
+    $childResultVarName = "childResult";
+    $template = "";
+    if($artificallyExtracted -contains $OperationName)
+    {
+        $artificalOperation = $artificalOperations | Where-Object { $_.Name -eq $OperationName };
+        $artificalOperationParent = GetPlural $artificalOperation.parent;
+        $safeGet = Get-SafeGetFunction $componentNameInLowerCase $artificalOperationParent $methodParamNameList $resultVarName $cliOperationDescription;
+        $template = Get-Content "$PSScriptRoot\templates\delete_child.ps1" -raw;
+    }
+    else
+    {
+        $safeGet = Get-SafeGetFunction $componentNameInLowerCase $cliOperationName $methodParamNameList $resultVarName $cliOperationDescription;
+        $template = Get-Content "$PSScriptRoot\templates\delete.ps1" -raw;
+    }
 
-    $template = Get-Content "$PSScriptRoot\templates\delete.ps1" -raw;
+    $parametersString = Get-ParametersString $methodParamNameList;
     $code += Invoke-Expression $template;
     return $code;

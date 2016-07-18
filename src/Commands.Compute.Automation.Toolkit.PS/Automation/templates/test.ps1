@@ -29,6 +29,7 @@ var networkUtil = new NetworkTestUtil();
 var testPrefix = 'arm-${componentNameInLowerCase}-autogen-${cliOperationNameInLowerCase}-tests',
   groupName = 'xplat-test-${opCliOptionName}',
   location;
+var index = 0;
 
 var ${cliOperationName} = {
 ${inputTestCode}"
