@@ -48,7 +48,7 @@
     $requireParams = @();
     $requireParamNormalizedNames = @();
     $methodParamNameListExtended = $methodParamNameList;
-    [array]$requiredAddons = ($cliOperationParamsRaw[$OperationName] | Where-Object { $_.useforall -eq $true}).name
+    [array]$requiredAddons = ($cliOperationParamsRaw[$OperationName] | Where-Object { $_.isChildName -eq $true}).name
     if($requiredAddons)
     {
         for ($i = 0; $i -lt $requiredAddons.Length; $i++)

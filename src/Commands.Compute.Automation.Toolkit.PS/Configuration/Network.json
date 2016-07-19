@@ -580,7 +580,7 @@
         {
           "name": "networkInterfaceIPConfigurationName",
           "required": "true",
-          "useforall": "true"
+          "isChildName": "true"
         },
         {
           "name": "subnetId",
@@ -626,15 +626,14 @@
         }
       ],
       "parent": "networkInterface",
-      "path": "ipConfigurations",
-      "parenttype": "NetworkInterfacesOperationsExtensions"
+      "path": "ipConfigurations"
     },
     { "name": "FrontendIPConfiguration",
       "parameters": [
         {
           "name": "frontendIpConfigurationName",
           "required": "true",
-          "useforall": "true"
+          "isChildName": "true"
         },
         {
           "name": "privateIPAddress",
@@ -668,8 +667,7 @@
         }
       ],
       "parent": "loadBalancer",
-      "path": "frontendIPConfigurations",
-      "parenttype": "LoadBalancersOperationsExtensions"
+      "path": "frontendIPConfigurations"
     }
   ]
 }

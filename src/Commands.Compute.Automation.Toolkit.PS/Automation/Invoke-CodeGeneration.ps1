@@ -276,7 +276,7 @@ $code +=
         $artificalOperationsFilter = $artificalOperations | Where-Object { $_.name -eq $operation_type.Name };
         if($artificalOperationsFilter)
         {
-            $operation_type = $filtered_types | Where-Object {$_.Name -eq $artificalOperationsFilter.parenttype}
+            $operation_type = $types | Where-Object {$_.Name -eq (GetPlural $artificalOperationsFilter.parent) + "OperationsExtensions"}
         }
         $methods = Get-OperationMethods $operation_type;
         if ($methods -eq $null -or $methods.Count -eq 0)
