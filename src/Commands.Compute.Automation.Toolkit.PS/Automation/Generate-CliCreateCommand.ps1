@@ -551,52 +551,15 @@ $treeAnalysisResult +=
         }
     }
 
-    $depsCode = "";
     $additionalOptionsCommon = "";
     $additionalOptionsCreate = "";
-    $closingBraces = "";
     if($dependencies[$OperationName])
     {
         foreach($dependency in $dependencies[$OperationName])
         {
-            $parentCmd = "";
-            $parentRef = "";
-            if($parents[$dependency])
-            {
-                $depParent = $parents[$dependency];
-                $parentCmd = Get-CliOptionName $parents[$dependency];
-                $parentRef = "--${parentCmd}-name ${depParent}Name";
-                $parentCmd = " ${parentCmd}";
-            }
-            $outResult = "";
             $depCliOption = Get-SingularNoun (Get-CliOptionName $dependency);
             $depResultVarName = (decapitalizeFirstLetter (Get-SingularNoun $dependency));
             $depCliName = $depResultVarName + "Name";
-            if($depCliName -eq "subnetName" -and $OperationName -eq "VirtualNetworkGateways")
-            {
-                $depCliName = "GatewaySubnet";
-            }
-            if($inputTestCode -like "*${depCliName}*")
-            {
-                $depCliName = "{${depCliName}}";
-            }
-            $outResult += "          var cmd = '${componentNameInLowerCase}-autogen${parentCmd} ${depCliOption} create -g {group} -n ${depCliName} ${parentRef} ";
-            foreach($param in $cliOperationParamsRaw[$dependency])
-            {
-                if($param.required -eq $true)
-                {
-                    $outResult += " --" + ((Get-CliOptionName $param.name) -replace "express-route-","") + " " + $param.createValue;
-                }
-                if($param.name -eq "location" -and $inputTestCode -notlike "*location*")
-                {
-                    $inputTestCode += "  location: '" +  $param.createValue + "'," + $NEW_LINE;
-                }
-            }
-            $outResult += " --json'.formatArgs(${cliOperationName})" + $NEW_LINE;
-            $outResult += "testUtils.executeCommand(suite, retry, cmd, function (${depResultVarName}) {"
-            $depsCode += $outResult + $NEW_LINE
-            $depsCode += "${depResultVarName}.exitStatus.should.equal(0);" + $NEW_LINE;
-            $depsCode += "${depResultVarName} = JSON.parse(${depResultVarName}.text);" + $NEW_LINE;
             if($testCreateStr -notlike "*${depCliOption}*")
             {
                 $depCliOption = $depCliOption -replace "express-route-","";
@@ -611,7 +574,6 @@ $treeAnalysisResult +=
                 }
                 $additionalOptionsCreate +=  $additionalOptionsValue;
             }
-            $closingBraces += "});" + $NEW_LINE;
         }
     }
 
