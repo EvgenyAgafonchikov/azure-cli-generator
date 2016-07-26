@@ -3,13 +3,12 @@
     .usage('[options]${usageParamsString}')
 ${cmdOptions}${commonOptions}    .execute(function(${optionParamString}options, _) {
       var useDefaults = true;
+      var index = 0;
 ${promptingOptions}
 ${promptingOptionsCustom}
       var subscription = profile.current.getSubscription(options.subscription);
       var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
 
-      nsgCrud = new Nsg(cli, networkManagementClient);
-      routeTableCrud = new RouteTable(cli, networkManagementClient);
       var ${resultVarName};
 ${safeGet}
       if (${resultVarName}) {

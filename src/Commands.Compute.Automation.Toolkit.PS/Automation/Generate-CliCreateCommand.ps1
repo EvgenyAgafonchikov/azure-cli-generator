@@ -57,7 +57,7 @@
         {
             Write-Warning "There is no name for one of the parameters inside of $OperationName config!"
         }
-		$commanderStyleName = Get-CommanderStyleOption $name;
+        $commanderStyleName = Get-CommanderStyleOption $name;
         if($paramItem.createValue)
         {
             $value = $paramItem.createValue;
@@ -125,7 +125,17 @@
     # Set Required Parameters
     $requireParams = @();
     $requireParamNormalizedNames = @();
-    $require = Update-RequiredParameters $methodParamNameList $methodParamTypeDict $allStringFieldCheck;
+    $methodParamNameListExtended = $methodParamNameList;
+    [array]$requiredAddons = ($cliOperationParamsRaw[$OperationName] | Where-Object { $_.isChildName -eq $true}).name
+    if($requiredAddons)
+    {
+        for ($i = 0; $i -lt $requiredAddons.Length; $i++)
+        {
+            $requiredAddons[$i] = Get-CommanderStyleOption $requiredAddons[$i];
+        }
+        $methodParamNameListExtended += $requiredAddons ;
+    }
+    $require = Update-RequiredParameters $methodParamNameListExtended $methodParamTypeDict $allStringFieldCheck;
     $requireParams = $require.requireParams;
     $requireParamNormalizedNames = $require.requireParamNormalizedNames;
 
@@ -177,6 +187,10 @@
 
     # Prompting options
     $promptingOptions = Get-PromptingOptionsCode $promptParametersNameList $promptParametersNameList 6;
+    if($artificallyExtracted -contains $OperationName)
+    {
+        $promptParametersNameList = $methodParamNameListExtended;
+    }
     $promptingOptionsCustom = Get-PromptingOptionsCode $cliPromptParams $promptParametersNameList 6;
 
     #
@@ -188,7 +202,20 @@
         $cliMethodFuncName += "Method";
     }
     $resultVarName = "result";
-    $safeGet = Get-SafeGetFunction $componentNameInLowerCase $cliOperationName $methodParamNameList $resultVarName $cliOperationDescription;
+    $childResultVarName = "childResult";
+    $safeGetChild = "";
+    if($artificallyExtracted -contains $OperationName)
+    {
+        $artificalOperation = $artificalOperations | Where-Object { $_.Name -eq $OperationName };
+        $artificalOperationParent = GetPlural $artificalOperation.parent;
+        $safeGet = Get-SafeGetFunction $componentNameInLowerCase $artificalOperationParent $methodParamNameList $resultVarName $cliOperationDescription;
+        $safeGetChild = Get-SafeGetFunction $componentNameInLowerCase $cliOperationName $methodParamNameList $childResultVarName $cliOperationDescription;
+    }
+    else
+    {
+        $safeGet = Get-SafeGetFunction $componentNameInLowerCase $cliOperationName $methodParamNameList $resultVarName $cliOperationDescription;
+    }
+
 
     $treeProcessedList = @();
     $treeAnalysisResult = "";
@@ -246,9 +273,9 @@
                 for ($i = 0; $i -lt $paramPathSplit.Length - 1; $i += 1) {
                     $current = decapitalizeFirstLetter $paramPathSplit[$i];
 
-                    if($current -like "*[0]*")
+                    if($current -match ".*\[index\].*")
                     {
-                        $currentArray = "${currentPath}.${current}" -replace "\[0\]","";
+                        $currentArray = "${currentPath}.${current}" -replace "\[index\]","";
                         $treeAnalysisResult += "        if(!$currentArray) {" + $NEW_LINE;
                         $treeAnalysisResult += "          ${currentArray} = [];" + $NEW_LINE;
                         $treeAnalysisResult += "        }" + $NEW_LINE;
@@ -256,9 +283,15 @@
 
                     $treeAnalysisResult += "        if(!${currentPath}.${current}) {" + $NEW_LINE;
                     $treeAnalysisResult += "          ${currentPath}.${current} = {};" + $NEW_LINE;
-                    if ($current -eq "ipConfigurations[0]")
+### TODO: change condition to actual for children and parents both
+                    #if ($current -eq "ipConfigurations[0]")
+                    if($artificallyExtracted -contains $OperationName)
                     {
-                        $treeAnalysisResult += "          ${currentPath}.${current}.name = 'default';" + $NEW_LINE;
+                        $treeAnalysisResult += "          ${currentPath}.${current}.name = ${currentOperationNormalizedName} || 'default';" + $NEW_LINE;
+                    }
+                    elseif($current -eq "ipConfigurations[index]")
+                    {
+                        $treeAnalysisResult += "          ${currentPath}.${current}.name = ${currentOperationNormalizedName} || 'default';" + $NEW_LINE;
                     }
                     ${currentPath} += ".${current}";
                     $treeAnalysisResult += "        }" + $NEW_LINE;
@@ -349,14 +382,7 @@
                             $treeAnalysisResult += "        } else if (options.${itemStrippedComander}Name) {" + $NEW_LINE;
                             $treeAnalysisResult += "          ${currentPath}.${itemStrippedId} = {};" + $NEW_LINE;
                             $cliOptionToGetIdByName = Get-CliNormalizedName $itemStrippedId;
-                            if ($cliOptionToGetIdByName.toLower().EndsWith("address"))
-                            {
-                                $cliOptionToGetIdByName += "es";
-                            }
-                            else
-                            {
-                                $cliOptionToGetIdByName += "s";
-                            }
+                            $cliOptionToGetIdByName = GetPlural $cliOptionToGetIdByName;
 
                             if($cliOptionToGetIdByName -eq "gatewayDefaultSites")
                             {
@@ -384,6 +410,8 @@ $treeAnalysisResult +=
                         $treeAnalysisResult += "          ${currentPath}.${last} = ${setValue};";
                         if($last -eq "privateIPAddress")
                         {
+                            $treeAnalysisResult += $NEW_LINE +
+                                "          if (!options.privateIpAddressVersion || (options.privateIpAddressVersion && options.privateIpAddressVersion.toLowerCase() != 'ipv6'))"
                             $treeAnalysisResult += $NEW_LINE + "          ${currentPath}.privateIPAllocationMethod = 'Static';";
                         }
                     }
@@ -416,6 +444,15 @@ $treeAnalysisResult +=
                         $assertCodeUpdate += "            ${assertPath}.${last}${conversion}.should.${assertionType}(${assertValueUpdate}${conversion});" + $NEW_LINE;
                     }
                     $treeAnalysisResult += "        }" + $NEW_LINE;
+            }
+            else
+            {
+                if($searchParam -ne "resourceGroup" -and $searchParam -ne $currentOperationNormalizedName -and $searchParam -ne $parents[$OperationName] -and $searchParam -cnotlike "*Name")
+                {
+                    $warningStr = "Parameter {0} was not found using reflection" -f $searchParam;
+                    Write-Host $warningStr -background "Yellow" -foreground "Blue";
+                    Write-Host "This could be because of mistype in config or because of SDK changes" -background "Yellow" -foreground "Blue";
+                }
             }
         }
     }
@@ -458,14 +495,8 @@ $treeAnalysisResult +=
                             $updateParametersCode += "        } else if (options.${itemStrippedId}Name) {" + $NEW_LINE;
                             $updateParametersCode += "          parameters.${itemStrippedId} = {};" + $NEW_LINE;
                             $cliOptionToGetIdByName = Get-CliNormalizedName $itemStrippedId;
-                            if ($cliOptionToGetIdByName.toLower().EndsWith("address"))
-                            {
-                                $cliOptionToGetIdByName += "es";
-                            }
-                            else
-                            {
-                                $cliOptionToGetIdByName += "s";
-                            }
+                            $cliOptionToGetIdByName = GetPlural $cliOptionToGetIdByName;
+
                             $updateParametersCode +=
 "          var idContainer = ${componentNameInLowerCase}ManagementClient.${cliOptionToGetIdByName}.get(resourceGroup, options.${itemStrippedId}Name, _);
           parameters.${itemStrippedId}.id = idContainer.id;
@@ -529,24 +560,12 @@ $treeAnalysisResult +=
         }
     }
 
-    $depsCode = "";
     $additionalOptionsCommon = "";
     $additionalOptionsCreate = "";
-    $closingBraces = "";
     if($dependencies[$OperationName])
     {
         foreach($dependency in $dependencies[$OperationName])
         {
-            $parentCmd = "";
-            $parentRef = "";
-            if($parents[$dependency])
-            {
-                $depParent = $parents[$dependency];
-                $parentCmd = Get-CliOptionName $parents[$dependency];
-                $parentRef = "--${parentCmd}-name ${depParent}Name";
-                $parentCmd = " ${parentCmd}";
-            }
-            $outResult = "";
             $depCliOption = Get-SingularNoun (Get-CliOptionName $dependency);
             $depResultVarName = (decapitalizeFirstLetter (Get-SingularNoun $dependency));
             $depCliName = $depResultVarName + "Name";
@@ -554,27 +573,6 @@ $treeAnalysisResult +=
             {
                 $depCliName = "GatewaySubnet";
             }
-            if($inputTestCode -like "*${depCliName}*")
-            {
-                $depCliName = "{${depCliName}}";
-            }
-            $outResult += "          var cmd = '${componentNameInLowerCase}-autogen${parentCmd} ${depCliOption} create -g {group} -n ${depCliName} ${parentRef} ";
-            foreach($param in $cliOperationParamsRaw[$dependency])
-            {
-                if($param.required -eq $true)
-                {
-                    $outResult += " --" + ((Get-CliOptionName $param.name) -replace "express-route-","") + " " + $param.createValue;
-                }
-                if($param.name -eq "location" -and $inputTestCode -notlike "*location*")
-                {
-                    $inputTestCode += "  location: '" +  $param.createValue + "'," + $NEW_LINE;
-                }
-            }
-            $outResult += " --json'.formatArgs(${cliOperationName})" + $NEW_LINE;
-            $outResult += "testUtils.executeCommand(suite, retry, cmd, function (${depResultVarName}) {"
-            $depsCode += $outResult + $NEW_LINE
-            $depsCode += "${depResultVarName}.exitStatus.should.equal(0);" + $NEW_LINE;
-            $depsCode += "${depResultVarName} = JSON.parse(${depResultVarName}.text);" + $NEW_LINE;
             if($testCreateStr -notlike "*${depCliOption}*")
             {
                 $depCliOption = $depCliOption -replace "express-route-","";
@@ -589,30 +587,48 @@ $treeAnalysisResult +=
                 }
                 $additionalOptionsCreate +=  $additionalOptionsValue;
             }
-            $closingBraces += "});" + $NEW_LINE;
         }
     }
 
     $parametersString = Get-ParametersString $methodParamNameList;
     $parsers = Get-SubnetParser;
 
-    $template = Get-Content "$PSScriptRoot\templates\create.ps1" -raw;
+    $parentOp = "";
+    $parentName = "";
+    $parentNamePlural = "";
+    if ($parents[$OperationName])
+    {
+        $parentOp = (Get-CliOptionName $parents[$OperationName]) + " ";
+        $parentName = $parents[$OperationName] + "Name";
+        $parentPlural = GetPlural $parents[$OperationName];
+    }
+    if($artificallyExtracted -contains $OperationName)
+    {
+        $artificalOperation = $artificalOperations | Where-Object { $_.Name -eq $OperationName };
+        $parentpath = $artificalOperation.path;
+        $template = Get-Content "$PSScriptRoot\templates\create_child.ps1" -raw;
+    }
+    else
+    {
+        $template = Get-Content "$PSScriptRoot\templates\create.ps1" -raw;
+    }
     $code += Invoke-Expression $template;
     $code += $NEW_LINE
 
     # Generate set command
     $cliMethodOption = "set";
-    $template = Get-Content "$PSScriptRoot\templates\set.ps1" -raw;
-    $code += Invoke-Expression $template;
-
-    if (-not $parents[$OperationName])
+    if($artificallyExtracted -contains $OperationName)
     {
-        $parentOp = "";
+        $artificalOperation = $artificalOperations | Where-Object { $_.Name -eq $OperationName };
+        $parentpath = $artificalOperation.path;
+        $template = Get-Content "$PSScriptRoot\templates\set_child.ps1" -raw;
     }
     else
     {
-        $parentOp = (Get-CliOptionName $parents[$OperationName]) + " ";
+        $template = Get-Content "$PSScriptRoot\templates\set.ps1" -raw;
     }
+    $code += Invoke-Expression $template;
+
     $template = Get-Content "$PSScriptRoot\templates\test.ps1" -raw;
     $outTest = Invoke-Expression $template;
     Set-Content -Path "$PSScriptRoot\arm.network.${cliOperationNameInLowerCase}-tests.js" -Value $outTest -Encoding "UTF8" -Force;

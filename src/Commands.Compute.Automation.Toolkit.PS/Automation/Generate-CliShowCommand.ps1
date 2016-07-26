@@ -47,7 +47,18 @@
     # Set Required Parameters
     $requireParams = @();
     $requireParamNormalizedNames = @();
-    $require = Update-RequiredParameters $methodParamNameList $methodParamTypeDict $allStringFieldCheck;
+    $methodParamNameListExtended = $methodParamNameList;
+    [array]$requiredAddons = ($cliOperationParamsRaw[$OperationName] | Where-Object { $_.isChildName -eq $true}).name
+    if($requiredAddons)
+    {
+        for ($i = 0; $i -lt $requiredAddons.Length; $i++)
+        {
+            $requiredAddons[$i] = Get-CommanderStyleOption $requiredAddons[$i];
+        }
+        $methodParamNameListExtended += $requiredAddons ;
+    }
+
+    $require = Update-RequiredParameters $methodParamNameListExtended $methodParamTypeDict $allStringFieldCheck;
     $requireParams = $require.requireParams;
     $requireParamNormalizedNames = $require.requireParamNormalizedNames;
 
@@ -64,9 +75,9 @@
     $option_str_items = @();
     $use_input_parameter_file = $false;
     $cmdOptions = "";
-    for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
+    for ($index = 0; $index -lt $methodParamNameListExtended.Count; $index++)
     {
-        [string]$optionParamName = $methodParamNameList[$index];
+        [string]$optionParamName = $methodParamNameListExtended[$index];
         $optionShorthandStr = $null;
 
         $cli_option_name = Get-CliOptionName $optionParamName;
@@ -81,7 +92,7 @@
     }
 
     $commonOptions = Get-CommonOptions $cliMethodOption
-    $promptingOptions = Get-PromptingOptionsCode $methodParamNameList $methodParamNameList 6;
+    $promptingOptions = Get-PromptingOptionsCode $methodParamNameListExtended $methodParamNameListExtended 6;
 
     #
     # API call using SDK
@@ -91,6 +102,18 @@
 
     $safeGet = Get-SafeGetFunction $componentNameInLowerCase $cliOperationName $methodParamNameList $resultVarName $cliOperationDescription;
 
-    $template = Get-Content "$PSScriptRoot\templates\show.ps1" -raw;
+    if($artificallyExtracted -contains $OperationName)
+    {
+        $artificalOperation = $artificalOperations | Where-Object { $_.Name -eq $OperationName };
+        $artificalOperationParent = GetPlural $artificalOperation.parent;
+        $safeGet = Get-SafeGetFunction $componentNameInLowerCase $artificalOperationParent $methodParamNameList $resultVarName $cliOperationDescription;
+        $parentpath = $artificalOperation.path;
+        $template = Get-Content "$PSScriptRoot\templates\show_child.ps1" -raw;
+    }
+    else
+    {
+        $template = Get-Content "$PSScriptRoot\templates\show.ps1" -raw;
+    }
+
     $code += Invoke-Expression $template;
     return $code;

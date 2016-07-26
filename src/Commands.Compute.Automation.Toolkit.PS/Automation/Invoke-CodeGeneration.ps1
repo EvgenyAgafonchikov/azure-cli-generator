@@ -60,6 +60,11 @@ param(
     $cliOperationParamsRaw = @{};
     $parents = @{};
     $dependencies = @{};
+
+    # TODO: merge into one
+    $artificalOperations = @();
+    $artificallyExtracted = @();
+
 # Read Settings from Config Object
 if (-not [string]::IsNullOrEmpty($ConfigPath))
 {
@@ -77,6 +82,11 @@ if (-not [string]::IsNullOrEmpty($ConfigPath))
         $operationNameFilter = @();
         foreach ($operationItem in $configJsonObject.operations)
         {
+            if($operationItem.path)
+            {
+                $artificalOperations += $operationItem;
+                $artificallyExtracted += $operationItem.name;
+            }
             $operationNameFilter += $operationItem.name;
             $operationSettings.Add($operationItem.name, @());
             $cliOperationSettings.Add($operationItem.name, @());
@@ -106,6 +116,15 @@ if (-not [string]::IsNullOrEmpty($ConfigPath))
             if($operationItem.dependencies)
             {
                 $dependencies[$operationItem.name] = $operationItem.dependencies;
+                foreach($dependency in $operationItem.dependencies)
+                {
+                    $check = $configJsonObject.operations | Where-Object {$_.name -eq $dependency}
+                    if(($configJsonObject.operations | Where-Object {$_.name -eq $dependency}) -eq $null)
+                    {
+                        $warningStr = "Tests for operation {0} are not valid as dependency {1} was not found" -f $operationItem.name,$dependency;
+                        Write-Host $warningStr -background "Yellow" -foreground "Blue";
+                    }
+                }
             }
         }
     }
@@ -263,6 +282,11 @@ $code +=
         }
         $st = mkdir -Force $opOutFolder;
 
+        $artificalOperationsFilter = $artificalOperations | Where-Object { $_.name -eq $operation_type.Name };
+        if($artificalOperationsFilter)
+        {
+            $operation_type = $types | Where-Object {$_.Name -eq (GetPlural $artificalOperationsFilter.parent) + "OperationsExtensions"}
+        }
         $methods = Get-OperationMethods $operation_type;
         if ($methods -eq $null -or $methods.Count -eq 0)
         {

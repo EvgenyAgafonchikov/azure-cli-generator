@@ -1,3 +1,62 @@
+$script:indent = 0;
+function AddDependenciesCode($isDefaultsTest)
+{
+    $depIndex = 0;
+    if($isDefaultsTest)
+    {
+        $depIndex += 2;
+    }
+    if($dependencies[$OperationName])
+    {
+        foreach($dependency in $dependencies[$OperationName])
+        {
+            $parentCmd = "";
+            $parentRef = "";
+            if($parents[$dependency])
+            {
+                $depParent = $parents[$dependency];
+                $parentCmd = Get-CliOptionName $parents[$dependency];
+                $parentRef = "--${parentCmd}-name ${depParent}Name";
+                $parentCmd = " ${parentCmd}";
+            }
+            $outResult = "";
+            $depCliOption = Get-SingularNoun (Get-CliOptionName $dependency);
+            $depResultVarName = (decapitalizeFirstLetter (Get-SingularNoun $dependency));
+            $depCliName = $depResultVarName + "Name";
+            if($depCliName -eq "subnetName" -and $OperationName -eq "VirtualNetworkGateways")
+            {
+                $depCliName = "GatewaySubnet";
+            }
+            if($inputTestCode -like "*${depCliName}*")
+            {
+                $depCliName = "{${depCliName}}";
+            }
+            " " * $depIndex + "          var cmd = ('${componentNameInLowerCase}-autogen${parentCmd} ${depCliOption} create -g {group} -n ${depCliName} ${parentRef} ' +";
+            foreach($param in $cliOperationParamsRaw[$dependency])
+            {
+                if($param.required -eq $true)
+                {
+                    " " * $depIndex + "            '--" + ((Get-CliOptionName $param.name) -replace "express-route-","") + " " + $param.createValue + " ' +" ;
+                }
+                if($param.name -eq "location" -and $inputTestCode -notlike "*location*")
+                {
+                    $inputTestCode += "  location: '" +  $param.createValue + "',";
+                }
+            }
+            " " * $depIndex + "            '--json').formatArgs(${cliOperationName})";
+            " " * $depIndex + "          testUtils.executeCommand(suite, retry, cmd, function (${depResultVarName}) {";
+            " " * $depIndex + "            ${depResultVarName}.exitStatus.should.equal(0);";
+            " " * $depIndex + "            ${depResultVarName} = JSON.parse(${depResultVarName}.text);";
+            $depIndex += 2;
+        }
+        $script:indent = $depIndex
+        if($isDefaultsTest)
+        {
+          $script:indent -= 2;
+        }
+    }
+}
+
 "/**
  * Copyright (c) Microsoft.  All rights reserved.
  *
@@ -29,6 +88,7 @@ var networkUtil = new NetworkTestUtil();
 var testPrefix = 'arm-${componentNameInLowerCase}-autogen-${cliOperationNameInLowerCase}-tests',
   groupName = 'xplat-test-${opCliOptionName}',
   location;
+var index = 0;
 
 var ${cliOperationName} = {
 ${inputTestCode}"
@@ -82,18 +142,22 @@ describe('arm', function () {
       this.timeout(hour);
       it('create should create ${cliOperationNameInLowerCase}', function (done) {
         networkUtil.createGroup(groupName, location, suite, function () {
-${depsCode}
-          var cmd = '${componentNameInLowerCase}-autogen ${parentOp}${opCliOptionNameSingular} create -g {group} -n {name} ${testCreateStr}${additionalOptionsCreate}--json'.formatArgs(${cliOperationName});
-          testUtils.executeCommand(suite, retry, cmd, function (result) {
-            result.exitStatus.should.equal(0);
-            var output = JSON.parse(result.text);
-            output.name.should.equal(${cliOperationName}.name);
-${assertCodeCreate}
-${assertIdCodeCreate}
-            done();
-          });
-${closingBraces}
-        });
+"
+AddDependenciesCode $false
+" " * $script:indent + "          var cmd = '${componentNameInLowerCase}-autogen ${parentOp}${opCliOptionNameSingular} create -g {group} -n {name} ${testCreateStr}${additionalOptionsCreate}--json'.formatArgs(${cliOperationName});"
+" " * $script:indent + "          testUtils.executeCommand(suite, retry, cmd, function (result) {"
+" " * $script:indent + "            result.exitStatus.should.equal(0);"
+" " * $script:indent + "            var output = JSON.parse(result.text);"
+" " * $script:indent + "            output.name.should.equal(${cliOperationName}.name);"
+$assertCodeCreate.Split("`r`n") | foreach { if($_) { " " * $script:indent + $_ } }
+$assertIdCodeCreate.Split("`r`n") | foreach { if($_) { " " * $script:indent + $_ } }
+" " * $script:indent + "            done();"
+" " * $script:indent + "          });"
+for($i = $script:indent; $i -gt 0; $i -= 2)
+{
+    " " * $i + "        });";
+}
+"        });
       });
       it('show should display ${cliOperationNameInLowerCase} details', function (done) {
         var cmd = '${componentNameInLowerCase}-autogen ${parentOp}${opCliOptionNameSingular} show -g {group} -n {name} ${additionalOptionsCommon}--json'.formatArgs(${cliOperationName});
@@ -148,22 +212,26 @@ if ($cliDefaults.Length -gt 0)
       it('create with defaults should create ${cliOperationNameInLowerCase} with default values', function (done) {
         this.timeout(hour);
         networkUtil.deleteGroup(groupName, suite, function () {
-        networkUtil.createGroup(groupName, location, suite, function () {
-${depsCode}
-          var cmd = '${componentNameInLowerCase}-autogen ${parentOp}${opCliOptionNameSingular} create -g {group} -n {name} ${testCreateDefaultStr}${additionalOptionsCreate}--json'.formatArgs(${cliOperationName});
-          testUtils.executeCommand(suite, retry, cmd, function (result) {
-            result.exitStatus.should.equal(0);
-            var output = JSON.parse(result.text);
-            output.name.should.equal(${cliOperationName}.name);
-${assertCodeCreateDefault}
-            done();
-          });
-${closingBraces}
-        });
+          networkUtil.createGroup(groupName, location, suite, function () {"
+AddDependenciesCode $true
+$script:indent += 2;
+" " * $script:indent + "          var cmd = '${componentNameInLowerCase}-autogen ${parentOp}${opCliOptionNameSingular} create -g {group} -n {name} ${testCreateDefaultStr}${additionalOptionsCreate}--json'.formatArgs(${cliOperationName});"
+" " * $script:indent + "          testUtils.executeCommand(suite, retry, cmd, function (result) {"
+" " * $script:indent + "            result.exitStatus.should.equal(0);"
+" " * $script:indent + "            var output = JSON.parse(result.text);"
+" " * $script:indent + "            output.name.should.equal(${cliOperationName}.name);"
+$assertCodeCreateDefault.Split("`r`n") | foreach { if($_) {" " * $script:indent + $_} }
+" " * $script:indent + "            done();"
+" " * $script:indent + "          });"
+$script:indent -= 2;
+for($i = $script:indent; $i -gt 0; $i -= 2)
+{
+    " " * $i + "        });";
+}
+"          });
         });
       });"
 }
-"
-    });
+"    });
   });
 });"

@@ -51,8 +51,16 @@
     # Set Required Parameters
     $requireParams = @();
     $requireParamNormalizedNames = @();
-    $require = Update-RequiredParameters $methodParamNameList $methodParamTypeDict $allStringFieldCheck;
+
+    $methodParamNameListExtended = $methodParamNameList;
+    if($artificallyExtracted -contains $OperationName)
+    {
+        $methodParamNameListExtended += ($parents[$OperationName] + "Name");
+        $optionParamString += ($parents[$OperationName] + "Name, ")
+    }
+    $require = Update-RequiredParameters $methodParamNameListExtended $methodParamTypeDict $allStringFieldCheck;
     $requireParams = $require.requireParams;
+
     $requireParamNormalizedNames = $require.requireParamNormalizedNames;
 
     $requireParamsString = $null;
@@ -75,9 +83,9 @@
     $option_str_items = @();
     $use_input_parameter_file = $false;
     $cmdOptions = "";
-    for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
+    for ($index = 0; $index -lt $methodParamNameListExtended.Count; $index++)
     {
-        [string]$optionParamName = $methodParamNameList[$index];
+        [string]$optionParamName = $methodParamNameListExtended[$index];
         $optionShorthandStr = $null;
 
         $cli_option_name = Get-CliOptionName $optionParamName;
@@ -103,7 +111,19 @@
     $promptingCode = Get-PromptingOptionsCode $methodParamNameList $methodParamNameList 12;
     $methodParamNameListNoRes = $methodParamNameList -ne "resourceGroup";
     $promptingCodeNoResource = Get-PromptingOptionsCode $methodParamNameListNoRes $methodParamNameListNoRes 12;
-
-    $template = Get-Content "$PSScriptRoot\templates\list.ps1" -raw;
+    if($artificallyExtracted -contains $OperationName)
+    {
+        $artificalOperation = $artificalOperations | Where-Object { $_.Name -eq $OperationName };
+        $artificalOperationParent = GetPlural $artificalOperation.parent;
+        $methodParamNameListExtendedOptions = $methodParamNameList;
+        $methodParamNameListExtendedOptions += ("options." + $parents[$OperationName] + "Name");
+        $safeGet = Get-SafeGetFunction $componentNameInLowerCase ${artificalOperationParent} $methodParamNameListExtended $resultVarName $cliOperationDescription;
+        $promptParentCode = Get-PromptingOptionsCode $methodParamNameListExtended $methodParamNameListExtended 6;
+        $template = Get-Content "$PSScriptRoot\templates\list_child.ps1" -raw;
+    }
+    else
+    {
+        $template = Get-Content "$PSScriptRoot\templates\list.ps1" -raw;
+    }
     $code += Invoke-Expression $template;
     return $code;
