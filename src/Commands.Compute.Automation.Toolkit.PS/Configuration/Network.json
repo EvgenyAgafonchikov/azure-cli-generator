@@ -573,6 +573,31 @@
       "parent": "",
       "dependencies": ["VirtualNetworks", "Subnets", "PublicIPAddresses"]
     },
+    { "name": "VirtualNetworkPeerings",
+      "parameters": [
+        {
+          "name": "remoteVirtualNetworkId",
+          "required": "true"
+        },
+        {
+          "name": "allowForwardedTraffic",
+          "required": "false"
+        },
+        {
+          "name": "allowGatewayTransit",
+          "required": "false"
+        },
+        {
+          "name": "useRemoteGateways",
+          "required": "false"
+        },
+        {
+          "name": "allowVirtualNetworkAccess",
+          "required": "false"
+        }
+      ],
+      "parent": "virtualNetwork"
+    },
     { "name": "NetworkInterfaceIPConfiguration",
       "parameters": [
         {
