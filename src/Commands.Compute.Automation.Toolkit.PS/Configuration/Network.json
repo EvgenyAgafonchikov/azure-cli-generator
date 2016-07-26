@@ -4,6 +4,9 @@
       "version": "3.1.0-preview",
       "description": "Network Resource Provider"
   },
+  "settings": {
+    "jsindent": "2"
+  },
   "produces": [
     {
       "name": "CLI",
@@ -15,27 +18,27 @@
       "parameters": [
         {
           "name": "location",
-          "createValue" : "westus",
+          "createTestValue" : "westus",
           "required": "true"
         },
         {
           "name": "domainNameLabel",
-          "createValue" : "label",
-          "setValue" : "newlabel",
+          "createTestValue" : "label",
+          "setTestValue" : "newlabel",
           "required": "false"
         },
         {
           "name": "publicIPAllocationMethod",
           "default": "Dynamic",
-          "createValue" : "Static",
-          "setValue" : "Dynamic",
+          "createTestValue" : "Static",
+          "setTestValue" : "Dynamic",
           "required": "false"
         },
         {
           "name": "idleTimeoutInMinutes",
           "default": "4",
-          "createValue" : "13",
-          "setValue" : "5",
+          "createTestValue" : "13",
+          "setTestValue" : "5",
           "required": "false"
         },
         {
@@ -45,13 +48,13 @@
         {
           "name": "publicIPAddressVersion",
           "default": "IPv4",
-          "createValue" : "IPv4",
+          "createTestValue" : "IPv4",
           "required": "false"
         },
         {
           "name": "tags",
-          "createValue" : "TagA=B",
-          "setValue" : "tagb=a",
+          "createTestValue" : "TagA=B",
+          "setTestValue" : "tagb=a",
           "required": "false"
         }
       ],
@@ -61,26 +64,26 @@
       "parameters": [
         {
           "name": "location",
-          "createValue" : "westus",
+          "createTestValue" : "westus",
           "required": "true"
         },
         {
           "name": "addressPrefixes",
           "default": "10.0.0.0/8",
-          "createValue" : "10.0.0.0/8",
-          "setValue" : "192.168.0.0/16",
+          "createTestValue" : "10.0.0.0/8",
+          "setTestValue" : "192.168.0.0/16",
           "required": "false"
         },
         {
           "name": "dnsServers",
-          "createValue" : "10.0.0.42",
-          "setValue" : "10.0.0.24",
+          "createTestValue" : "10.0.0.42",
+          "setTestValue" : "10.0.0.24",
           "required": "false"
         },
         {
           "name": "tags",
-          "createValue" : "TagVnet=Test",
-          "setValue" : "tagNew=new",
+          "createTestValue" : "TagVnet=Test",
+          "setTestValue" : "tagNew=new",
           "required": "false"
         }
       ],
@@ -90,8 +93,8 @@
       "parameters": [
         {
           "name": "addressPrefix",
-          "createValue" : "10.0.0.0/16",
-          "setValue" : "10.0.0.0/24",
+          "createTestValue" : "10.0.0.0/16",
+          "setTestValue" : "10.0.0.0/24",
           "required": "true"
         },
         {
@@ -102,7 +105,7 @@
         {
           "name": "networkSecurityGroupName",
           "alternative": "networkSecurityGroupId",
-          "createValue" : "nsgName",
+          "createTestValue" : "nsgName",
           "required": "false"
         },
         {
@@ -113,7 +116,7 @@
         {
           "name": "routeTableName",
           "alternative": "routeTableId",
-          "createValue" : "routeTableName",
+          "createTestValue" : "routeTableName",
           "required": "false"
         }
       ],
@@ -124,13 +127,13 @@
       "parameters": [
         {
           "name": "location",
-          "createValue" : "westus",
+          "createTestValue" : "westus",
           "required": "true"
         },
         {
           "name": "tags",
-          "createValue" : "LBTag=lbTag",
-          "setValue" : "lb=tag",
+          "createTestValue" : "LBTag=lbTag",
+          "setTestValue" : "lb=tag",
           "required": "false"
         }
       ],
@@ -140,13 +143,13 @@
       "parameters": [
         {
           "name": "location",
-          "createValue" : "westus",
+          "createTestValue" : "westus",
           "required": "true"
         },
         {
           "name": "tags",
-          "createValue" : "NSGTag=NSG",
-          "setValue" : "tag=nsg",
+          "createTestValue" : "NSGTag=NSG",
+          "setTestValue" : "tag=nsg",
           "required": "false"
         }
       ],
@@ -156,13 +159,13 @@
       "parameters": [
         {
           "name": "location",
-          "createValue" : "westus",
+          "createTestValue" : "westus",
           "required": "true"
         },
         {
           "name": "tags",
-          "createValue" : "RTTag=tag",
-          "setValue" : "rt=rt",
+          "createTestValue" : "RTTag=tag",
+          "setTestValue" : "rt=rt",
           "required": "false"
         }
       ],
@@ -172,56 +175,56 @@
       "parameters": [
         {
           "name": "description",
-          "createValue" : "testdesc",
+          "createTestValue" : "testdesc",
           "required": "false"
         },
         {
           "name": "protocol",
           "default": "*",
-          "createValue" : "tcp",
+          "createTestValue" : "tcp",
           "required": "false"
         },
         {
           "name": "sourceAddressPrefix",
-          "createValue" : "10.0.0.0",
+          "createTestValue" : "10.0.0.0",
           "default": "*",
           "required": "false"
         },
         {
           "name": "sourcePortRange",
           "default": "*",
-          "createValue" : "*",
+          "createTestValue" : "*",
           "required": "false"
         },
         {
           "name": "destinationAddressPrefix",
           "default": "*",
-          "createValue" : "10.0.0.0",
+          "createTestValue" : "10.0.0.0",
           "required": "false"
         },
         {
           "name": "destinationPortRange",
           "default": "80",
-          "createValue" : "*",
+          "createTestValue" : "*",
           "required": "false"
         },
         {
           "name": "access",
           "default": "Allow",
-          "createValue" : "allow",
+          "createTestValue" : "allow",
           "required": "false"
         },
         {
           "name": "priority",
           "default": "100",
-          "createValue" : "150",
-          "setValue" : "256",
+          "createTestValue" : "150",
+          "setTestValue" : "256",
           "required": "false"
         },
         {
           "name": "direction",
           "default": "Inbound",
-          "createValue" : "inbound",
+          "createTestValue" : "inbound",
           "required": "false"
         }
       ],
@@ -232,13 +235,13 @@
       "parameters": [
         {
           "name": "addressPrefix",
-          "createValue" : "10.0.0.0/8",
-          "setValue" : "10.0.0.0/16",
+          "createTestValue" : "10.0.0.0/8",
+          "setTestValue" : "10.0.0.0/16",
           "required": "true"
         },
         {
           "name": "nextHopType",
-          "createValue" : "VNETLocal",
+          "createTestValue" : "VNETLocal",
           "required": "true"
         },
         {
@@ -285,18 +288,18 @@
         },
         {
           "name": "peerAsn",
-          "createValue" : "1",
+          "createTestValue" : "1",
           "required": "true"
         },
         {
           "name": "primaryPeerAddressPrefix",
-          "createValue" : "10.0.0.0/30",
+          "createTestValue" : "10.0.0.0/30",
           "required": "true"
         },
         {
           "name": "secondaryPeerAddressPrefix",
-          "createValue" : "10.0.0.0/30",
-          "setValue" : "11.0.0.0/30",
+          "createTestValue" : "10.0.0.0/30",
+          "setTestValue" : "11.0.0.0/30",
           "required": "true"
         },
         {
@@ -313,7 +316,7 @@
         },
         {
           "name": "vlanId",
-          "createValue" : "1",
+          "createTestValue" : "1",
           "required": "true"
         },
         {
@@ -340,42 +343,42 @@
       "parameters": [
         {
           "name": "location",
-          "createValue" : "eastasia",
+          "createTestValue" : "eastasia",
           "required": "true"
         },
         {
           "name": "serviceProviderName",
-          "createValue" : "Equinix",
+          "createTestValue" : "Equinix",
           "required": "true"
         },
         {
           "name": "peeringLocation",
-          "createValue" : "Seattle",
+          "createTestValue" : "Seattle",
           "required": "true"
         },
         {
           "name": "bandwidthInMbps",
           "default": "100",
-          "createValue" : "100",
-          "setValue" : "200",
+          "createTestValue" : "100",
+          "setTestValue" : "200",
           "required": "false"
         },
         {
           "name": "skuTier",
           "default": "Standard",
-          "createValue" : "Standard",
+          "createTestValue" : "Standard",
           "required": "false"
         },
         {
           "name": "skuFamily",
           "default": "MeteredData",
-          "createValue" : "MeteredData",
+          "createTestValue" : "MeteredData",
           "required": "false"
         },
         {
           "name": "tags",
-          "createValue" : "ERC=erctag",
-          "setValue" : "tag=erc",
+          "createTestValue" : "ERC=erctag",
+          "setTestValue" : "tag=erc",
           "required": "false"
         }
       ],
@@ -385,7 +388,7 @@
       "parameters": [
         {
           "name": "location",
-          "createValue" : "westus",
+          "createTestValue" : "westus",
           "required": "true"
         },
         {
@@ -432,8 +435,8 @@
         },
         {
           "name": "privateIPAddress",
-          "createValue" : "10.0.0.13",
-          "setValue" : "10.0.0.42",
+          "createTestValue" : "10.0.0.13",
+          "setTestValue" : "10.0.0.42",
           "required": "false"
         },
         {
@@ -442,19 +445,19 @@
         },
         {
           "name": "internalDnsNameLabel",
-          "createValue" : "testlabel",
+          "createTestValue" : "testlabel",
           "required": "false"
         },
         {
           "name": "enableIPForwarding",
-          "createValue" : "true",
-          "setValue" : "false",
+          "createTestValue" : "true",
+          "setTestValue" : "false",
           "required": "false"
         },
         {
           "name": "tags",
-          "createValue" : "first=one",
-          "setValue" : "second=two",
+          "createTestValue" : "first=one",
+          "setTestValue" : "second=two",
           "required": "false"
         }
       ],
@@ -465,25 +468,25 @@
       "parameters": [
         {
           "name": "location",
-          "createValue" : "westus",
+          "createTestValue" : "westus",
           "required": "true"
         },
         {
           "name": "addressPrefixes",
-          "createValue" : "10.0.0.0/8",
-          "setValue" : "192.168.0.0/16",
+          "createTestValue" : "10.0.0.0/8",
+          "setTestValue" : "192.168.0.0/16",
           "required": "false"
         },
         {
           "name": "gatewayIpAddress",
-          "createValue" : "10.0.0.42",
-          "setValue" : "10.0.0.24",
+          "createTestValue" : "10.0.0.42",
+          "setTestValue" : "10.0.0.24",
           "required": "true"
         },
         {
           "name": "tags",
-          "createValue" : "first=one",
-          "setValue" : "second=two",
+          "createTestValue" : "first=one",
+          "setTestValue" : "second=two",
           "required": "false"
         }
       ],
@@ -493,26 +496,26 @@
       "parameters": [
         {
           "name": "location",
-          "createValue" : "westus",
+          "createTestValue" : "westus",
           "required": "true"
         },
         {
           "name": "gatewayType",
           "default": "VPN",
-          "createValue": "ExpressRoute",
+          "createTestValue": "ExpressRoute",
           "required": "false"
         },
         {
           "name": "vpnType",
           "default": "RouteBased",
-          "createValue": "PolicyBased",
+          "createTestValue": "PolicyBased",
           "required": "false"
         },
         {
           "name": "skuName",
           "default": "Basic",
-          "createValue": "Standard",
-          "setValue": "Basic",
+          "createTestValue": "Standard",
+          "setTestValue": "Basic",
           "required": "false"
         },
         {
@@ -551,24 +554,24 @@
         },
         {
           "name": "addressPrefixes",
-          "createValue": "192.0.0.0/8",
+          "createTestValue": "192.0.0.0/8",
           "required": "false"
         },
         {
           "name": "privateIPAddress",
-          "createValue": "10.0.0.42",
+          "createTestValue": "10.0.0.42",
           "required": "false"
         },
         {
           "name": "enableBgp",
           "default": "false",
-          "createValue": "true",
+          "createTestValue": "true",
           "required": "false"
         },
         {
           "name": "tags",
-          "createValue" : "first=old",
-          "setValue" : "second=new",
+          "createTestValue" : "first=old",
+          "setTestValue" : "second=new",
           "required": "false"
         }
       ],
@@ -616,8 +619,8 @@
         },
         {
           "name": "privateIPAddress",
-          "createValue" : "10.0.0.13",
-          "setValue" : "10.0.0.42",
+          "createTestValue" : "10.0.0.13",
+          "setTestValue" : "10.0.0.42",
           "required": "false"
         },
         {
@@ -637,8 +640,8 @@
         },
         {
           "name": "privateIPAddress",
-          "createValue" : "10.0.0.13",
-          "setValue" : "10.0.0.42",
+          "createTestValue" : "10.0.0.13",
+          "setTestValue" : "10.0.0.42",
           "required": "false"
         },
         {

@@ -58,16 +58,16 @@
             Write-Warning "There is no name for one of the parameters inside of $OperationName config!"
         }
         $commanderStyleName = Get-CommanderStyleOption $name;
-        if($paramItem.createValue)
+        if($paramItem.createTestValue)
         {
-            $value = $paramItem.createValue;
+            $value = $paramItem.createTestValue;
             $testCreateStr += ("--" + (Get-CliOptionName $paramItem.name) + " {${commanderStyleName}} ");
             $inputTestCode += "  ${commanderStyleName}: '$value'," + $NEW_LINE;
             $cliCreateParams += $commanderStyleName;
         }
-        if($paramItem.setValue)
+        if($paramItem.setTestValue)
         {
-            $value = $paramItem.setValue;
+            $value = $paramItem.setTestValue;
             $testUpdateStr += ("--" + (Get-CliOptionName $paramItem.name) + " {${commanderStyleName}New} ");
             $inputTestCode += "  ${commanderStyleName}New: '$value'," + $NEW_LINE;
             $cliUpdateParams += $commanderStyleName;

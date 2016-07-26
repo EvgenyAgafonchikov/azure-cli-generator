@@ -64,6 +64,7 @@ param(
     # TODO: merge into one
     $artificalOperations = @();
     $artificallyExtracted = @();
+    $global:js_indent_length = 2; # set default indent for generated JS code; Value from config is applied then
 
 # Read Settings from Config Object
 if (-not [string]::IsNullOrEmpty($ConfigPath))
@@ -72,6 +73,7 @@ if (-not [string]::IsNullOrEmpty($ConfigPath))
     $configJsonObject = ConvertFrom-Json ([string]::Join('', $lines));
     $global:cli_sample_code_lines = '';
     $global:ps_sample_code_lines = '';
+    $global:js_indent_length = $configJsonObject.settings.jsindent;
 
     $operationSettings = @{};
     $cliOperationSettings = @{};

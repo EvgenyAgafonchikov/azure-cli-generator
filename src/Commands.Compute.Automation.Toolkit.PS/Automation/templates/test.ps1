@@ -4,7 +4,7 @@ function AddDependenciesCode($isDefaultsTest)
     $depIndex = 0;
     if($isDefaultsTest)
     {
-        $depIndex += 2;
+        $depIndex += $global:js_indent_length;
     }
     if($dependencies[$OperationName])
     {
@@ -47,12 +47,12 @@ function AddDependenciesCode($isDefaultsTest)
             " " * $depIndex + "          testUtils.executeCommand(suite, retry, cmd, function (${depResultVarName}) {";
             " " * $depIndex + "            ${depResultVarName}.exitStatus.should.equal(0);";
             " " * $depIndex + "            ${depResultVarName} = JSON.parse(${depResultVarName}.text);";
-            $depIndex += 2;
+            $depIndex += $global:js_indent_length;
         }
         $script:indent = $depIndex
         if($isDefaultsTest)
         {
-          $script:indent -= 2;
+          $script:indent -= $global:js_indent_length;
         }
     }
 }
@@ -153,7 +153,7 @@ $assertCodeCreate.Split("`r`n") | foreach { if($_) { " " * $script:indent + $_ }
 $assertIdCodeCreate.Split("`r`n") | foreach { if($_) { " " * $script:indent + $_ } }
 " " * $script:indent + "            done();"
 " " * $script:indent + "          });"
-for($i = $script:indent; $i -gt 0; $i -= 2)
+for($i = $script:indent; $i -gt 0; $i -= $global:js_indent_length)
 {
     " " * $i + "        });";
 }
@@ -214,7 +214,7 @@ if ($cliDefaults.Length -gt 0)
         networkUtil.deleteGroup(groupName, suite, function () {
           networkUtil.createGroup(groupName, location, suite, function () {"
 AddDependenciesCode $true
-$script:indent += 2;
+$script:indent += $global:js_indent_length;
 " " * $script:indent + "          var cmd = '${componentNameInLowerCase}-autogen ${parentOp}${opCliOptionNameSingular} create -g {group} -n {name} ${testCreateDefaultStr}${additionalOptionsCreate}--json'.formatArgs(${cliOperationName});"
 " " * $script:indent + "          testUtils.executeCommand(suite, retry, cmd, function (result) {"
 " " * $script:indent + "            result.exitStatus.should.equal(0);"
@@ -223,8 +223,8 @@ $script:indent += 2;
 $assertCodeCreateDefault.Split("`r`n") | foreach { if($_) {" " * $script:indent + $_} }
 " " * $script:indent + "            done();"
 " " * $script:indent + "          });"
-$script:indent -= 2;
-for($i = $script:indent; $i -gt 0; $i -= 2)
+$script:indent -= $global:js_indent_length;
+for($i = $script:indent; $i -gt 0; $i -= $global:js_indent_length)
 {
     " " * $i + "        });";
 }
