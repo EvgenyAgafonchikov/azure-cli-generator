@@ -116,6 +116,15 @@ if (-not [string]::IsNullOrEmpty($ConfigPath))
             if($operationItem.dependencies)
             {
                 $dependencies[$operationItem.name] = $operationItem.dependencies;
+                foreach($dependency in $operationItem.dependencies)
+                {
+                    $check = $configJsonObject.operations | Where-Object {$_.name -eq $dependency}
+                    if(($configJsonObject.operations | Where-Object {$_.name -eq $dependency}) -eq $null)
+                    {
+                        $warningStr = "Tests for operation {0} are not valid as dependency {1} was not found" -f $operationItem.name,$dependency;
+                        Write-Host $warningStr -background "Yellow" -foreground "Blue";
+                    }
+                }
             }
         }
     }

@@ -445,6 +445,15 @@ $treeAnalysisResult +=
                     }
                     $treeAnalysisResult += "        }" + $NEW_LINE;
             }
+            else
+            {
+                if($searchParam -ne "resourceGroup" -and $searchParam -ne $currentOperationNormalizedName -and $searchParam -ne $parents[$OperationName] -and $searchParam -cnotlike "*Name")
+                {
+                    $warningStr = "Parameter {0} was not found using reflection" -f $searchParam;
+                    Write-Host $warningStr -background "Yellow" -foreground "Blue";
+                    Write-Host "This could be because of mistype in config or because of SDK changes" -background "Yellow" -foreground "Blue";
+                }
+            }
         }
     }
 
