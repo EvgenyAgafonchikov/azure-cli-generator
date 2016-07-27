@@ -245,13 +245,9 @@
                     $searchParam = $tmp;
                 }
             }
-            elseif($param -like "*Id")
+            elseif($param -like "*Id" -and $param -ne "VlanId")
             {
-                $tmp = $param -replace "Id", "";
-                if($alternativesArray -contains $tmp)
-                {
-                    $searchParam = $tmp;
-                }
+                $searchParam = $param -replace "Id", "";
             }
             $paramPathHash = Search-TreeElement $searchRoot $searchTree $searchParam;
             if ($paramPathHash)
@@ -265,7 +261,7 @@
                 {
                     continue;
                 }
-                elseif($param -like "*Id" -and $alternativesArray -contains ($param -replace "Id", ""))
+                elseif($param -like "*Id" -and $param -ne "VlanId")
                 {
                     $paramPathSplit[$paramPathSplit.Length - 1] += "Id";
                 }
@@ -374,7 +370,7 @@
                     }
                 }
 
-                    if($last -clike "*Id" -and $alternativesArray -contains ($param -replace "Id", ""))
+                    if(($last -clike "*Id" -and $alternativesArray -contains ($param -replace "Id", "")))
                     {
                         $itemStrippedId = $last -creplace "Id","";
                         $itemStrippedComander = Get-CommanderStyleOption $itemStrippedId;
@@ -407,6 +403,12 @@ $treeAnalysisResult +=
           ${currentPath}.${itemStrippedId}.id = idContainer.id;
 "
                         }
+                    }
+                    elseif($last -clike "*Id" -and $last -ne "VlanId")
+                    {
+                        $itemStrippedId = $last -creplace "Id","";
+                        $treeAnalysisResult += "          ${currentPath}.${itemStrippedId} = {};" + $NEW_LINE;
+                        $treeAnalysisResult += "          ${currentPath}.${itemStrippedId}.id = options.${last};" + $NEW_LINE;
                     }
                     else
                     {
