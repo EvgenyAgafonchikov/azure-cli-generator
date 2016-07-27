@@ -80,7 +80,7 @@
         $optionShorthandStr = $null;
 
         $cli_option_name = Get-CliOptionName $optionParamName;
-        $cli_shorthand_str = Get-CliShorthandName $optionParamName $currentOperationNormalizedName;
+        $cli_shorthand_str = (Get-CliShorthandName $optionParamName $currentOperationNormalizedName @()).name;
         if ($cli_shorthand_str -ne '')
         {
             $cli_shorthand_str = "-" + $cli_shorthand_str + ", ";

@@ -36,11 +36,11 @@ function AddDependenciesCode($isDefaultsTest)
             {
                 if($param.required -eq $true)
                 {
-                    " " * $depIndex + "            '--" + ((Get-CliOptionName $param.name) -replace "express-route-","") + " " + $param.createValue + " ' +" ;
+                    " " * $depIndex + "            '--" + ((Get-CliOptionName $param.name) -replace "express-route-","") + " " + $param.createTestValue + " ' +" ;
                 }
                 if($param.name -eq "location" -and $inputTestCode -notlike "*location*")
                 {
-                    $inputTestCode += "  location: '" +  $param.createValue + "',";
+                    $inputTestCode += "  location: '" +  $param.createTestValue + "',";
                 }
             }
             " " * $depIndex + "            '--json').formatArgs(${cliOperationName})";

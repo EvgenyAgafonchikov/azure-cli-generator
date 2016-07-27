@@ -298,13 +298,16 @@ function Get-CliShorthandName
         [string]$inName,
 
         [Parameter(Mandatory = $False)]
-        [string]$currentCliItem
+        [string]$currentCliItem,
+
+        [Parameter(Mandatory = $False)]
+        [array]$currentShorthandsSet
     )
 
     # First check if this name parameter
     if($inName -eq $currentCliItem)
     {
-        return 'n';
+        return @{name='n'; set=$currentShorthandsSet};
     }
     elseif ($inName -eq 'ResourceGroupName' -or $inName -eq 'ResourceGroup')
     {
@@ -330,7 +333,7 @@ function Get-CliShorthandName
     {
         $outName = 'a';
     }
-    elseif($inName -eq "BandwidthInMbps" -or $inName -eq "SecondaryAzurePort")
+    elseif($inName -eq "BandwidthInMbps" -or $inName -eq "SecondaryAzurePort"  -or $inName -eq "EnableBgp")
     {
         $outName = 'b';
     }
@@ -338,7 +341,8 @@ function Get-CliShorthandName
     {
         $outName = 'c';
     }
-    elseif ($inName -eq 'instanceId' -or $inName -eq 'DnsServers' -or $inName -eq 'Description' -or $inName -eq "PrimaryAzurePort" -or $inName -eq "LoadBalancerBackendAddressPools")
+    elseif ($inName -eq 'instanceId' -or $inName -eq 'DnsServers' -or $inName -eq 'Description' -or $inName -eq "PrimaryAzurePort"-or
+            $inName -eq "LoadBalancerBackendAddressPools" -or $inName -eq "GatewayDefaultSiteName" -or $inName -eq 'DomainNameLabel')
     {
         $outName = 'd';
     }
@@ -346,23 +350,22 @@ function Get-CliShorthandName
     {
         $outName = 'D';
     }
-    elseif ($inName -eq 'DomainNameLabel')
-    {
-        $outName = 'd';
-    }
-    elseif ($inName -eq 'ExpandExpression' -or $inName -eq 'VirtualNetworkName' -or $inName -eq 'tier' -or $inName -eq 'DestinationAddressPrefix' -or $inName -like '*AddressVersion')
+    elseif ($inName -eq 'ExpandExpression' -or $inName -eq 'VirtualNetworkName' -or $inName -eq 'tier' -or
+            $inName -eq 'DestinationAddressPrefix' -or $inName -like '*AddressVersion')
     {
         $outName = 'e';
     }
-    elseif ($inName -eq 'ReverseFqdn' -or $inName -eq 'SourceAddressPrefix' -or $inName -eq 'family' -or $inName -eq "AdvertisedPublicPrefixes" -or $inName -eq "EnableIpForwarding")
+    elseif ($inName -eq 'ReverseFqdn' -or $inName -eq 'SourceAddressPrefix' -or $inName -eq 'family' -or
+            $inName -eq "AdvertisedPublicPrefixes" -or $inName -eq "EnableIpForwarding")
     {
         $outName = 'f';
     }
-    elseif ($inName -like 'IdleTimeout*' -or $inName -eq 'RouteTableId' -or $inName -eq "PeeringLocation" -or $inName -eq "VlanId" -or $inName -eq "PublicIpAddressId")
+    elseif ($inName -like 'IdleTimeout*' -or $inName -eq 'RouteTableId' -or $inName -eq "PeeringLocation" -or $inName -eq "VlanId"-or
+            $inName -eq "PublicIpAddressId" -or $inName -eq "GatewayDefaultSiteId")
     {
         $outName = 'i';
     }
-    elseif ($inName -eq 'AuthorizationKey' -or $inName -eq 'SharedKey' -or $inName -eq "SubnetName")
+    elseif ($inName -eq 'AuthorizationKey' -or $inName -eq 'SharedKey' -or $inName -eq "SubnetName" -or $inName -eq "SkuName")
     {
         $outName = 'k';
     }
@@ -378,7 +381,8 @@ function Get-CliShorthandName
     {
         $outName = 'o';
     }
-    elseif ($inName -eq 'parameters' -or $inName -eq 'Protocol' -or $inName -eq 'NextHopIpAddress' -or $inName -eq "ServiceProviderName" -or $inName -eq "PeerAsn" -or $inName -eq "PublicIpAddressName")
+    elseif ($inName -eq 'parameters' -or $inName -eq 'Protocol' -or $inName -eq 'NextHopIpAddress' -or
+            $inName -eq "ServiceProviderName" -or $inName -eq "PeerAsn" -or $inName -eq "PublicIpAddressName")
     {
         $outName = 'p';
     }
@@ -394,11 +398,11 @@ function Get-CliShorthandName
     {
         $outName = 'u';
     }
-    elseif ($inName -eq 'NetworkSecurityGroupId')
+    elseif ($inName -eq 'NetworkSecurityGroupId' -or $inName -eq 'GatewayType')
     {
         $outName = 'w';
     }
-    elseif ($inName -eq 'Priority' -or $inName -eq 'NextHopType' -or $inName -eq "PeeringType")
+    elseif ($inName -eq 'Priority' -or $inName -eq 'NextHopType' -or $inName -eq "PeeringType" -or $inName -eq 'VpnType')
     {
         $outName = 'y';
     }
@@ -407,7 +411,23 @@ function Get-CliShorthandName
         $outName = '';
     }
 
-    return $outName;
+    $notUsedLettersSet = @("j", "q", "x", "z", "A", "B", "C", "E", "F", "I", "J", "K", "L", "M", "O", "P", "Q", "R", "T", "U", "W", "X", "Y", "Z");
+    if($currentShorthandsSet -ccontains $outName)
+    {
+        $outName = $notUsedLettersSet[0];
+        $i = 0;
+        while($currentShorthandsSet -ccontains $outName)
+        {
+            $i++;
+            $outName = $notUsedLettersSet[$i];
+        }
+    }
+    if($outName -ne "")
+    {
+        $currentShorthandsSet += $outName;
+    }
+
+    return @{name=$outName; set=$currentShorthandsSet};
 }
 
 function Get-SplitTextLines

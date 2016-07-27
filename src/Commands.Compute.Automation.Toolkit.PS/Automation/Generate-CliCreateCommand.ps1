@@ -159,13 +159,16 @@
     $cmdOptions = "";
     $cmdOptionsSet = "";
     $cliOperationParams = $methodParamNameList + $cliOperationParams;
+    $cliShorthandsSet = @();
     for ($index = 0; $index -lt $cliOperationParams.Count; $index++)
     {
         [string]$optionParamName = $cliOperationParams[$index];
         $optionShorthandStr = $null;
 
         $cli_option_name = Get-CliOptionName $optionParamName;
-        $cli_shorthand_str = Get-CliShorthandName $optionParamName $currentOperationNormalizedName;
+        $cli_shorthand = Get-CliShorthandName $optionParamName $currentOperationNormalizedName $cliShorthandsSet;
+        $cli_shorthand_str = $cli_shorthand.name;
+        $cliShorthandsSet = $cli_shorthand.set;
         if ($cli_shorthand_str -ne '')
         {
             $cli_shorthand_str = "-" + $cli_shorthand_str + ", ";

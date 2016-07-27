@@ -558,11 +558,6 @@
           "required": "false"
         },
         {
-          "name": "privateIPAddress",
-          "createTestValue": "10.0.0.42",
-          "required": "false"
-        },
-        {
           "name": "enableBgp",
           "default": "false",
           "createTestValue": "true",
