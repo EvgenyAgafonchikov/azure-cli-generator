@@ -57,8 +57,13 @@ elseif($cliOperationName -eq "ExpressRouteServiceProviders")
 else
 {
 "       cli.output.table(${resultVarName}, function (row, item) {
-          row.cell(`$('Name'), item.name);
-          row.cell(`$('Location'), item.location);
+          row.cell(`$('Name'), item.name);"
+    if(-not $parents[$OperationName])
+    {
+    "
+          row.cell(`$('Location'), item.location);"
+    }
+"
           var resInfo = resourceUtils.getResourceInformation(item.id);
           row.cell(`$('Resource group'), resInfo.resourceGroup);
           row.cell(`$('Provisioning state'), item.provisioningState);
