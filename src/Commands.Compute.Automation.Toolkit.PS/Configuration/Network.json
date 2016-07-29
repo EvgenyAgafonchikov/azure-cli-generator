@@ -15,6 +15,7 @@
   ],
   "operations": [
     { "name": "PublicIPAddresses",
+      "shortname": "public-ip",
       "parameters": [
         {
           "name": "location",
@@ -29,6 +30,7 @@
         },
         {
           "name": "publicIPAllocationMethod",
+          "shortname": "allocationMethod",
           "default": "Dynamic",
           "createTestValue" : "Static",
           "setTestValue" : "Dynamic",
@@ -36,6 +38,7 @@
         },
         {
           "name": "idleTimeoutInMinutes",
+          "shortname": "idleTimeout",
           "default": "4",
           "createTestValue" : "13",
           "setTestValue" : "5",
@@ -47,6 +50,7 @@
         },
         {
           "name": "publicIPAddressVersion",
+          "shortname": "ipVersion",
           "default": "IPv4",
           "createTestValue" : "IPv4",
           "required": "false"
@@ -61,6 +65,7 @@
       "parent": ""
     },
     { "name": "VirtualNetworks",
+      "shortname": "vnet",
       "parameters": [
         {
           "name": "location",
@@ -120,10 +125,11 @@
           "required": "false"
         }
       ],
-      "parent": "virtualNetwork",
+      "parent": "VirtualNetworks",
       "dependencies": ["VirtualNetworks", "NetworkSecurityGroups", "RouteTables"]
     },
     { "name": "LoadBalancers",
+      "shortname": "lb",
       "parameters": [
         {
           "name": "location",
@@ -140,6 +146,7 @@
       "parent": ""
     },
     { "name": "NetworkSecurityGroups",
+      "shortname": "nsg",
       "parameters": [
         {
           "name": "location",
@@ -172,6 +179,7 @@
       "parent": ""
     },
     { "name": "SecurityRules",
+      "shortname": "rule",
       "parameters": [
         {
           "name": "description",
@@ -228,7 +236,7 @@
           "required": "false"
         }
       ],
-      "parent": "networkSecurityGroup",
+      "parent": "NetworkSecurityGroups",
       "dependencies": ["NetworkSecurityGroups"]
     },
     { "name": "Routes",
@@ -249,7 +257,7 @@
           "required": "false"
         }
       ],
-      "parent": "routeTable",
+      "parent": "RouteTables",
       "dependencies": ["RouteTables"]
     },
     { "name": "Usages",
@@ -269,6 +277,7 @@
       "parameters": [
         {
           "name": "authorizationKey",
+          "shortname": "key",
           "required": "false"
         }
       ],
@@ -279,6 +288,7 @@
       "parameters": [
         {
           "name": "peeringType",
+          "shortname": "type",
           "default": "AzurePrivatePeering",
           "required": "false"
         },
@@ -293,11 +303,13 @@
         },
         {
           "name": "primaryPeerAddressPrefix",
+          "shortname": "primaryAddressPrefix",
           "createTestValue" : "10.0.0.0/30",
           "required": "true"
         },
         {
           "name": "secondaryPeerAddressPrefix",
+          "shortname": "secondaryAddressPrefix",
           "createTestValue" : "10.0.0.0/30",
           "setTestValue" : "11.0.0.0/30",
           "required": "true"
@@ -321,18 +333,22 @@
         },
         {
           "name": "advertisedPublicPrefixes",
+          "shortname": "msAdvertisedPublicPrefixes",
           "required": "false"
         },
         {
           "name": "advertisedPublicPrefixesState",
+          "shortname": "msAdvertisedPublicPrefixState",
           "required": "false"
         },
         {
           "name": "customerAsn",
+          "shortname": "msCustomerAsn",
           "required": "false"
         },
         {
           "name": "routingRegistryName",
+          "shortname": "msRoutingRegistryName",
           "required": "false"
         }
       ],
@@ -385,6 +401,7 @@
       "parent": ""
     },
     { "name": "NetworkInterfaces",
+      "shortname": "nic",
       "parameters": [
         {
           "name": "location",
@@ -403,6 +420,7 @@
         },
         {
           "name": "subnetVirtualNetworkName",
+          "shortname": "subnetVnetName",
           "required": "false"
         },
         {
@@ -417,20 +435,24 @@
         },
         {
           "name": "publicIpAddressId",
+          "shortname": "publicIpId",
           "alternative": "publicIpAddressName",
           "required": "false"
         },
         {
           "name": "publicIpAddressName",
+          "shortname": "publicIpName",
           "alternative": "publicIpAddressId",
           "required": "false"
         },
         {
           "name": "loadBalancerBackendAddressPools",
+          "shortname": "lbAddressPoolsIds",
           "required": "false"
         },
         {
           "name": "loadBalancerInboundNatRules",
+          "shortname": "lbInboundNatRuleIds",
           "required": "false"
         },
         {
@@ -441,6 +463,7 @@
         },
         {
           "name": "privateIPAddressVersion",
+          "shortname": "privateIPVersion",
           "required": "false"
         },
         {
@@ -465,6 +488,7 @@
       "dependencies": ["VirtualNetworks", "Subnets", "PublicIPAddresses"]
     },
     { "name": "LocalNetworkGateways",
+      "shortname": "local-gateway",
       "parameters": [
         {
           "name": "location",
@@ -473,12 +497,14 @@
         },
         {
           "name": "addressPrefixes",
+          "shortname": "addressSpace",
           "createTestValue" : "10.0.0.0/8",
           "setTestValue" : "192.168.0.0/16",
           "required": "false"
         },
         {
           "name": "gatewayIpAddress",
+          "shortname": "ipAddress",
           "createTestValue" : "10.0.0.42",
           "setTestValue" : "10.0.0.24",
           "required": "true"
@@ -493,6 +519,7 @@
       "parent": ""
     },
     { "name": "VirtualNetworkGateways",
+      "shortname": "vpn-gateway",
       "parameters": [
         {
           "name": "location",
@@ -520,11 +547,13 @@
         },
         {
           "name": "publicIpAddressId",
+          "shortname": "publicIpId",
           "alternative": "publicIpAddressName",
           "required": "false"
         },
         {
           "name": "publicIpAddressName",
+          "shortname": "publicIpName",
           "alternative": "publicIpAddressId",
           "required": "false"
         },
@@ -535,6 +564,7 @@
         },
         {
           "name": "subnetVirtualNetworkName",
+          "shortname": "vnetName",
           "required": "false"
         },
         {
@@ -544,11 +574,13 @@
         },
         {
           "name": "gatewayDefaultSiteName",
+          "shortname": "defaultSiteName",
           "alternative": "gatewayDefaultSiteId",
           "required": "false"
         },
         {
           "name": "gatewayDefaultSiteId",
+          "shortname": "defaultSiteId",
           "alternative": "gatewayDefaultSiteName",
           "required": "false"
         },
@@ -574,9 +606,11 @@
       "dependencies": ["VirtualNetworks", "Subnets", "PublicIPAddresses"]
     },
     { "name": "VirtualNetworkPeerings",
+      "shortname": "vnet-peering",
       "parameters": [
         {
           "name": "remoteVirtualNetworkId",
+          "shortname": "remoteVnetId",
           "required": "true"
         },
         {
@@ -593,12 +627,14 @@
         },
         {
           "name": "allowVirtualNetworkAccess",
+          "shortname": "allowVnetAccess",
           "required": "false"
         }
       ],
-      "parent": "virtualNetwork"
+      "parent": "VirtualNetworks"
     },
     { "name": "NetworkInterfaceIPConfiguration",
+      "shortname": "ip-config",
       "parameters": [
         {
           "name": "networkInterfaceIPConfigurationName",
@@ -617,24 +653,29 @@
         },
         {
           "name": "subnetVirtualNetworkName",
+          "shortname": "subnetVnetName",
           "required": "false"
         },
         {
           "name": "publicIpAddressId",
+          "shortname": "publicIpId",
           "alternative": "publicIpAddressName",
           "required": "false"
         },
         {
           "name": "publicIpAddressName",
+          "shortname": "publicIpName",
           "alternative": "publicIpAddressId",
           "required": "false"
         },
         {
           "name": "loadBalancerBackendAddressPools",
+          "shortname": "lbAddressPoolIds",
           "required": "false"
         },
         {
           "name": "loadBalancerInboundNatRules",
+          "shortname": "lbInboundNatRuleIds",
           "required": "false"
         },
         {
@@ -645,13 +686,15 @@
         },
         {
           "name": "privateIPAddressVersion",
+          "shortname": "privateIpVersion",
           "required": "false"
         }
       ],
-      "parent": "networkInterface",
+      "parent": "NetworkInterfaces",
       "path": "ipConfigurations"
     },
     { "name": "FrontendIPConfiguration",
+      "shortname": "frontend-ip",
       "parameters": [
         {
           "name": "frontendIpConfigurationName",
@@ -666,11 +709,13 @@
         },
         {
           "name": "publicIpAddressId",
+          "shortname": "publicIpId",
           "alternative": "publicIpAddressName",
           "required": "false"
         },
         {
           "name": "publicIpAddressName",
+          "shortname": "publicIpName",
           "alternative": "publicIpAddressId",
           "required": "false"
         },
@@ -686,10 +731,11 @@
         },
         {
           "name": "subnetVirtualNetworkName",
+          "shortname": "subnetVnetName",
           "required": "false"
         }
       ],
-      "parent": "loadBalancer",
+      "parent": "LoadBalancers",
       "path": "frontendIPConfigurations"
     }
   ]

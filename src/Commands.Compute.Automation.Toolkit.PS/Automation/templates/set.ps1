@@ -11,7 +11,7 @@ ${promptingOptions}
       var ${resultVarName};
 ${safeGet}
       if (!${resultVarName}) {
-        throw new Error(util.format(`$('A ${cliOperationDescription} with name `"%s`" not found in the resource group `"%s`"'), ${currentOperationNormalizedName}, resourceGroup));
+        throw new Error(util.format(`$('A ${cliOperationDescription} with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
       }
 
         var parameters = ${resultVarName};
@@ -19,7 +19,7 @@ ${treeAnalysisResult}
 ${updateParametersCode}
 ${skuNameCode}
       removeEmptyObjects(parameters);
-      var progress = cli.interaction.progress(util.format(`$('Updating ${cliOperationDescription} `"%s`"'), ${currentOperationNormalizedName}));
+      var progress = cli.interaction.progress(util.format(`$('Updating ${cliOperationDescription} `"%s`"'), name));
       try {
         ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(${parametersString}, parameters, _);
       } finally {

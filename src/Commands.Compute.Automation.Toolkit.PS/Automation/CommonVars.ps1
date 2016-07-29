@@ -20,6 +20,10 @@
     # i.e. --virtual-machine-scale-set
     $opCliOptionName = Get-CliOptionName $OperationName;
     $opCliOptionNameSingular = Get-SingularNoun $opCliOptionName;
+    if($operationMappings[$OperationName])
+    {
+        $opCliOptionNameSingular = $operationMappings[$OperationName];
+    }
 
     # 3.2 Functions
     # 3.2.1 Compute the CLI Category Name, i.e. VirtualMachineScaleSet => vmss, VirtualMachineScaleSetVM => vmssvm

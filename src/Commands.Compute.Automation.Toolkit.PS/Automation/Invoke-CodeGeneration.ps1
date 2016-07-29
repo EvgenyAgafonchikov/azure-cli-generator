@@ -60,6 +60,7 @@ param(
     $cliOperationParamsRaw = @{};
     $parents = @{};
     $dependencies = @{};
+    $operationMappings = @{};
 
     # TODO: merge into one
     $artificalOperations = @();
@@ -127,6 +128,10 @@ if (-not [string]::IsNullOrEmpty($ConfigPath))
                         Write-Host $warningStr -background "Yellow" -foreground "Blue";
                     }
                 }
+            }
+            if($operationItem.shortname)
+            {
+                $operationMappings[$operationItem.name] = $operationItem.shortname;
             }
         }
     }
@@ -245,14 +250,25 @@ else
 " + $NEW_LINE;
         if($parents[$operation_nomalized_name])
         {
-            $subName = $parents[$operation_nomalized_name];
+            $subName = decapitalizeFirstLetter $parents[$operation_nomalized_name];
             $subNameNormalized = Get-CliOptionName $subName;
-            $cliCommandCodeMainBody += "  var $subName = ${nameSpaceNormalizedName}.category('$subNameNormalized')
+            $opShort = $subNameNormalized ;
+            if($operationMappings[$subName])
+            {
+                $opShort = Get-CliOptionName $operationMappings[$subName]
+            }
+            $opShort = Get-SingularNoun $opShort;
+            $cliCommandCodeMainBody += "  var $subName = ${nameSpaceNormalizedName}.category('$opShort')
     .description(`$('Commands to manage $cliOperationDescription'));
 " + $NEW_LINE;
             ${nameSpaceNormalizedName} = $subName;
         }
-        $cliCommandCodeMainBody += "  var $operationNormalizedName = ${nameSpaceNormalizedName}.category('$operationCliName')
+        $opShort = $operationCliName;
+        if($operationMappings[$operationNormalizedName])
+        {
+            $opShort = $operationMappings[$operationNormalizedName]
+        }
+        $cliCommandCodeMainBody += "  var $operationNormalizedName = ${nameSpaceNormalizedName}.category('$opShort')
     .description(`$('Commands to manage $cliOperationDescription'));
 " + $NEW_LINE;
 
@@ -287,7 +303,7 @@ $code +=
         $artificalOperationsFilter = $artificalOperations | Where-Object { $_.name -eq $operation_type.Name };
         if($artificalOperationsFilter)
         {
-            $operation_type = $types | Where-Object {$_.Name -eq (GetPlural $artificalOperationsFilter.parent) + "OperationsExtensions"}
+            $operation_type = $types | Where-Object {$_.Name -eq $artificalOperationsFilter.parent + "OperationsExtensions"}
         }
         $methods = Get-OperationMethods $operation_type;
         if ($methods -eq $null -or $methods.Count -eq 0)

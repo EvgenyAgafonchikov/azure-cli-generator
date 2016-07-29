@@ -30,6 +30,7 @@
     }
 
     $cliOperationParams = @();
+    $cliOperationParamsMap = @{};
     $cliPromptParams = @();
     $cliDefaults = @();
 
@@ -51,6 +52,10 @@
         $name = $paramItem.name
         if($name)
         {
+            if($paramItem.shortname)
+            {
+                $cliOperationParamsMap[$name] = $paramItem.shortname;
+            }
             $cliOperationParams += $name;
         }
         else
@@ -61,14 +66,24 @@
         if($paramItem.createTestValue)
         {
             $value = $paramItem.createTestValue;
-            $testCreateStr += ("--" + (Get-CliOptionName $paramItem.name) + " {${commanderStyleName}} ");
+            $testCreateParamName = $paramItem.name;
+            if($paramItem.shortname)
+            {
+                $testCreateParamName = $paramItem.shortname;
+            }
+            $testCreateStr += ("--" + (Get-CliOptionName $testCreateParamName) + " {${commanderStyleName}} ");
             $inputTestCode += "  ${commanderStyleName}: '$value'," + $NEW_LINE;
             $cliCreateParams += $commanderStyleName;
         }
         if($paramItem.setTestValue)
         {
+            $testSetParamName = $paramItem.name;
+            if($paramItem.shortname)
+            {
+                $testSetParamName = $paramItem.shortname;
+            }
             $value = $paramItem.setTestValue;
-            $testUpdateStr += ("--" + (Get-CliOptionName $paramItem.name) + " {${commanderStyleName}New} ");
+            $testUpdateStr += ("--" + (Get-CliOptionName $testSetParamName) + " {${commanderStyleName}New} ");
             $inputTestCode += "  ${commanderStyleName}New: '$value'," + $NEW_LINE;
             $cliUpdateParams += $commanderStyleName;
         }
@@ -77,7 +92,12 @@
             $cliPromptParams += $commanderStyleName;
             if(-not $paramItem.default)
             {
-                $testCreateDefaultStr += ("--" + (Get-CliOptionName $paramItem.name) + " {${commanderStyleName}} ");
+                $testParamName = $paramItem.name;
+                if($paramItem.shortname)
+                {
+                    $testParamName = $paramItem.shortname;
+                }
+                $testCreateDefaultStr += ("--" + (Get-CliOptionName $testParamName) + " {${commanderStyleName}} ");
             }
         }
         if($paramItem.default)
@@ -138,6 +158,19 @@
     $require = Update-RequiredParameters $methodParamNameListExtended $methodParamTypeDict $allStringFieldCheck;
     $requireParams = $require.requireParams;
     $requireParamNormalizedNames = $require.requireParamNormalizedNames;
+    $requireParams = $require.requireParams;
+
+    # Adjust parameters names
+    $parentItem = $null;
+    if($parents[$OperationName])
+    {
+        if($operationMappings[$parents[$OperationName]])
+        {
+            $parentItem = $operationMappings[$parents[$OperationName]];
+        }
+    }
+    $requireParams = Get-MappedOptionsArray $requireParams $OperationName $parents[$OperationName] $parentItem;
+    $requireParamNormalizedNames = Get-MappedParametersArray $requireParamNormalizedNames $OperationName $parents[$OperationName] $parentItem;
 
     $requireParamsString = $null;
     $usageParamsString = $null;
@@ -178,6 +211,11 @@
         {
             $cli_option_name = "parameters-file";
         }
+        if($cliOperationParamsMap[$optionParamName])
+        {
+            $cli_option_name = Get-CliOptionName $cliOperationParamsMap[$optionParamName];
+        }
+        $cli_option_name = Get-MappedOption $cli_option_name $OperationName $parents[$OperationName] $parentItem;
         $cmdOptions += "    .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
         if($cli_option_name -ne "location")
         {
@@ -189,12 +227,12 @@
     $commonOptions = Get-CommonOptions $cliMethodOption;
 
     # Prompting options
-    $promptingOptions = Get-PromptingOptionsCode $promptParametersNameList $promptParametersNameList 6;
+    $promptingOptions = Get-PromptingOptionsCode $promptParametersNameList $promptParametersNameList $parentItem 6;
     if($artificallyExtracted -contains $OperationName)
     {
         $promptParametersNameList = $methodParamNameListExtended;
     }
-    $promptingOptionsCustom = Get-PromptingOptionsCode $cliPromptParams $promptParametersNameList 6;
+    $promptingOptionsCustom = Get-PromptingOptionsCode $cliPromptParams $promptParametersNameList $parentItem 6;
 
     #
     # API call using SDK
@@ -268,6 +306,11 @@
                 $lastItem =  $paramPathSplit[$paramPathSplit.Length - 1];
                 $last = decapitalizeFirstLetter $lastItem;
                 $commanderLast = Get-CommanderStyleOption $last;
+                $commanderLastTest = $commanderLast;
+                if($cliOperationParamsMap[$last])
+                {
+                    $commanderLast = Get-CommanderStyleOption $cliOperationParamsMap[$last]
+                }
                 $currentPath = "parameters"
                 for ($i = 0; $i -lt $paramPathSplit.Length - 1; $i += 1) {
                     $current = decapitalizeFirstLetter $paramPathSplit[$i];
@@ -336,16 +379,16 @@
                         $underlying =  [System.Nullable]::GetUnderlyingType($paramType);
                         if($underlying -like "*Int*")
                         {
-                            $setValue = "parseInt(options.${commanderLast}, 10);";
-                            $assertValue = "parseInt(${cliOperationName}.${commanderLast}, 10)";
-                            $assertValueUpdate = "parseInt(${cliOperationName}.${commanderLast}New, 10)";
+                            $setValue = "parseInt(options.${commanderLast}, 10)";
+                            $assertValue = "parseInt(${cliOperationName}.${commanderLastTest}, 10)";
+                            $assertValueUpdate = "parseInt(${cliOperationName}.${commanderLastTest}New, 10)";
                             $wrapType = "int";
                         }
                         elseif($underlying.Name -like "*Boolean*")
                         {
-                            $setValue = "utils.parseBool(options.${commanderLast});";
-                            $assertValue = "utils.parseBool(${cliOperationName}.${commanderLast})";
-                            $assertValueUpdate = "utils.parseBool(${cliOperationName}.${commanderLast}New)";
+                            $setValue = "utils.parseBool(options.${commanderLast})";
+                            $assertValue = "utils.parseBool(${cliOperationName}.${commanderLastTest})";
+                            $assertValueUpdate = "utils.parseBool(${cliOperationName}.${commanderLastTest}New)";
                             $wrapType = "bool";
                         }
                     }
@@ -359,35 +402,41 @@
                             $setValue = "options." + $commanderLast;
                         }
                         $conversion = ".toLowerCase()";
-                        $assertValue = "${cliOperationName}.${commanderLast}";
-                        $assertValueUpdate = "${cliOperationName}.${commanderLast}New";
+                        $assertValue = "${cliOperationName}.${commanderLastTest}";
+                        $assertValueUpdate = "${cliOperationName}.${commanderLastTest}New";
                         $wrapType = "string";
                     }
                     else {
                         $setValue = "options." + $commanderLast;
-                        $assertValue = "${cliOperationName}.${commanderLast}"
-                        $assertValueUpdate = "${cliOperationName}.${commanderLast}New";
+                        $assertValue = "${cliOperationName}.${commanderLastTest}"
+                        $assertValueUpdate = "${cliOperationName}.${commanderLastTest}New";
                     }
                 }
 
                     if(($last -clike "*Id" -and $alternativesArray -contains ($param -replace "Id", "")))
                     {
+                        $lastCut = $last -creplace "Id","";
                         $itemStrippedId = $last -creplace "Id","";
                         $itemStrippedComander = Get-CommanderStyleOption $itemStrippedId;
-                        if ($alternativesArray -contains $itemStrippedId)
+                        if($cliOperationParamsMap[$last])
                         {
-                            $treeAnalysisResult += "          ${currentPath}.${itemStrippedId} = {};" + $NEW_LINE;
-                            $treeAnalysisResult += "          ${currentPath}.${itemStrippedId}.id = options.${last};" + $NEW_LINE;
+                            $itemStrippedId = $cliOperationParamsMap[$last] -creplace "Id", "";
+                            $itemStrippedComander = Get-CommanderStyleOption $itemStrippedId;
+                        }
+                        if ($alternativesArray -contains $lastCut)
+                        {
+                            $treeAnalysisResult += "          ${currentPath}.${lastCut} = {};" + $NEW_LINE;
+                            $treeAnalysisResult += "          ${currentPath}.${lastCut}.id = options.${itemStrippedComander}Id;" + $NEW_LINE;
                             $treeAnalysisResult += "        } else if (options.${itemStrippedComander}Name) {" + $NEW_LINE;
-                            $treeAnalysisResult += "          ${currentPath}.${itemStrippedId} = {};" + $NEW_LINE;
-                            $cliOptionToGetIdByName = Get-CliNormalizedName $itemStrippedId;
+                            $treeAnalysisResult += "          ${currentPath}.${lastCut} = {};" + $NEW_LINE;
+                            $cliOptionToGetIdByName = Get-CliNormalizedName $lastCut;
                             $cliOptionToGetIdByName = GetPlural $cliOptionToGetIdByName;
 
                             if($cliOptionToGetIdByName -eq "gatewayDefaultSites")
                             {
                                 $cliOptionToGetIdByName = "localNetworkGateways";
                             }
-
+# TODO: improve if condition and string creation inside of else
                             if($itemStrippedId -ne "subnet")
                             {
                                 $treeAnalysisResult +=
@@ -396,19 +445,25 @@
                             else
                             {
                                 $treeAnalysisResult +=
-"          var idContainer = ${componentNameInLowerCase}ManagementClient.${cliOptionToGetIdByName}.get(resourceGroup, options.subnetVirtualNetworkName, options.${itemStrippedComander}Name, _);"
+"          var idContainer = ${componentNameInLowerCase}ManagementClient.${cliOptionToGetIdByName}.get(resourceGroup, options.subnetVnetName, options.${itemStrippedComander}Name, _);"
                             }
 $treeAnalysisResult +=
 "
-          ${currentPath}.${itemStrippedId}.id = idContainer.id;
+          ${currentPath}.${lastCut}.id = idContainer.id;
 "
                         }
                     }
                     elseif($last -clike "*Id" -and $last -ne "VlanId")
                     {
                         $itemStrippedId = $last -creplace "Id","";
+                        $itemStrippedComander = Get-CommanderStyleOption $itemStrippedId;
+                        $mappedLast = $last
+                        if($cliOperationParamsMap[$last])
+                        {
+                            $mappedLast = $cliOperationParamsMap[$last];
+                        }
                         $treeAnalysisResult += "          ${currentPath}.${itemStrippedId} = {};" + $NEW_LINE;
-                        $treeAnalysisResult += "          ${currentPath}.${itemStrippedId}.id = options.${last};" + $NEW_LINE;
+                        $treeAnalysisResult += "          ${currentPath}.${itemStrippedId}.id = options.${mappedLast};" + $NEW_LINE;
                     }
                     else
                     {
@@ -416,8 +471,8 @@ $treeAnalysisResult +=
                         if($last -eq "privateIPAddress")
                         {
                             $treeAnalysisResult += $NEW_LINE +
-                                "          if (!options.privateIpAddressVersion || (options.privateIpAddressVersion && options.privateIpAddressVersion.toLowerCase() != 'ipv6'))"
-                            $treeAnalysisResult += $NEW_LINE + "          ${currentPath}.privateIPAllocationMethod = 'Static';";
+                                "          if (!options.privateIpVersion || (options.privateIpVersion && options.privateIpVersion.toLowerCase() != 'ipv6'))"
+                            $treeAnalysisResult += $NEW_LINE + "            ${currentPath}.privateIPAllocationMethod = 'Static';";
                         }
                     }
 
@@ -475,13 +530,14 @@ $treeAnalysisResult +=
     {
         if (-not ($treeProcessedList -contains $item) -and $item -ne "parameters")
         {
+            $mappedParameterName = Get-MappedParameterName $item $OperationName $parents[$OperationName] $parentItem;
             if($item -cnotlike "*Id" -and $item -cnotlike "*Name")
             {
                 $updateParametersCode  += "        if(options.${item}) {" + $NEW_LINE;
             }
             elseif($alternativesArray -notcontains ($item -creplace "Id","") -and $alternativesArray -notcontains ($item -creplace "Name",""))
             {
-                $updateParametersCode  += "        if(options.${item}) {" + $NEW_LINE;
+                $updateParametersCode  += "        if(options.${mappedParameterName}) {" + $NEW_LINE;
             }
             if($item -ne "tags")
             {
@@ -541,7 +597,7 @@ $treeAnalysisResult +=
                 }
                 elseif($alternativesArray -notcontains ($item -creplace "Id","") -and $alternativesArray -notcontains ($item -creplace "Name",""))
                 {
-                    $updateParametersCode  += "          parameters.${item} = options.${item};" + $NEW_LINE;
+                    $updateParametersCode  += "          parameters.${item} = options.${mappedParameterName};" + $NEW_LINE;
                 }
             }
             else
@@ -572,6 +628,10 @@ $treeAnalysisResult +=
         foreach($dependency in $dependencies[$OperationName])
         {
             $depCliOption = Get-SingularNoun (Get-CliOptionName $dependency);
+            if($parents[$OperationName] -and $depCliOption -eq (Get-CliOptionName (Get-SingularNoun $parents[$OperationName])) -and $parentItem)
+            {
+                $depCliOption = $parentItem;
+            }
             $depResultVarName = (decapitalizeFirstLetter (Get-SingularNoun $dependency));
             $depCliName = $depResultVarName + "Name";
             if($depCliName -eq "subnetName" -and $OperationName -eq "VirtualNetworkGateways")
@@ -586,7 +646,7 @@ $treeAnalysisResult +=
                 {
                     $additionalOptionsValue = $additionalOptionsValue -creplace "virtual-network-name","subnet-virtual-network-name";
                 }
-                if($parents[$OperationName] -eq (Get-SingularNoun $dependency) -or $dependency -eq "ExpressRouteCircuits")
+                if($parents[$OperationName] -eq  $dependency -or $dependency -eq "ExpressRouteCircuits")
                 {
                     $additionalOptionsCommon += $additionalOptionsValue;
                 }
@@ -595,7 +655,7 @@ $treeAnalysisResult +=
         }
     }
 
-    $parametersString = Get-ParametersString $methodParamNameList;
+    $parametersString = Get-ParametersString $methodParamNameList $parentItem;
     $parsers = Get-SubnetParser;
 
     $parentOp = "";
@@ -603,9 +663,12 @@ $treeAnalysisResult +=
     $parentNamePlural = "";
     if ($parents[$OperationName])
     {
-        $parentOp = (Get-CliOptionName $parents[$OperationName]) + " ";
+        $parentOp = (Get-CliOptionName (Get-SingularNoun $parents[$OperationName])) + " ";
         $parentName = $parents[$OperationName] + "Name";
-        $parentPlural = GetPlural $parents[$OperationName];
+        if($operationMappings[$parents[$OperationName]])
+        {
+            $parentOp = $operationMappings[$parents[$OperationName]] + " ";
+        }
     }
     if($artificallyExtracted -contains $OperationName)
     {

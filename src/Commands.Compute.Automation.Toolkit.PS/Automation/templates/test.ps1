@@ -16,11 +16,20 @@ function AddDependenciesCode($isDefaultsTest)
             {
                 $depParent = $parents[$dependency];
                 $parentCmd = Get-CliOptionName $parents[$dependency];
+                if($operationMappings[$parents[$dependency]])
+                {
+                    $parentCmd = $operationMappings[$parents[$dependency]];
+                    $depParent = Get-SingularNoun $parents[$dependency];
+                }
                 $parentRef = "--${parentCmd}-name ${depParent}Name";
                 $parentCmd = " ${parentCmd}";
             }
             $outResult = "";
             $depCliOption = Get-SingularNoun (Get-CliOptionName $dependency);
+            if($operationMappings[$dependency])
+            {
+                $depCliOption = Get-SingularNoun $operationMappings[$dependency];
+            }
             $depResultVarName = (decapitalizeFirstLetter (Get-SingularNoun $dependency));
             $depCliName = $depResultVarName + "Name";
             if($depCliName -eq "subnetName" -and $OperationName -eq "VirtualNetworkGateways")

@@ -60,8 +60,17 @@
     }
     $require = Update-RequiredParameters $methodParamNameListExtended $methodParamTypeDict $allStringFieldCheck;
     $requireParams = $require.requireParams;
-
     $requireParamNormalizedNames = $require.requireParamNormalizedNames;
+    $parentItem = $null;
+    if($parents[$OperationName])
+    {
+        if($operationMappings[$parents[$OperationName]])
+        {
+            $parentItem = $operationMappings[$parents[$OperationName]];
+        }
+    }
+    $requireParams = Get-MappedOptionsArray $requireParams $OperationName $parents[$OperationName] $parentItem ;
+    $requireParamNormalizedNames = Get-MappedParametersArray $requireParamNormalizedNames $OperationName $parents[$OperationName] $parentItem;
 
     $requireParamsString = $null;
     $usageParamsString = $null;
@@ -95,7 +104,7 @@
             $cli_shorthand_str = "-" + $cli_shorthand_str + ", ";
         }
         $cli_option_help_text = "the ${cli_option_name} of ${cliOperationDescription}";
-
+        $cli_option_name = Get-MappedOption $cli_option_name $OperationName $parents[$OperationName] $parentItem;
         $cmdOptions += "    .option('${cli_shorthand_str}--${cli_option_name} <${cli_option_name}>', `$('${cli_option_help_text}'))" + $NEW_LINE;
         $option_str_items += "--${cli_option_name} `$p${index}";
     }
@@ -108,9 +117,9 @@
     $cliMethodFuncName = $cliMethodName;
     $resultVarName = "result";
 
-    $promptingCode = Get-PromptingOptionsCode $methodParamNameList $methodParamNameList 12;
+    $promptingCode = Get-PromptingOptionsCode $methodParamNameList $methodParamNameList $parentItem 12;
     $methodParamNameListNoRes = $methodParamNameList -ne "resourceGroup";
-    $promptingCodeNoResource = Get-PromptingOptionsCode $methodParamNameListNoRes $methodParamNameListNoRes 12;
+    $promptingCodeNoResource = Get-PromptingOptionsCode $methodParamNameListNoRes $methodParamNameListNoRes $parentItem 12;
     if($artificallyExtracted -contains $OperationName)
     {
         $artificalOperation = $artificalOperations | Where-Object { $_.Name -eq $OperationName };
@@ -118,7 +127,7 @@
         $methodParamNameListExtendedOptions = $methodParamNameList;
         $methodParamNameListExtendedOptions += ("options." + $parents[$OperationName] + "Name");
         $safeGet = Get-SafeGetFunction $componentNameInLowerCase ${artificalOperationParent} $methodParamNameListExtended $resultVarName $cliOperationDescription;
-        $promptParentCode = Get-PromptingOptionsCode $methodParamNameListExtended $methodParamNameListExtended 6;
+        $promptParentCode = Get-PromptingOptionsCode $methodParamNameListExtended $methodParamNameListExtended $parentItem 6;
         $template = Get-Content "$PSScriptRoot\templates\list_child.ps1" -raw;
     }
     else

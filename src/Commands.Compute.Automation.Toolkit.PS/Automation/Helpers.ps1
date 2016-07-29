@@ -22,15 +22,15 @@ function Get-ParametersNames($methodParameters)
         {
             # Record the Normalized Parameter Name, i.e. 'vmName' => 'VMName', 'resourceGroup' => 'ResourceGroup', etc.
             $methodParamName = (Get-CamelCaseName $paramItem.Name);
-            if($methodParamName -ne $currentOperationNormalizedName -and
-               $methodParamName -ne ($parents[$cliOperationName] + "Name") -and
-               $methodParamName  -notlike "circuit*")
+            if($methodParamName -eq $currentOperationNormalizedName -or
+               ($parents[$cliOperationName] -and $methodParamName -eq ((Get-SingularNoun $parents[$cliOperationName]) + "Name")) -or
+               $methodParamName  -like "circuit*")
             {
-                $methodParamName = (Get-CliMethodMappedParameterName $methodParamName $methodParamIndex);
+                $methodParamName = Get-CommanderStyleOption $methodParamName;
             }
             else
             {
-                $methodParamName = Get-CommanderStyleOption $methodParamName;
+                $methodParamName = (Get-CliMethodMappedParameterName $methodParamName $methodParamIndex);
             }
             $methodParamNameList += $methodParamName;
             $methodParamTypeDict.Add($paramItem.Name, $paramType);
@@ -98,7 +98,7 @@ function Update-RequiredParameters($methodParamNameList, $methodParamTypeDict, $
     return $Return;
 }
 
-function Get-PromptingOptionsCode($methodParamNameList, $functionArgsList, $spaceLength)
+function Get-PromptingOptionsCode($methodParamNameList, $functionArgsList, $parentItem, $spaceLength)
 {
     $result = "";
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
@@ -108,6 +108,7 @@ function Get-PromptingOptionsCode($methodParamNameList, $functionArgsList, $spac
         $cli_option_name  = $cli_option_name -replace "parameters", "parameters-file (press enter to skip and use options)"
 
         $cli_param_name = Get-CliNormalizedName $optionParamName;
+        $mappedParamName = Get-MappedParameterName $cli_param_name $OperationName $parents[$OperationName] $parentItem;
         $conditionStr = "";
         if($functionArgsList -contains "parameters")
         {
@@ -119,7 +120,7 @@ function Get-PromptingOptionsCode($methodParamNameList, $functionArgsList, $spac
             {
                 $conditionStr += " && ";
             }
-            $conditionStr += "!options.${cli_param_name}";
+            $conditionStr += "!options.${mappedParamName}";
             $result += (" " * $spaceLength) + "if(${conditionStr}) {" + $NEW_LINE;
         } else
         {
@@ -131,11 +132,11 @@ function Get-PromptingOptionsCode($methodParamNameList, $functionArgsList, $spac
         $result += (" " * ($spaceLength + 2));
         if($functionArgsList -contains $cli_param_name)
         {
-            $result += "${cli_param_name} = cli.interaction.promptIfNotGiven(`$('${cli_option_name} : '), ${cli_param_name}, _);" + $NEW_LINE;
+            $result += "${mappedParamName} = cli.interaction.promptIfNotGiven(`$('${cli_option_name} : '), ${mappedParamName}, _);" + $NEW_LINE;
         }
         else
         {
-            $result += "options.${cli_param_name} = cli.interaction.promptIfNotGiven(`$('${cli_option_name} : '), options.${cli_param_name}, _);" + $NEW_LINE;
+            $result += "options.${mappedParamName} = cli.interaction.promptIfNotGiven(`$('${cli_option_name} : '), options.${mappedParamName}, _);" + $NEW_LINE;
         }
         if ($conditionStr -ne "")
         {
@@ -145,13 +146,42 @@ function Get-PromptingOptionsCode($methodParamNameList, $functionArgsList, $spac
     return $result;
 }
 
-function Get-ParametersString($methodParamNameList)
+function Get-MappedParameterName($parameterName, $OperationName, $paramParent, $parentShort)
+{
+    $replaceNameParam = ((Get-SingularNoun $OperationName) + "Name") -replace "ExpressRouteCircuit","";
+    if($parameterName -eq $replaceNameParam)
+    {
+        return "name";
+    }
+    elseif($paramParent -and $parameterName -eq ((Get-SingularNoun $paramParent) + "Name"))
+    {
+        if($parentShort)
+        {
+            return "${parentShort}Name"
+        }
+        else
+        {
+            return (decapitalizeFirstLetter (Get-SingularNoun $paramParent)) + "Name";
+        }
+    }
+    elseif($parameterName -eq "remoteVirtualNetworkId")
+    {
+        return "remoteVnetId"
+    }
+    else
+    {
+        return $parameterName;
+    }
+}
+
+function Get-ParametersString($methodParamNameList, $parentItem)
 {
     $str ="";
     for ($index = 0; $index -lt $methodParamNameList.Count; $index++)
     {
         # Function Call - For Each Method Parameter
         $cli_param_name = Get-CliNormalizedName $methodParamNameList[$index];
+        $cli_param_name = Get-MappedParameterName $cli_param_name $OperationName $parents[$OperationName] $parentItem;
         $str += "${cli_param_name}";
         if ($index -lt $methodParamNameList.Count - 1)
         {
@@ -163,17 +193,17 @@ function Get-ParametersString($methodParamNameList)
 
 function Get-SafeGetFunction($componentNameInLowerCase, $cliOperationName, $methodParamNameList, $resultVarName, $cliOperationDescription)
 {
-    $cliNormalizedCurrentName = Get-CommanderStyleOption (Get-SingularNoun $cliOperationName);
-    $cliNormalizedCurrentNameArg = "${cliNormalizedCurrentName}Name";
-    if($cliNormalizedCurrentNameArg -eq "Name")
+    $replaceNameParam = ((Get-SingularNoun $cliOperationName) + "Name") -replace "ExpressRouteCircuit","";
+    $check = $methodParamNameList | Where-Object {$_ -eq $replaceNameParam}
+    if($check)
     {
-        $cliNormalizedCurrentNameArg = decapitalizeFirstLetter $cliNormalizedCurrentNameArg;
+        $methodParamNameList = $methodParamNameList -replace $check,"name";
     }
     $tempCode = "
-      var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), ${cliNormalizedCurrentNameArg}));
+      var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), name));
       try {
         ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.get("
-    $tempCode += (Get-ParametersString $methodParamNameList) -replace ", parameters", "";
+    $tempCode += (Get-ParametersString $methodParamNameList $parentItem) -replace ", parameters", "";
     $tempCode += ", null, _);";
 
     $tempCode += "
@@ -350,5 +380,82 @@ function GetPlural($inStr)
     else
     {
         return $inStr + "s";
+    }
+}
+
+function Get-MappedOption($optionName, $opName, $parentNameOption, $parentItem)
+{
+    if($optionName -eq (((Get-CliOptionName (Get-SingularNoun $opName)) + "-name") -replace "express-route-circuit-",""))
+    {
+        $optionName = "name";
+    }
+    elseif($parentNameOption -and $optionName -eq (((Get-CliOptionName (Get-SingularNoun $parentNameOption)) + "-name") -replace "express-route-circuit-",""))
+    {
+        if($parentItem)
+        {
+            $optionName = "${parentItem}-name"
+        }
+    }
+    return $optionName;
+}
+
+function Get-MappedOptionsArray($inArray, $opName, $parentNameInput, $parentShortnameOption)
+{
+    $replaceNameOption = ((Get-CliOptionName (Get-SingularNoun $opName)) + "-name") -replace "express-route-circuit-","";
+    $checkOption = $inArray | Where-Object {$_ -eq $replaceNameOption};
+    $checkParent = $null;
+    if($parentNameInput)
+    {
+        $replaceNameParentOption = ((Get-CliOptionName (Get-SingularNoun $parentNameInput)) + "-name") -replace "express-route-circuit-","";
+        $checkParentOption = $inArray | Where-Object {$_ -eq $replaceNameParentOption};
+    }
+    if($checkOption)
+    {
+        $inArray = $inArray -replace $checkOption,"name";
+    }
+    if($checkParentOption)
+    {
+        if($parentShortnameOption)
+        {
+            $parentShortnameOption = Get-CliOptionName (Get-SingularNoun $parentShortnameOption);
+            $inArray = $inArray -replace $checkParentOption,"${parentShortnameOption}-name";
+        }
+    }
+    return $inArray;
+}
+
+function Get-MappedParametersArray($inArray, $opName, $parentNameInput, $parentShortname)
+{
+    $replaceNameParam = ((Get-SingularNoun $opName) + "Name") -replace "ExpressRouteCircuit","";
+    $check = $inArray | Where-Object {$_ -eq $replaceNameParam};
+    $checkParent = $null;
+    if($parentNameInput)
+    {
+        $replaceNameParent = ((Get-SingularNoun $parentNameInput) + "Name") -replace "ExpressRouteCircuit","";
+        $checkParent = $inArray | Where-Object {$_ -eq $replaceNameParent};
+    }
+    if($check)
+    {
+        $inArray = $inArray -replace $check,"name";
+    }
+    if($checkParent)
+    {
+        if($parentShortname)
+        {
+            $inArray = $inArray -replace $checkParent,"${parentShortname}Name";
+        }
+    }
+    return $inArray;
+}
+
+function Get-CustomMapping($inputStr)
+{
+    if($inputStr -eq "VirtualNetworkName")
+    {
+        return "VnetName";
+    }
+    else
+    {
+        return $inputStr;
     }
 }
