@@ -149,7 +149,12 @@ function Get-PromptingOptionsCode($methodParamNameList, $functionArgsList, $pare
 function Get-MappedParameterName($parameterName, $OperationName, $paramParent, $parentShort)
 {
     $replaceNameParam = ((Get-SingularNoun $OperationName) + "Name") -replace "ExpressRouteCircuit","";
+    $replaceNameParam = ((Get-SingularNoun $OperationName) + "Name") -replace "ExpressRoute","";
     if($parameterName -eq $replaceNameParam)
+    {
+        return "name";
+    }
+    elseif($parameterName -eq "peeringName" -or $parameterName -eq "authorizationName")
     {
         return "name";
     }
@@ -157,7 +162,7 @@ function Get-MappedParameterName($parameterName, $OperationName, $paramParent, $
     {
         if($parentShort)
         {
-            return "${parentShort}Name"
+            return "${parentShort}Name";
         }
         else
         {
@@ -166,7 +171,23 @@ function Get-MappedParameterName($parameterName, $OperationName, $paramParent, $
     }
     elseif($parameterName -eq "remoteVirtualNetworkId")
     {
-        return "remoteVnetId"
+        return "remoteVnetId";
+    }
+    elseif($parameterName -eq "gatewayIpAddress")
+    {
+        return "ipAddress";
+    }
+    elseif($parameterName -eq "subnetVirtualNetworkName" -and $OperationName -eq "VirtualNetworkGateways")
+    {
+        return "vnetName";
+    }
+    elseif($parameterName -eq "primaryPeerAddressPrefix")
+    {
+        return "primaryAddressPrefix";
+    }
+    elseif($parameterName -eq "secondaryPeerAddressPrefix")
+    {
+        return "secondaryAddressPrefix";
     }
     else
     {
@@ -389,6 +410,10 @@ function Get-MappedOption($optionName, $opName, $parentNameOption, $parentItem)
     {
         $optionName = "name";
     }
+    elseif($optionName -eq (((Get-CliOptionName (Get-SingularNoun $opName)) + "-name") -replace "express-route-",""))
+    {
+        $optionName = "name";
+    }
     elseif($parentNameOption -and $optionName -eq (((Get-CliOptionName (Get-SingularNoun $parentNameOption)) + "-name") -replace "express-route-circuit-",""))
     {
         if($parentItem)
@@ -402,11 +427,13 @@ function Get-MappedOption($optionName, $opName, $parentNameOption, $parentItem)
 function Get-MappedOptionsArray($inArray, $opName, $parentNameInput, $parentShortnameOption)
 {
     $replaceNameOption = ((Get-CliOptionName (Get-SingularNoun $opName)) + "-name") -replace "express-route-circuit-","";
+    $replaceNameOption = ((Get-CliOptionName (Get-SingularNoun $opName)) + "-name") -replace "express-route-","";
     $checkOption = $inArray | Where-Object {$_ -eq $replaceNameOption};
     $checkParent = $null;
     if($parentNameInput)
     {
         $replaceNameParentOption = ((Get-CliOptionName (Get-SingularNoun $parentNameInput)) + "-name") -replace "express-route-circuit-","";
+        $replaceNameParentOption = ((Get-CliOptionName (Get-SingularNoun $parentNameInput)) + "-name") -replace "express-route-","";
         $checkParentOption = $inArray | Where-Object {$_ -eq $replaceNameParentOption};
     }
     if($checkOption)
@@ -421,17 +448,27 @@ function Get-MappedOptionsArray($inArray, $opName, $parentNameInput, $parentShor
             $inArray = $inArray -replace $checkParentOption,"${parentShortnameOption}-name";
         }
     }
+    if($inArray -contains "authorization-name")
+    {
+        $inArray = $inArray -replace "authorization-name","name";
+    }
+    if($inArray -contains "peering-name")
+    {
+        $inArray = $inArray -replace "peering-name","name";
+    }
     return $inArray;
 }
 
 function Get-MappedParametersArray($inArray, $opName, $parentNameInput, $parentShortname)
 {
     $replaceNameParam = ((Get-SingularNoun $opName) + "Name") -replace "ExpressRouteCircuit","";
+    $replaceNameParam = ((Get-SingularNoun $opName) + "Name") -replace "ExpressRoute","";
     $check = $inArray | Where-Object {$_ -eq $replaceNameParam};
     $checkParent = $null;
     if($parentNameInput)
     {
         $replaceNameParent = ((Get-SingularNoun $parentNameInput) + "Name") -replace "ExpressRouteCircuit","";
+        $replaceNameParam = ((Get-SingularNoun $opName) + "Name") -replace "ExpressRoute","";
         $checkParent = $inArray | Where-Object {$_ -eq $replaceNameParent};
     }
     if($check)
@@ -444,6 +481,14 @@ function Get-MappedParametersArray($inArray, $opName, $parentNameInput, $parentS
         {
             $inArray = $inArray -replace $checkParent,"${parentShortname}Name";
         }
+    }
+    if($inArray -contains "authorizationName")
+    {
+        $inArray = $inArray -replace "authorizationName","name";
+    }
+    if($inArray -contains "peeringName")
+    {
+        $inArray = $inArray -replace "peeringName","name";
     }
     return $inArray;
 }

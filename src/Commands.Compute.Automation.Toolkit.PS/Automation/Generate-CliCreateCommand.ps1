@@ -329,11 +329,11 @@
                     #if ($current -eq "ipConfigurations[0]")
                     if($artificallyExtracted -contains $OperationName)
                     {
-                        $treeAnalysisResult += "          ${currentPath}.${current}.name = ${currentOperationNormalizedName} || 'default';" + $NEW_LINE;
+                        $treeAnalysisResult += "          ${currentPath}.${current}.name = name || 'default';" + $NEW_LINE;
                     }
                     elseif($current -eq "ipConfigurations[index]")
                     {
-                        $treeAnalysisResult += "          ${currentPath}.${current}.name = ${currentOperationNormalizedName} || 'default';" + $NEW_LINE;
+                        $treeAnalysisResult += "          ${currentPath}.${current}.name = name || 'default';" + $NEW_LINE;
                     }
                     ${currentPath} += ".${current}";
                     $treeAnalysisResult += "        }" + $NEW_LINE;
@@ -444,8 +444,13 @@
                             }
                             else
                             {
-                                $treeAnalysisResult +=
-"          var idContainer = ${componentNameInLowerCase}ManagementClient.${cliOptionToGetIdByName}.get(resourceGroup, options.subnetVnetName, options.${itemStrippedComander}Name, _);"
+                                $parentSubstitution = "options.subnetVnetName";
+                                if($OperationName -eq "VirtualNetworkGateways")
+                                {
+                                    $parentSubstitution = "options.vnetName";
+                                }
+                                    $treeAnalysisResult +=
+"          var idContainer = ${componentNameInLowerCase}ManagementClient.${cliOptionToGetIdByName}.get(resourceGroup, ${parentSubstitution}, options.${itemStrippedComander}Name, _);"
                             }
 $treeAnalysisResult +=
 "
@@ -634,6 +639,14 @@ $treeAnalysisResult +=
             }
             $depResultVarName = (decapitalizeFirstLetter (Get-SingularNoun $dependency));
             $depCliName = $depResultVarName + "Name";
+            if($cliOperationParamsMap[$depCliName])
+            {
+                $depCliOption = Get-CliOptionName ($cliOperationParamsMap[$depCliName] -creplace "Name","");
+            }
+            elseif($cliOperationParamsMap["subnet" + $depCliName])
+            {
+                $depCliOption = Get-CliOptionName ($cliOperationParamsMap["subnet" + $depCliName] -creplace "Name","");
+            }
             if($depCliName -eq "subnetName" -and $OperationName -eq "VirtualNetworkGateways")
             {
                 $depCliName = "GatewaySubnet";
@@ -665,6 +678,7 @@ $treeAnalysisResult +=
     {
         $parentOp = (Get-CliOptionName (Get-SingularNoun $parents[$OperationName])) + " ";
         $parentName = $parents[$OperationName] + "Name";
+        $parentPlural = decapitalizeFirstLetter $parents[$OperationName];
         if($operationMappings[$parents[$OperationName]])
         {
             $parentOp = $operationMappings[$parents[$OperationName]] + " ";

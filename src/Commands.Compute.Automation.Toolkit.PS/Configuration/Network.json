@@ -110,7 +110,7 @@
         {
           "name": "networkSecurityGroupName",
           "alternative": "networkSecurityGroupId",
-          "createTestValue" : "nsgName",
+          "createTestValue" : "networkSecurityGroupName",
           "required": "false"
         },
         {
@@ -615,10 +615,14 @@
         },
         {
           "name": "allowForwardedTraffic",
+          "createTestValue": "true",
+          "setTestValue": "true",
           "required": "false"
         },
         {
           "name": "allowGatewayTransit",
+          "createTestValue": "true",
+          "setTestValue": "true",
           "required": "false"
         },
         {
@@ -628,10 +632,13 @@
         {
           "name": "allowVirtualNetworkAccess",
           "shortname": "allowVnetAccess",
+          "createTestValue": "true",
+          "setTestValue": "true",
           "required": "false"
         }
       ],
-      "parent": "VirtualNetworks"
+      "parent": "VirtualNetworks",
+      "dependencies": ["VirtualNetworks", "VirtualNetworks"]
     },
     { "name": "NetworkInterfaceIPConfiguration",
       "shortname": "ip-config",

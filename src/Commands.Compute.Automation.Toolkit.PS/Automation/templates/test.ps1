@@ -45,7 +45,12 @@ function AddDependenciesCode($isDefaultsTest)
             {
                 if($param.required -eq $true)
                 {
-                    " " * $depIndex + "            '--" + ((Get-CliOptionName $param.name) -replace "express-route-","") + " " + $param.createTestValue + " ' +" ;
+                    $paramItemName = $param.name;
+                    if($param.shortname)
+                    {
+                        $paramItemName = $param.shortname;
+                    }
+                    " " * $depIndex + "            '--" + ((Get-CliOptionName $paramItemName) -replace "express-route-","") + " " + $param.createTestValue + " ' +" ;
                 }
                 if($param.name -eq "location" -and $inputTestCode -notlike "*location*")
                 {
