@@ -1129,20 +1129,33 @@ function Write-CLICommandFile
 
     $codeContent +=
 @"
-
-var __ = require('underscore');
 var profile = require('../../../util/profile');
 var utils = require('../../../util/utils');
-var resourceUtils = require('../resource/resourceUtils');
+
+"@
+if($operationName -ne "usages" -and $operationName -ne "expressRouteServiceProviders")
+{
+    $codeContent +=
+@"
+var cli = require('../../../cli');
 var util = require('util');
-var validation = require('../../../util/validation');
-var constants = require('./constants');
-var tagUtils = require('../tag/tagUtils');
-var Nsg = require('./nsg');
-var RouteTable = require('./routeTable');
+
+"@
+}
+if($commandCodeLines -clike "*resourceUtils*")
+{
+    $codeContent += "var resourceUtils = require('../resource/resourceUtils');
+"
+}
+if($commandCodeLines -clike "*tagUtils*")
+{
+    $codeContent += "var tagUtils = require('../tag/tagUtils');
+"
+}
+    $codeContent +=
+@"
 var $ = utils.getLocaleString;
 
-var nsgCrud, routeTableCrud;
 "@;
 
     if ($define_beautify)
@@ -1169,6 +1182,8 @@ function makeTuple(k, v, d) {
 "@;
     }
 
+if($operationName -ne "usages" -and $operationName -ne "expressRouteServiceProviders")
+{
     $codeContent +=
 @"
 
@@ -1180,25 +1195,25 @@ function getHumanReadableFromCamelCase(inName) {
   }
 
   var varName = inName;
-  var outName = "";
+  var outName = '';
 
   var i = 0;
   while (i < varName.length) {
-    if (i == 0 || varName[i] == varName[i].toUpperCase()) {
+    if (i === 0 || varName[i] == varName[i].toUpperCase()) {
       if (i > 0) {
         outName += ' ';
       }
 
       var abbrWords =['VM', 'IP', 'RM', 'OS', 'NAT', 'IDs', 'DNS', 'VNet', 'ASN', 'SubNet'];
       var matched = false;
-      var matchedAbbr = "";
-      abbrWords.every(function(item, index, arr) {
+      var matchedAbbr = '';
+      abbrWords.every(function(item) {
         if (varName.substring(i).lastIndexOf(item, 0) === 0) {
           matched = true;
           matchedAbbr = item;
           return false;
         }
-        return true
+        return true;
       });
 
       if (matched) {
@@ -1225,66 +1240,55 @@ function getHumanReadableFromCamelCase(inName) {
   return outName;
 }
 
-  function showKeyValue(key, value, indent) {
-    cli.output.nameValue(utils.capitalizeFirstLetter(getHumanReadableFromCamelCase(key)), value, indent);
-  }
+function showKeyValue(key, value, indent) {
+  cli.output.nameValue(utils.capitalizeFirstLetter(getHumanReadableFromCamelCase(key)), value, indent);
+}
 
-  function traverse(obj, indent) {
-   if(typeof(obj) != "string") {
-      for (var i in obj) {
-        if (typeof(obj[i]) != "object") {
-          showKeyValue.apply(this,[i, obj[i], indent]);
+function traverse(obj, indent) {
+ if(typeof(obj) != 'string') {
+    for (var i in obj) {
+      if (typeof(obj[i]) != 'object') {
+        showKeyValue.apply(null,[i, obj[i], indent]);
+        continue;
+      }
+      if (obj[i] !== null && typeof(obj[i])=='object') {
+        if (i == 'tags') {
+          showKeyValue.apply(null,[i, JSON.stringify(obj[i])]);
           continue;
         }
-        if (obj[i] !== null && typeof(obj[i])=="object") {
-          if (i == 'tags') {
-            showKeyValue.apply(this,[i, JSON.stringify(obj[i])]);
-            continue;
-          }
-          if(!(obj[i] instanceof Array)) {
-            traverse(obj[i], 2);
-          } else {
-            cli.output.header(utils.capitalizeFirstLetter(getHumanReadableFromCamelCase(i)));
-            for(var j in obj[i]) {
-              traverse(obj[i][j], 2)
-            }
+        if(!(obj[i] instanceof Array)) {
+          traverse(obj[i], 2);
+        } else {
+          cli.output.header(utils.capitalizeFirstLetter(getHumanReadableFromCamelCase(i)));
+          for(var j in obj[i]) {
+            traverse(obj[i][j], 2);
           }
         }
       }
-    } else {
-      cli.output.list([utils.capitalizeFirstLetter(getHumanReadableFromCamelCase(obj))], 2, false);
+    }
+  } else {
+    cli.output.list([utils.capitalizeFirstLetter(getHumanReadableFromCamelCase(obj))], 2, false);
+  }
+}
+
+function removeEmptyObjects(test) {
+  for (var i in test) {
+    if (typeof test[i] === 'object' && Object.getOwnPropertyNames(test[i]).length === 0) {
+      delete test[i];
+    } else if (typeof test[i] === 'object') {
+      removeEmptyObjects(test[i]);
     }
   }
+}
 
-  function getFlatObject(obj) {
-    var result = {};
-    function recurse(obj) {
-      for (var i in obj) {
-        if (typeof(obj[i]) != "object") {
-          result[i] = obj[i];
-        }
-        if (obj[i] !== null && typeof(obj[i])=="object") {
-          recurse(obj[i], showKeyValue);
-        }
-      }
-    }
-    recurse(obj);
-    return result
-  }
-
-  function removeEmptyObjects(test) {
-    for (var i in test) {
-      if (typeof test[i] === 'object' && Object.getOwnPropertyNames(test[i]).length == 0) {
-        delete test[i];
-      } else if (typeof test[i] === 'object') {
-        removeEmptyObjects(test[i]);
-      }
-    }
-  }
-
+"@
+}
+    $codeContent+=
+@"
 exports.init = function (cli) {
 $commandCodeLines
 };
+
 "@;
 
     $st = Set-FileContent -Path $fileFullPath -Value $codeContent;

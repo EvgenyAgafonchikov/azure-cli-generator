@@ -261,6 +261,7 @@
     $treeProcessedList = @();
     $treeAnalysisResult = "";
     $skuNameCode = "";
+    $indexVarRequired = $false;
     foreach($param in $cliOperationParams) {
         $conversion = "";
         $wrapType = "";
@@ -317,6 +318,7 @@
 
                     if($current -match ".*\[index\].*")
                     {
+                        $indexVarRequired = $true;
                         $currentArray = "${currentPath}.${current}" -replace "\[index\]","";
                         $treeAnalysisResult += "        if(!$currentArray) {" + $NEW_LINE;
                         $treeAnalysisResult += "          ${currentArray} = [];" + $NEW_LINE;
@@ -352,7 +354,7 @@
                         if("sku${lastItem}" -eq "skuName")
                         {
                             $treeAnalysisResult += "          if(!options.skuTier) {" + $NEW_LINE;
-                            $treeAnalysisResult += "            ${currentPath}.tier = options.sku${lastItem}" + $NEW_LINE;
+                            $treeAnalysisResult += "            ${currentPath}.tier = options.sku${lastItem};" + $NEW_LINE;
                             $treeAnalysisResult += "          }" + $NEW_LINE;
                         }
                     }
@@ -363,7 +365,7 @@
                     if($paramType -ne $null -and $paramType -like "*List*") {
                         if($last -eq "loadBalancerBackendAddressPools" -or $last -eq "loadBalancerInboundNatRules")
                         {
-                            $setValue = "options." + $commanderLast + ".split(',').map(function(item) { return { id: item } })";
+                            $setValue = "options." + $commanderLast + ".split(',').map(function(item) { return { id: item }; })";
                         }
                         else
                         {
@@ -440,7 +442,7 @@
                             if($itemStrippedId -ne "subnet")
                             {
                                 $treeAnalysisResult +=
-"          var idContainer = ${componentNameInLowerCase}ManagementClient.${cliOptionToGetIdByName}.get(resourceGroup, options.${itemStrippedComander}Name, _);"
+"          var idContainer${lastItem} = ${componentNameInLowerCase}ManagementClient.${cliOptionToGetIdByName}.get(resourceGroup, options.${itemStrippedComander}Name, _);"
                             }
                             else
                             {
@@ -450,11 +452,11 @@
                                     $parentSubstitution = "options.vnetName";
                                 }
                                     $treeAnalysisResult +=
-"          var idContainer = ${componentNameInLowerCase}ManagementClient.${cliOptionToGetIdByName}.get(resourceGroup, ${parentSubstitution}, options.${itemStrippedComander}Name, _);"
+"          var idContainer${lastItem} = ${componentNameInLowerCase}ManagementClient.${cliOptionToGetIdByName}.get(resourceGroup, ${parentSubstitution}, options.${itemStrippedComander}Name, _);"
                             }
 $treeAnalysisResult +=
 "
-          ${currentPath}.${lastCut}.id = idContainer.id;
+          ${currentPath}.${lastCut}.id = idContainer${lastItem}.id;
 "
                         }
                     }
@@ -564,8 +566,8 @@ $treeAnalysisResult +=
                             $cliOptionToGetIdByName = GetPlural $cliOptionToGetIdByName;
 
                             $updateParametersCode +=
-"          var idContainer = ${componentNameInLowerCase}ManagementClient.${cliOptionToGetIdByName}.get(resourceGroup, options.${itemStrippedId}Name, _);
-          parameters.${itemStrippedId}.id = idContainer.id;
+"          var idContainer${item} = ${componentNameInLowerCase}ManagementClient.${cliOptionToGetIdByName}.get(resourceGroup, options.${itemStrippedId}Name, _);
+          parameters.${itemStrippedId}.id = idContainer${item}.id;
 "
                             $updateParametersCode += "        }" + $NEW_LINE;
                             if($cliCreateParams -contains $item -or $cliCreateParams -contains ($itemStrippedId + "Name"))

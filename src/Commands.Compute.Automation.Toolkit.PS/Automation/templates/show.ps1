@@ -3,7 +3,6 @@
     .usage('[options]${usageParamsString}')
 ${cmdOptions}${commonOptions}    .execute(function(${optionParamString}options, _) {
 ${promptingOptions}
-      var index = 0;
       var subscription = profile.current.getSubscription(options.subscription);
       var ${componentNameInLowerCase}ManagementClient = utils.create${componentName}ManagementClient(subscription);
       var ${resultVarName};

@@ -15,7 +15,7 @@ ${safeGet}
         return;
       }
 
-      var progress = cli.interaction.progress(util.format(`$('Deleting ${cliOperationDescription} `"%s`"'), name));
+      progress = cli.interaction.progress(util.format(`$('Deleting ${cliOperationDescription} `"%s`"'), name));
       try {
         ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(${parametersString}, _);
       } finally {

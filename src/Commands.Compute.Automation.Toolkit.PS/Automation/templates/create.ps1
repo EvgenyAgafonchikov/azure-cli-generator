@@ -1,9 +1,18 @@
 "  ${cliOperationName}.command(`'${cliMethodOption}${requireParamsString}`')
     .description(`$('Create a ${cliOperationDescription}'))
     .usage('[options]${usageParamsString}')
-${cmdOptions}${commonOptions}    .execute(function(${optionParamString}options, _) {
-      var useDefaults = true;
-      var index = 0;
+${cmdOptions}${commonOptions}    .execute(function(${optionParamString}options, _) {"
+if ($cliDefaults.Length -gt 0)
+{
+"
+      var useDefaults = true;"
+}
+if($indexVarRequired )
+{
+"
+      var index = 0;"
+}
+"
 ${promptingOptions}
 ${promptingOptionsCustom}
       var subscription = profile.current.getSubscription(options.subscription);
@@ -20,7 +29,7 @@ ${treeAnalysisResult}
 ${updateParametersCode}
 ${skuNameCode}
       removeEmptyObjects(parameters);
-      var progress = cli.interaction.progress(util.format(`$('Creating ${cliOperationDescription} `"%s`"'), name));
+      progress = cli.interaction.progress(util.format(`$('Creating ${cliOperationDescription} `"%s`"'), name));
       try {
         ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(${parametersString}, parameters, _);
       } finally {
