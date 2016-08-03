@@ -1137,12 +1137,11 @@ if($operationName -ne "usages" -and $operationName -ne "expressRouteServiceProvi
 {
     $codeContent +=
 @"
-var cli = require('../../../cli');
 var util = require('util');
 
 "@
 }
-if($commandCodeLines -clike "*resourceUtils*")
+if($commandCodeLines -clike "*resourceUtils.*")
 {
     $codeContent += "var resourceUtils = require('../resource/resourceUtils');
 "
@@ -1186,100 +1185,7 @@ if($operationName -ne "usages" -and $operationName -ne "expressRouteServiceProvi
 {
     $codeContent +=
 @"
-
-// TODO: move to utils
-function getHumanReadableFromCamelCase(inName) {
-  if (!inName)
-  {
-    return inName;
-  }
-
-  var varName = inName;
-  var outName = '';
-
-  var i = 0;
-  while (i < varName.length) {
-    if (i === 0 || varName[i] == varName[i].toUpperCase()) {
-      if (i > 0) {
-        outName += ' ';
-      }
-
-      var abbrWords =['VM', 'IP', 'RM', 'OS', 'NAT', 'IDs', 'DNS', 'VNet', 'ASN', 'SubNet'];
-      var matched = false;
-      var matchedAbbr = '';
-      abbrWords.every(function(item) {
-        if (varName.substring(i).lastIndexOf(item, 0) === 0) {
-          matched = true;
-          matchedAbbr = item;
-          return false;
-        }
-        return true;
-      });
-
-      if (matched) {
-        outName += matchedAbbr;
-        i = i + matchedAbbr.length;
-      }
-      else
-      {
-        var j = i + 1;
-        while ((j < varName.length) && varName[j] == varName[j].toLowerCase())
-        {
-          j++;
-        }
-        outName += varName.substring(i, j);
-        i = j;
-      }
-    }
-    else
-    {
-      i++;
-    }
-  }
-
-  return outName;
-}
-
-function showKeyValue(key, value, indent) {
-  cli.output.nameValue(utils.capitalizeFirstLetter(getHumanReadableFromCamelCase(key)), value, indent);
-}
-
-function traverse(obj, indent) {
- if(typeof(obj) != 'string') {
-    for (var i in obj) {
-      if (typeof(obj[i]) != 'object') {
-        showKeyValue.apply(null,[i, obj[i], indent]);
-        continue;
-      }
-      if (obj[i] !== null && typeof(obj[i])=='object') {
-        if (i == 'tags') {
-          showKeyValue.apply(null,[i, JSON.stringify(obj[i])]);
-          continue;
-        }
-        if(!(obj[i] instanceof Array)) {
-          traverse(obj[i], 2);
-        } else {
-          cli.output.header(utils.capitalizeFirstLetter(getHumanReadableFromCamelCase(i)));
-          for(var j in obj[i]) {
-            traverse(obj[i][j], 2);
-          }
-        }
-      }
-    }
-  } else {
-    cli.output.list([utils.capitalizeFirstLetter(getHumanReadableFromCamelCase(obj))], 2, false);
-  }
-}
-
-function removeEmptyObjects(test) {
-  for (var i in test) {
-    if (typeof test[i] === 'object' && Object.getOwnPropertyNames(test[i]).length === 0) {
-      delete test[i];
-    } else if (typeof test[i] === 'object') {
-      removeEmptyObjects(test[i]);
-    }
-  }
-}
+var generatorUtils = require('../../../util/generatorUtils');
 
 "@
 }

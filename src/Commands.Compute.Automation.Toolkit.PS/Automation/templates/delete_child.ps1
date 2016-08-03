@@ -9,18 +9,18 @@ ${promptingOptions}
 
 ${safeGet}
       if (!${resultVarName}) {
-        throw new Error(util.format(`$('A ${cliOperationDescription} with name `"%s`" not found in the resource group `"%s`"'), ${currentOperationNormalizedName}, resourceGroup));
+        throw new Error(util.format(`$('A ${cliOperationDescription} with name `"%s`" not found in the resource group `"%s`"'), name, resourceGroup));
       }
-      var index = utils.indexOfCaseIgnore(${resultVarName}.${parentPath}, {name: ${currentOperationNormalizedName}});
+      var index = utils.indexOfCaseIgnore(${resultVarName}.${parentPath}, {name: name});
       if (index === -1) {
-        throw new Error(util.format(`$('${cliOperationDescription} with name `"%s`" not found in the ${parentName} `"%s`"'), ${currentOperationNormalizedName}, ${resultVarName}.name));
+        throw new Error(util.format(`$('${cliOperationDescription} with name `"%s`" not found in the ${parentName} `"%s`"'), name, ${resultVarName}.name));
       }
       
-      if (!options.quiet && !cli.interaction.confirm(util.format(`$('Delete ${cliOperationDescription} `"%s`"? [y/n] '), ${currentOperationNormalizedName}), _)) {
+      if (!options.quiet && !cli.interaction.confirm(util.format(`$('Delete ${cliOperationDescription} `"%s`"? [y/n] '), name), _)) {
         return;
       }
       ${resultVarName}.${parentPath}.splice(index, 1);
-      var progress = cli.interaction.progress(util.format(`$('Deleting ${cliOperationDescription} `"%s`"'), ${currentOperationNormalizedName}));
+      progress = cli.interaction.progress(util.format(`$('Deleting ${cliOperationDescription} `"%s`"'), name));
       try {
         ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${parentPlural}.createOrUpdate(${parametersString}, ${resultVarName}, _);
       } finally {

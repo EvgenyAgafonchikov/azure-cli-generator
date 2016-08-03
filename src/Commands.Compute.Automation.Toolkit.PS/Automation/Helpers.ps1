@@ -216,12 +216,22 @@ function Get-SafeGetFunction($componentNameInLowerCase, $cliOperationName, $meth
 {
     $replaceNameParam = ((Get-SingularNoun $cliOperationName) + "Name") -replace "ExpressRouteCircuit","";
     $check = $methodParamNameList | Where-Object {$_ -eq $replaceNameParam}
+    $nameVar = "name";
     if($check)
     {
-        $methodParamNameList = $methodParamNameList -replace $check,"name";
+        if($artificallyExtracted -notcontains $OperationName)
+        {
+            $methodParamNameList = $methodParamNameList -replace $check,"name";
+        }
+        else
+        {
+            $replacer = $operationMappings[$cliOperationName];
+            $methodParamNameList = $methodParamNameList -replace $check,"${replacer}Name";
+            $nameVar = "'in ' + ${replacer}Name";
+        }
     }
     $tempCode = "
-      var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), name));
+      var progress = cli.interaction.progress(util.format(`$('Looking up the ${cliOperationDescription} `"%s`"'), ${nameVar}));
       try {
         ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.get("
     $tempCode += (Get-ParametersString $methodParamNameList $parentItem) -replace ", parameters", "";

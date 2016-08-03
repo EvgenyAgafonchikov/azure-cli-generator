@@ -121,8 +121,8 @@
     if($artificallyExtracted -contains $OperationName)
     {
         $artificalOperation = $artificalOperations | Where-Object { $_.Name -eq $OperationName };
-        $artificalOperationParent = GetPlural $artificalOperation.parent;
-        $safeGet = Get-SafeGetFunction $componentNameInLowerCase $artificalOperationParent $methodParamNameList $resultVarName $cliOperationDescription;
+        $artificalOperationCliName = Get-CommanderStyleOption $artificalOperation.parent;
+        $safeGet = Get-SafeGetFunction $componentNameInLowerCase $artificalOperationCliName $methodParamNameList $resultVarName $cliOperationDescription;
         $template = Get-Content "$PSScriptRoot\templates\delete_child.ps1" -raw;
     }
     else

@@ -698,7 +698,8 @@
         }
       ],
       "parent": "NetworkInterfaces",
-      "path": "ipConfigurations"
+      "path": "ipConfigurations",
+      "dependencies": ["NetworkInterfaces", "VirtualNetworks", "Subnets", "PublicIpAddresses"]
     },
     { "name": "FrontendIPConfiguration",
       "shortname": "frontend-ip",
@@ -710,8 +711,6 @@
         },
         {
           "name": "privateIPAddress",
-          "createTestValue" : "10.0.0.13",
-          "setTestValue" : "10.0.0.42",
           "required": "false"
         },
         {
@@ -743,7 +742,8 @@
         }
       ],
       "parent": "LoadBalancers",
-      "path": "frontendIPConfigurations"
+      "path": "frontendIPConfigurations",
+      "dependencies": ["LoadBalancers", "PublicIpAddresses"]
     }
   ]
 }

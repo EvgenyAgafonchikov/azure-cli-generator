@@ -27,13 +27,13 @@ ${safeGet}
 ${treeAnalysisResult}
 ${updateParametersCode}
 ${skuNameCode}
-      removeEmptyObjects(parameters);
+      generatorUtils.removeEmptyObjects(parameters);
       progress = cli.interaction.progress(util.format(`$('Updating ${cliOperationDescription} `"%s`"'), name));
       try {
         ${resultVarName} = ${componentNameInLowerCase}ManagementClient.${cliOperationName}.${cliMethodFuncName}(${parametersString}, parameters, _);
       } finally {
         progress.end();
       }
-      cli.interaction.formatOutput(${resultVarName}, traverse);
+      cli.interaction.formatOutput(${resultVarName}, generatorUtils.traverse);
     });
 "

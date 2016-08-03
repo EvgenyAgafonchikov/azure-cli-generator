@@ -248,8 +248,8 @@
     if($artificallyExtracted -contains $OperationName)
     {
         $artificalOperation = $artificalOperations | Where-Object { $_.Name -eq $OperationName };
-        $artificalOperationParent = GetPlural $artificalOperation.parent;
-        $safeGet = Get-SafeGetFunction $componentNameInLowerCase $artificalOperationParent $methodParamNameList $resultVarName $cliOperationDescription;
+        $artificalOperationCliName = Get-CommanderStyleOption $artificalOperation.parent;
+        $safeGet = Get-SafeGetFunction $componentNameInLowerCase $artificalOperationCliName $methodParamNameList $resultVarName $cliOperationDescription;
         $safeGetChild = Get-SafeGetFunction $componentNameInLowerCase $cliOperationName $methodParamNameList $childResultVarName $cliOperationDescription;
     }
     else
@@ -684,6 +684,7 @@ $treeAnalysisResult +=
         if($operationMappings[$parents[$OperationName]])
         {
             $parentOp = $operationMappings[$parents[$OperationName]] + " ";
+            $parentName = $operationMappings[$parents[$OperationName]] + "Name";
         }
     }
     if($artificallyExtracted -contains $OperationName)

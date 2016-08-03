@@ -55,7 +55,7 @@
     $methodParamNameListExtended = $methodParamNameList;
     if($artificallyExtracted -contains $OperationName)
     {
-        $methodParamNameListExtended += ($parents[$OperationName] + "Name");
+        $methodParamNameListExtended += ((Get-SingularNoun $parents[$OperationName]) + "Name");
         $optionParamString += ($parents[$OperationName] + "Name, ")
     }
     $require = Update-RequiredParameters $methodParamNameListExtended $methodParamTypeDict $allStringFieldCheck;
@@ -123,10 +123,10 @@
     if($artificallyExtracted -contains $OperationName)
     {
         $artificalOperation = $artificalOperations | Where-Object { $_.Name -eq $OperationName };
-        $artificalOperationParent = GetPlural $artificalOperation.parent;
         $methodParamNameListExtendedOptions = $methodParamNameList;
         $methodParamNameListExtendedOptions += ("options." + $parents[$OperationName] + "Name");
-        $safeGet = Get-SafeGetFunction $componentNameInLowerCase ${artificalOperationParent} $methodParamNameListExtended $resultVarName $cliOperationDescription;
+        $artificalOperationCliName = Get-CommanderStyleOption $artificalOperation.parent;
+        $safeGet = Get-SafeGetFunction $componentNameInLowerCase $artificalOperationCliName $methodParamNameListExtended $resultVarName $cliOperationDescription;
         $promptParentCode = Get-PromptingOptionsCode $methodParamNameListExtended $methodParamNameListExtended $parentItem 6;
         $template = Get-Content "$PSScriptRoot\templates\list_child.ps1" -raw;
     }
